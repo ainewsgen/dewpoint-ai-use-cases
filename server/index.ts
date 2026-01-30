@@ -26,10 +26,16 @@ app.get('/api/health', (req, res) => {
 
 // Serve static frontend files in production
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../../dist')));
+    const staticPath = path.join(__dirname, '../../dist');
+    app.use(express.static(staticPath));
 
-    app.get('/*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../../dist/index.html'));
+    // Catch-all: send index.html for any non-API routes (SPA routing)
+    app.use((req, res, next) => {
+        if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(staticPath, 'index.html'));
+        } else {
+            next();
+        }
     });
 }
 

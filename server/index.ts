@@ -49,10 +49,11 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-// Run migrations then start server
-runMigrations().then(() => {
-    app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`📊 API available at http://localhost:${PORT}/api`);
-    });
+// Start server immediately
+const server = app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 API available at http://localhost:${PORT}/api`);
 });
+
+// Run migrations in background
+runMigrations().catch(console.error);

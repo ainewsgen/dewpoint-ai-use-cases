@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "tsx watch server/index.ts",
-    "build:server": "tsc -p tsconfig.server.json && cp server/db/migrations.sql dist/server/db/ && echo '{\"type\":\"commonjs\"}' > dist/server/package.json",
+    "build:server": "tsc -p tsconfig.server.json && mkdir -p dist/server/db && cp server/db/migrations.sql dist/server/db/ && echo '{\"type\":\"commonjs\"}' > dist/server/package.json",
     "build": "npm run build:server && npx vite build",
     "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",

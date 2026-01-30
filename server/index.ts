@@ -9,6 +9,7 @@ import leadsRoutes from './routes/leads';
 import cmsRoutes from './routes/cms';
 import usersRoutes from './routes/users';
 import integrationsRoutes from './routes/integrations';
+import { runMigrations } from './db/migrate';
 
 dotenv.config();
 
@@ -48,7 +49,10 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📊 API available at http://localhost:${PORT}/api`);
+// Run migrations then start server
+runMigrations().then(() => {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📊 API available at http://localhost:${PORT}/api`);
+    });
 });

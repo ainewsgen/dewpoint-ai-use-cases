@@ -14,12 +14,12 @@
         "noEmit": false
     },
     "include": [
-        "server/**/*",
-        "drizzle.config.ts"
+        "server/**/*"
     ],
     "exclude": [
         "node_modules",
         "dist",
-        "src"
+        "src",
+        "drizzle.config.ts"
     ]
 }

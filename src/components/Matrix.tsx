@@ -1,7 +1,7 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { generateOpportunities, CompanyData, Opportunity } from '../lib/engine';
-import { BadgeCheck, Frown, Sparkles, Server, ChevronDown, ChevronUp, Bookmark, Plus } from 'lucide-react';
+import { BadgeCheck, Frown, Sparkles, Server, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { EmailModal } from './EmailModal';
 
 interface MatrixProps {
@@ -93,61 +93,69 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
 
     return (
         <div className="glass-panel recipe-card">
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span className="badge rev" style={{ background: 'hsla(var(--accent-gold)/0.2)', color: 'hsl(var(--accent-primary))', border: '1px solid hsla(var(--accent-gold)/0.4)' }}>{opp.public_view.roi_estimate}</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
+                <div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>{opp.department}</span>
+                    <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
                 </div>
+                {/* Save Icon Button */}
                 <button
                     onClick={onToggleSave}
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: isSaved ? 'hsl(var(--accent-gold))' : 'var(--text-muted)' }}
-                    title={isSaved ? "Saved to Roadmap" : "Save to Roadmap"}
+                    style={{
+                        background: isSaved ? 'hsl(var(--accent-gold))' : 'rgba(0,0,0,0.05)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '32px', height: '32px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: isSaved ? 'white' : 'var(--text-muted)',
+                        transition: 'all 0.2s'
+                    }}
+                    title={isSaved ? "Saved to Roadmap" : "Add to Roadmap"}
                 >
-                    <Bookmark size={20} fill={isSaved ? "currentColor" : "none"} />
+                    {isSaved ? <BadgeCheck size={18} /> : <Plus size={18} />}
                 </button>
             </div>
 
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
-
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <Frown size={16} style={{ color: 'salmon', minWidth: '16px', marginTop: '4px' }} />
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>{opp.public_view.problem}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <span className="badge rev" style={{ background: 'hsla(var(--accent-gold)/0.1)', color: 'hsl(var(--accent-primary))', border: '1px solid hsla(var(--accent-gold)/0.2)', fontSize: '0.8rem' }}>
+                    💰 {opp.public_view.roi_estimate}
+                </span>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <Sparkles size={16} className="text-gold" style={{ minWidth: '16px', marginTop: '4px' }} />
-                <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>{opp.public_view.solution_narrative}</p>
+            <div style={{ marginBottom: '1.5rem', minHeight: '80px' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                    <Frown size={14} style={{ color: 'salmon', marginTop: '3px', minWidth: '14px' }} />
+                    {opp.public_view.problem}
+                </p>
+                <p style={{ fontSize: '0.9rem', display: 'flex', gap: '0.5rem' }}>
+                    <Sparkles size={14} className="text-gold" style={{ marginTop: '3px', minWidth: '14px' }} />
+                    {opp.public_view.solution_narrative}
+                </p>
             </div>
 
             {/* Deep Dive Content (Public + Admin) */}
             {showDetails && (
-                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.03)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.02)', padding: '1.25rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem', border: '1px solid var(--border-glass)' }}>
 
                     {/* Publicly visible "Technical Workflow" (simplified) */}
-                    <div style={{ marginBottom: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', color: '#555' }}>
-                            <strong>⚙️ How it works:</strong>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                            <strong>⚙️ How it works</strong>
                         </div>
-                        <p style={{ color: 'var(--text-muted)' }}>{opp.admin_view.workflow_steps}</p>
+                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.admin_view.workflow_steps}</p>
                     </div>
 
-                    {/* New Content Fields */}
-                    {opp.public_view.detailed_explanation && (
-                        <div style={{ marginBottom: '1rem' }}>
-                            <strong>📝 Deep Dive:</strong>
-                            <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>{opp.public_view.detailed_explanation}</p>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                            <strong>📝 Deep Dive</strong>
                         </div>
-                    )}
-                    {opp.public_view.example_scenario && (
-                        <div style={{ marginBottom: '1rem' }}>
-                            <strong>💡 Example:</strong>
-                            <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontStyle: 'italic' }}>"{opp.public_view.example_scenario}"</p>
-                        </div>
-                    )}
+                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
+                    </div>
 
                     {/* Admin Only Stack */}
                     {isAdmin && (
-                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
+                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
                                 <Server size={14} /> <strong>Admin Stack View</strong>
                             </div>
@@ -161,29 +169,22 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                 </div>
             )}
 
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', marginBottom: '1rem' }}>
-                <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Value Prop</label>
-                <span style={{ fontSize: '0.95rem', fontStyle: 'italic', color: 'hsl(var(--accent-secondary))' }}>"{opp.public_view.value_proposition}"</span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div style={{ marginTop: 'auto' }}>
                 <button
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
                         setShowDetails(!showDetails);
                     }}
-                    className="btn-secondary"
-                    style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', position: 'relative', zIndex: 10 }}
-                >
-                    {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {showDetails ? 'Hide' : 'Blueprint'}
-                </button>
-                <button
-                    onClick={onToggleSave}
                     className="btn-primary"
-                    style={{ padding: '0.5rem', fontSize: '0.9rem', background: isSaved ? 'hsl(var(--accent-gold))' : undefined, color: isSaved ? 'hsl(var(--bg-dark))' : undefined, borderColor: isSaved ? 'hsl(var(--accent-gold))' : undefined }}
+                    style={{
+                        width: '100%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                        padding: '0.75rem', fontSize: '1rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
                 >
-                    {isSaved ? <BadgeCheck size={16} /> : <Plus size={16} />} {isSaved ? 'On Roadmap' : 'Add to Roadmap'}
+                    {showDetails ? 'Hide Blueprint' : 'View Blueprint'} {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
             </div>
         </div>

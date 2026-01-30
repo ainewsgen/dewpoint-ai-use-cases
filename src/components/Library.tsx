@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { BookOpen, Server, Plus, BadgeCheck } from 'lucide-react';
+import { BookOpen, Server, Plus, BadgeCheck, Frown, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { EmailModal } from './EmailModal';
 
 // We'll move the recipe data to a shared source in engine.ts soon.
@@ -151,7 +151,7 @@ export function Library({ isAdmin }: LibraryProps) {
                         style={{
                             padding: '0.5rem 1.5rem',
                             background: filter === dept ? 'hsl(var(--accent-primary))' : 'transparent',
-                            color: filter === dept ? 'white' : 'var(--text-muted)', // Fixed: White text on blue
+                            color: filter === dept ? 'white' : 'var(--text-muted)',
                             border: `1px solid ${filter === dept ? 'hsl(var(--accent-primary))' : 'var(--border-glass)'}`,
                             borderRadius: '50px',
                             cursor: 'pointer',
@@ -191,24 +191,63 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
 
     return (
         <div className="glass-panel recipe-card">
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <span className="badge" style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--text-muted)' }}>{opp.department}</span>
-                <span style={{ color: 'hsl(var(--accent-primary))', fontSize: '0.8rem', fontWeight: 600 }}>{opp.public_view.roi_estimate}</span>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
+                <div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>{opp.department}</span>
+                    <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
+                </div>
+                {/* Save Icon Button */}
+                <button
+                    onClick={onToggle}
+                    style={{
+                        background: isSaved ? 'hsl(var(--accent-gold))' : 'rgba(0,0,0,0.05)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '32px', height: '32px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: isSaved ? 'white' : 'var(--text-muted)',
+                        transition: 'all 0.2s'
+                    }}
+                    title={isSaved ? "Saved to Roadmap" : "Add to Roadmap"}
+                >
+                    {isSaved ? <BadgeCheck size={18} /> : <Plus size={18} />}
+                </button>
             </div>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>{opp.public_view.solution_narrative}</p>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <span className="badge rev" style={{ background: 'hsla(var(--accent-gold)/0.1)', color: 'hsl(var(--accent-primary))', border: '1px solid hsla(var(--accent-gold)/0.2)', fontSize: '0.8rem' }}>
+                    💰 {opp.public_view.roi_estimate}
+                </span>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem', minHeight: '80px' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                    <Frown size={14} style={{ color: 'salmon', marginTop: '3px', minWidth: '14px' }} />
+                    {opp.public_view.problem}
+                </p>
+                <p style={{ fontSize: '0.9rem', display: 'flex', gap: '0.5rem' }}>
+                    <Sparkles size={14} className="text-gold" style={{ marginTop: '3px', minWidth: '14px' }} />
+                    {opp.public_view.solution_narrative}
+                </p>
+            </div>
 
             {showSpecs && (
-                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.03)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.85rem' }}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>How it works:</p>
-                        <p style={{ color: 'var(--text-muted)' }}>{opp.admin_view.workflow_steps}</p>
+                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.03)', padding: '1.25rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem' }}>
+
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                            <strong>⚙️ How it works</strong>
+                        </div>
+                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.admin_view.workflow_steps}</p>
                     </div>
 
                     {opp.public_view.detailed_explanation && (
                         <div style={{ marginBottom: '1rem' }}>
-                            <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Deep Dive:</p>
-                            <p style={{ color: 'var(--text-muted)' }}>{opp.public_view.detailed_explanation}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                                <strong>📝 Deep Dive</strong>
+                            </div>
+                            <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
                         </div>
                     )}
 
@@ -224,31 +263,19 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                 </div>
             )}
 
-            <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
-                <button
-                    type="button"
-                    onClick={onToggle}
-                    className="btn-primary"
-                    style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        fontSize: '0.9rem',
-                        background: isSaved ? 'hsl(var(--accent-gold))' : undefined,
-                        color: isSaved ? 'hsl(var(--bg-dark))' : undefined,
-                        borderColor: isSaved ? 'hsl(var(--accent-gold))' : undefined
-                    }}
-                >
-                    {isSaved ? <BadgeCheck size={16} /> : <Plus size={16} />} {isSaved ? 'On Roadmap' : 'Add'}
-                </button>
-
+            <div style={{ marginTop: 'auto' }}>
                 <button
                     type="button"
                     onClick={() => setShowSpecs(!showSpecs)}
-                    className="btn-secondary"
-                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', cursor: 'pointer', width: 'auto' }}
-                    title={showSpecs ? "Hide details" : "View details"}
+                    className="btn-primary"
+                    style={{
+                        width: '100%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                        padding: '0.75rem', fontSize: '1rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
                 >
-                    {showSpecs ? 'Hide' : 'Info'}
+                    {showSpecs ? 'Hide Blueprint' : 'View Blueprint'} {showSpecs ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
             </div>
         </div>

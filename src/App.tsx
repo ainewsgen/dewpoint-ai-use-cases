@@ -81,10 +81,21 @@ function App() {
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>
 
                     {/* User Login for Discovery Mode */}
-                    {view === 'DISCOVERY' && (
+                    {/* User Login - Global */}
+                    {view !== 'ADMIN' && (
                         <button
                             onClick={() => setShowLoginModal(true)}
-                            style={{ background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', padding: '0.3rem 0.8rem', borderRadius: '4px' }}
+                            style={{
+                                background: 'transparent',
+                                border: '1px solid var(--border-glass)',
+                                color: 'var(--text-muted)',
+                                marginRight: '0.5rem',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                padding: '0.3rem 0.8rem',
+                                borderRadius: '4px',
+                                display: localStorage.getItem('dpg_user_email') ? 'none' : 'block' // Hide if logged in
+                            }}
                         >
                             Login
                         </button>

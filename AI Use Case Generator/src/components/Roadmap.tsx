@@ -4,28 +4,34 @@ import { Opportunity } from '../lib/engine';
 import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server, Lock, ArrowDownUp } from 'lucide-react';
 
 
+import { AdminDashboard } from './AdminDashboard'; // Ensure import
+
 interface RoadmapProps {
     isAdmin: boolean;
+    user?: any;
+    leads?: any[];
 }
 
 type SortOption = 'ROI' | 'DEPARTMENT' | 'NEWEST';
+type Tab = 'ROADMAP' | 'ADMIN';
 
-export function Roadmap({ isAdmin }: RoadmapProps) {
+export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
     const [isLocked, setIsLocked] = useState(true);
     const [sortBy, setSortBy] = useState<SortOption>('ROI');
+    const [activeTab, setActiveTab] = useState<Tab>('ROADMAP');
 
     useEffect(() => {
         // Gating Check
-        const email = localStorage.getItem('dpg_user_email');
-        if (email) {
+        // If user is passed as prop (authenticated in App), we are good.
+        if (user || localStorage.getItem('dpg_user_email')) {
             setIsLocked(false);
             const saved = localStorage.getItem('dpg_roadmap');
             if (saved) {
                 setSavedRecipes(JSON.parse(saved));
             }
         }
-    }, []);
+    }, [user]);
 
     const handleLoginSuccess = () => {
         setIsLocked(false);
@@ -34,14 +40,11 @@ export function Roadmap({ isAdmin }: RoadmapProps) {
     };
 
     const removeRecipe = (index: number) => {
-        // Note: Removing by index might be buggy if sorted. Better to remove by Title.
-        // But for now, we'll filter the current list and re-save.
-        // Actually, to be safe with sorting, we should find the item in the master list.
-        // Let's assume title is unique enough for this demo.
         const targetTitle = sortedRecipes[index].title;
         const updated = savedRecipes.filter(r => r.title !== targetTitle);
         setSavedRecipes(updated);
         localStorage.setItem('dpg_roadmap', JSON.stringify(updated));
+        window.dispatchEvent(new Event('roadmap-updated'));
     };
 
     // Sorting Logic
@@ -50,14 +53,13 @@ export function Roadmap({ isAdmin }: RoadmapProps) {
             return a.department.localeCompare(b.department);
         }
         if (sortBy === 'ROI') {
-            // Heuristic: Extract first number. If '$', prioritize.
             const getVal = (s: string) => {
                 const num = parseInt(s.replace(/\D/g, '')) || 0;
-                return s.includes('$') ? num * 1000 : num; // Weight $ amounts higher
+                return s.includes('$') ? num * 1000 : num;
             };
             return getVal(b.public_view.roi_estimate) - getVal(a.public_view.roi_estimate);
         }
-        return 0; // Newest (default order in array is usually oldest first pushed? actually push adds to end. So reverse for newest.)
+        return 0;
     });
 
     if (sortBy === 'NEWEST') {
@@ -72,69 +74,90 @@ export function Roadmap({ isAdmin }: RoadmapProps) {
                 </div>
                 <h2 style={{ marginBottom: '1rem' }}>Roadmap Locked</h2>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', textAlign: 'center', maxWidth: '400px' }}>
-                    Please verify your email address to access your saved strategic roadmap.
+                    Please login to access your saved strategic roadmap.
                 </p>
-                <div style={{ width: '100%', maxWidth: '400px' }}>
-                    {/* Reuse EmailModal logic but inline or trigger it? Let's just inline a simple button to trigger standard modal if we want, or just render the modal form directly. 
-                         Since we have the EmailModal component, let's just render it but maybe tweaking it to be inline? 
-                         Actually, let's just use the EmailModal as a "gate". 
-                      */}
-                    {/* Simple Unlock Button */}
-                    <button
-                        onClick={() => {
-                            localStorage.setItem('dpg_user_email', 'guest@demo.com');
-                            handleLoginSuccess();
-                        }}
-                        className="btn-primary"
-                        style={{ width: '100%', padding: '1rem' }}
-                    >
-                        Unlock Roadmap (Demo)
-                    </button>
-                </div>
+                {/* Rely on App.tsx modal for login now, or inline button triggers parent modality?
+                    Actually App.tsx gates it mostly. If we end up here (e.g. direct link or refresh issue), 
+                    we show a lock. 
+                */}
             </div>
         );
     }
 
+    // Admin View Wrapper
     return (
         <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>
-            <header className="library-header" style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-gold)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-                    <Bookmark size={48} className="text-gold" />
-                </div>
-                <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>My Roadmap</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Your curated list of high-impact AI strategies.</p>
-            </header>
 
-            {/* Toolbar */}
-            {savedRecipes.length > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', paddingRight: '1rem' }}>
-                    <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <ArrowDownUp size={16} color="var(--text-muted)" />
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Sort by:</span>
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as SortOption)}
-                            style={{ background: 'transparent', border: 'none', color: 'hsl(var(--text-main))', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
-                        >
-                            <option value="ROI">Highest ROI</option>
-                            <option value="DEPARTMENT">Department</option>
-                            <option value="NEWEST">Newest Added</option>
-                        </select>
-                    </div>
+            {/* Admin Tabs */}
+            {isAdmin && (
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
+                    <button
+                        onClick={() => setActiveTab('ROADMAP')}
+                        className={activeTab === 'ROADMAP' ? 'btn-primary' : 'btn-secondary'}
+                        style={{ minWidth: '150px' }}
+                    >
+                        My Roadmap
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('ADMIN')}
+                        className={activeTab === 'ADMIN' ? 'btn-primary' : 'btn-secondary'}
+                        style={{ minWidth: '150px' }}
+                    >
+                        Admin Console
+                    </button>
                 </div>
             )}
 
-            {savedRecipes.length === 0 ? (
-                <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
-                    <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Your roadmap is currently empty.</p>
-                    <p>Go back to the <strong>Generator</strong> or <strong>Library</strong> to find recipes to save.</p>
+            {/* TAB CONTENT: ADMIN */}
+            {isAdmin && activeTab === 'ADMIN' && (
+                <div className="animate-fade-in">
+                    <AdminDashboard leads={leads} />
                 </div>
-            ) : (
-                <div className="matrix-grid">
-                    {sortedRecipes.map((opp, idx) => (
-                        <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
-                    ))}
-                </div>
+            )}
+
+            {/* TAB CONTENT: ROADMAP */}
+            {(!isAdmin || activeTab === 'ROADMAP') && (
+                <>
+                    <header className="library-header" style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                        <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-gold)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
+                            <Bookmark size={48} className="text-gold" />
+                        </div>
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>My Roadmap</h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Your curated list of high-impact AI strategies.</p>
+                    </header>
+
+                    {/* Toolbar */}
+                    {savedRecipes.length > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', paddingRight: '1rem' }}>
+                            <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <ArrowDownUp size={16} color="var(--text-muted)" />
+                                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Sort by:</span>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                                    style={{ background: 'transparent', border: 'none', color: 'hsl(var(--text-main))', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
+                                >
+                                    <option value="ROI">Highest ROI</option>
+                                    <option value="DEPARTMENT">Department</option>
+                                    <option value="NEWEST">Newest Added</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
+                    {savedRecipes.length === 0 ? (
+                        <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
+                            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Your roadmap is currently empty.</p>
+                            <p>Go back to the <strong>Generator</strong> or <strong>Library</strong> to find recipes to save.</p>
+                        </div>
+                    ) : (
+                        <div className="matrix-grid">
+                            {sortedRecipes.map((opp, idx) => (
+                                <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

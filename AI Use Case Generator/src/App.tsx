@@ -40,7 +40,75 @@ function App() {
         console.log("DewPoint App v2.1 Loaded - Auth Tabs Removed");
     }, []);
 
-    // ... (keep handlers) ...
+    // Handlers
+    const handleOnboardingComplete = (data: Partial<CompanyData>) => {
+        setData(prev => ({ ...prev, ...data }));
+        setView('ANALYSIS');
+    };
+
+    const handleAnalysisComplete = (opportunities: Opportunity[]) => {
+        setLeads([{
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            company: data,
+            recipes: opportunities
+        }]);
+        setView('MATRIX');
+    };
+
+    const handleCaptureLead = (lead: any) => {
+        // Logic to unlock functionality
+        console.log("Lead captured", lead);
+    };
+
+    const saveToBackend = async (recipe: Opportunity, userContext?: any) => {
+        try {
+            const currentUser = userContext || user;
+            if (!currentUser?.email) return;
+
+            const token = localStorage.getItem('dpg_auth_token');
+            const response = await fetch(`${import.meta.env.PROD ? 'https://dewpoint-ai-use-cases.onrender.com' : 'http://localhost:3000'}/api/leads`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    email: currentUser.email,
+                    name: currentUser.name,
+                    recipes: [recipe] // Upsert logic on backend handles merging
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to sync save');
+
+        } catch (err) {
+            console.error("Failed to sync save to backend", err);
+        }
+    };
+
+    const handleRequestSave = (recipe: Opportunity) => {
+        if (user) {
+            // Optimistic Update?
+            // Actually, we should just save to backend
+            saveToBackend(recipe).then(() => {
+                alert("Saved to Roadmap!");
+            });
+        } else {
+            setPendingSave(recipe);
+            setAuthModal('LOGIN');
+        }
+    };
+
+    const handleLoginSuccess = (loggedInUser: any) => {
+        setAuthModal(null);
+        if (pendingSave) {
+            saveToBackend(pendingSave, loggedInUser).then(() => {
+                setPendingSave(null);
+                alert("Saved to Roadmap!");
+            });
+        }
+    };
 
     return (
         <div className="app-shell">

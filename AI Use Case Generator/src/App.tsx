@@ -36,6 +36,9 @@ function App() {
     const [pendingSave, setPendingSave] = useState<Opportunity | null>(null);
 
     // ... (keep useEffect) ...
+    useEffect(() => {
+        console.log("DewPoint App v2.1 Loaded - Auth Tabs Removed");
+    }, []);
 
     // ... (keep handlers) ...
 

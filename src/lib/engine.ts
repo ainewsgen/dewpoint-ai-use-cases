@@ -20,6 +20,8 @@ export interface Opportunity {
         solution_narrative: string;
         value_proposition: string;
         roi_estimate: string;
+        detailed_explanation?: string; // New field
+        example_scenario?: string;     // New field
     };
     admin_view: {
         tech_stack: string[];
@@ -42,7 +44,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
             problem: `You identified "${painPoint}" as a major daily friction point.`,
             solution_narrative: `An intelligent digital assistant that intercepts "${painPoint}" tasks, understands the context regardless of format, and handles the execution instantly without you lifting a finger.`,
             value_proposition: "Eliminates cognitive load and context switching.",
-            roi_estimate: "10-15 hours/month saved"
+            roi_estimate: "10-15 hours/month saved",
+            detailed_explanation: "This workflow acts as a virtual layer between you and the tedious task. Using extraction AI, it turns messy inputs (emails, voice notes, screenshots) into structured data and pushes it exactly where it needs to go.",
+            example_scenario: `You forward a client email about "${painPoint}" to 'assistant@dewpoint.ai'. Within seconds, the system parses the request, updates your database, schedules the necessary follow-up, and sends you a Slack confirmation.`
         },
         admin_view: {
             tech_stack: ["Antigravity", stack[0] || 'Email API', "OpenAI GPT-4o"],
@@ -62,7 +66,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
                 problem: "Duplicate invoices and creeping vendor costs often go unnoticed until it's too late.",
                 solution_narrative: "A 24/7 auditor that reads every incoming PDF invoice, compares it against your contract terms, and alerts you only when it finds a mistake.",
                 value_proposition: "Catches overbilling before payment is released.",
-                roi_estimate: "$2k - $10k recovered annually"
+                roi_estimate: "$2k - $10k recovered annually",
+                detailed_explanation: "This system sits on top of your accounts payable workflow. It uses OCR to 'read' every line item of every invoice and cross-references it with your approved vendor contracts and purchase orders.",
+                example_scenario: "A vendor submits an invoice for $5,000, which is 10% higher than the agreed rate. The Watchdog instantly flags this variance, pauses the payment in Xero, and drafts an email to the vendor asking for clarification."
             },
             admin_view: {
                 tech_stack: ["Antigravity", financeTool, "Azure Document Intelligence"],
@@ -79,7 +85,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
                 problem: "Chasing employees for receipts is a low-value distraction.",
                 solution_narrative: "Automatically matches email receipts to credit card transactions and categorizes them instantly.",
                 value_proposition: "End-of-month reconciliation becomes 1-click.",
-                roi_estimate: "5 hours/month saved"
+                roi_estimate: "5 hours/month saved",
+                detailed_explanation: "By connecting to both your email server and your bank feed, this agent acts as a matchmaker. It identifies transaction pairs that humans often miss due to date discrepancies or vendor name variations.",
+                example_scenario: "An employee spends $50 at a client lunch. They snap a photo of the receipt. The system matches it to the Amex charge, categorizes it as 'Meals & Entertainment', and appends the image to the transaction record."
             },
             admin_view: {
                 tech_stack: ["Antigravity", "Gmail API", "Table Extractor"],
@@ -100,7 +108,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
                 problem: "Leads go cold because manual follow-up is too slow or generic.",
                 solution_narrative: "When a high-value prospect visits your pricing page, this agent instantly researches them and drafts a hyper-personalized video script and email for your rep to approve.",
                 value_proposition: "Increases response rates by 300%.",
-                roi_estimate: "$50k net new revenue/qtr"
+                roi_estimate: "$50k net new revenue/qtr",
+                detailed_explanation: "Speed to lead is everything. This workflow eliminates the research phase for your SDRs. It aggregates data from LinkedIn, news sources, and company websites to create a comprehensive dossier and a tailored outreach message.",
+                example_scenario: "A VP from a target account visits your site. The system identifies them, pulls their recent LinkedIn posts, and drafts an email referencing their latest keynote speech, ready for your rep to hit 'Send'."
             },
             admin_view: {
                 tech_stack: [crmTool, "LinkedIn Scraper", "HeyGen API", "OpenAI"],
@@ -117,7 +127,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
                 problem: "Wasting time talking to unqualified leads.",
                 solution_narrative: "Intelligently researches every new inquiry, scores them based on your criteria, and drafts the perfect reply.",
                 value_proposition: "Focus time only on 5-star prospects.",
-                roi_estimate: "10 hours/week saved"
+                roi_estimate: "10 hours/week saved",
+                detailed_explanation: "This agent acts as your first line of defense. It takes the limited info from a contact form (name, email, website) and enriches it with public data to determine if the lead fits your Ideal Customer Profile (ICP).",
+                example_scenario: "A lead submits a form with a Gmail address. The system finds their LinkedIn, sees they are a college student, scores them as 'Low Priority', and sends a polite automated denial email with links to free resources."
             },
             admin_view: {
                 tech_stack: ["Antigravity", "Google Search API", "Browserless.io"],
@@ -136,7 +148,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
             problem: "Project updates require constantly nagging the team for status.",
             solution_narrative: "An observer that silently reads all project activity and automatically updates your client dashboard so they never have to ask 'where are we at?'.",
             value_proposition: "Improves client trust and retention.",
-            roi_estimate: "Invaluable client goodwill"
+            roi_estimate: "Invaluable client goodwill",
+            detailed_explanation: "Transparency builds trust. This workflow connects your internal project management tools (Jira, Trello, GitHub) with your external client communications, translating technical jargon into clear business progress updates.",
+            example_scenario: "Your dev team closes 5 tickets in Jira. The system summarizes this as 'Completed Backend API Integration', updates the client's Notion portal, and posts a weekly summary to the #client-updates Slack channel."
         },
         admin_view: {
             tech_stack: ["Slack API", "Jira API", "Client Portal"],
@@ -167,7 +181,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
                 problem: "Your firm sits on decades of PDF case files that are effectively invisible to your current team.",
                 solution_narrative: "An internal search engine that indexes every past case/project, allowing staff to ask 'Have we solved a problem like this before?' and get instant cited answers.",
                 value_proposition: "Monetize your dormant intellectual property.",
-                roi_estimate: "Reduces research time by 80%"
+                roi_estimate: "Reduces research time by 80%",
+                detailed_explanation: "This 'Knowledge Graph' ingests your unstructured data (PDFs, Word Docs, Emails), chunks it into searchable segments, and allows you to chat with your firm's collective brain.",
+                example_scenario: "A junior associate needs to find a precedent for a specific contract clause. Instead of emailing partners, they ask the Case Miner, which instantly surfaces 3 relevant cases from 2018, 2021, and 2023."
             },
             admin_view: {
                 tech_stack: ["Antigravity", "Pinecone (Vector DB)", "LangChain"],
@@ -187,7 +203,9 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
                 problem: "Competitors are launching moves you don't see until it's too late.",
                 solution_narrative: "A silent scout that monitors your top 5 competitors' websites, hiring boards, and press releases daily, summarizing their strategy in a weekly briefing.",
                 value_proposition: "Never be blindquided by market shifts.",
-                roi_estimate: "Strategic agility"
+                roi_estimate: "Strategic agility",
+                detailed_explanation: "This is automated competitive intelligence. It tracks changes in DOM elements on competitor sites (pricing changes, new headers) and semantic shifts in their job postings to predict their next move.",
+                example_scenario: "Competitor X changes their H1 tag to focus on 'Enterprise'. The Watchtower notes this pivot, correlates it with 3 new 'Enterprise Sales' job postings, and alerts you that they are moving up-market."
             },
             admin_view: {
                 tech_stack: ["Antigravity", "Browserless", "Summarization LLM"],

@@ -1,8 +1,13 @@
+// ... imports
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { Bookmark, Frown, Sparkles, Trash2, ArrowRight } from 'lucide-react';
+import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server } from 'lucide-react';
 
-export function Roadmap() {
+interface RoadmapProps {
+    isAdmin: boolean;
+}
+
+export function Roadmap({ isAdmin }: RoadmapProps) {
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
 
     useEffect(() => {
@@ -36,7 +41,7 @@ export function Roadmap() {
             ) : (
                 <div className="matrix-grid">
                     {savedRecipes.map((opp, idx) => (
-                        <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} />
+                        <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
                     ))}
                 </div>
             )}
@@ -44,8 +49,8 @@ export function Roadmap() {
     );
 }
 
-function RoadmapCard({ opp, onRemove }: { opp: Opportunity, onRemove: () => void }) {
-    const [showAdmin, setShowAdmin] = useState(false);
+function RoadmapCard({ opp, onRemove, isAdmin }: { opp: Opportunity, onRemove: () => void, isAdmin: boolean }) {
+    const [showDetails, setShowDetails] = useState(false);
 
     return (
         <div className="glass-panel recipe-card" style={{ borderTopColor: 'hsl(var(--accent-secondary))' }}>
@@ -65,27 +70,49 @@ function RoadmapCard({ opp, onRemove }: { opp: Opportunity, onRemove: () => void
                 <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>{opp.public_view.solution_narrative}</p>
             </div>
 
-            {/* Admin View Toggle */}
-            {showAdmin && (
+            {/* Deep Dive Content */}
+            {showDetails && (
                 <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.05)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem' }}>
-                    <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Technical Specs:</p>
-                    <p style={{ color: 'var(--text-muted)' }}>{opp.admin_view.workflow_steps}</p>
-                    <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        {opp.admin_view.tech_stack.map(t => (
-                            <span key={t} className="chip active" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>{t}</span>
-                        ))}
+                    {/* Publicly visible "Technical Workflow" */}
+                    <div style={{ marginBottom: '1rem' }}>
+                        <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>How it works:</p>
+                        <p style={{ color: 'var(--text-muted)' }}>{opp.admin_view.workflow_steps}</p>
                     </div>
+
+                    {/* New Content Fields */}
+                    {opp.public_view.detailed_explanation && (
+                        <div style={{ marginBottom: '1rem' }}>
+                            <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Deep Dive:</p>
+                            <p style={{ color: 'var(--text-muted)' }}>{opp.public_view.detailed_explanation}</p>
+                        </div>
+                    )}
+                    {opp.public_view.example_scenario && (
+                        <div style={{ marginBottom: '1rem' }}>
+                            <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Example:</p>
+                            <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>"{opp.public_view.example_scenario}"</p>
+                        </div>
+                    )}
+
+                    {/* Admin Only Stack */}
+                    {isAdmin && (
+                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '0.5rem' }}>
+                            <div style={{ width: '100%', color: 'salmon', fontSize: '0.75rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Server size={12} /> Admin Stack View</div>
+                            {opp.admin_view.tech_stack.map(t => (
+                                <span key={t} className="chip active" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>{t}</span>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
             <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem' }}>
                 <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setShowAdmin(!showAdmin); }}
+                    onClick={(e) => { e.stopPropagation(); setShowDetails(!showDetails); }}
                     className="btn-secondary"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', position: 'relative', zIndex: 10 }}
                 >
-                    View Specs <ArrowRight size={14} />
+                    {showDetails ? 'Hide Specs' : 'View Specs'} <ArrowRight size={14} />
                 </button>
                 <button
                     onClick={onRemove}

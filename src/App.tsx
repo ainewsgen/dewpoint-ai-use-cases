@@ -24,8 +24,8 @@ function App() {
         url: '', role: '', size: 'Solopreneur', stack: [], painPoint: ''
     });
     const [leads, setLeads] = useState<Lead[]>([]);
+    const [isAdminMode, setIsAdminMode] = useState(false);
 
-    // Lucid React components are used directly now.
     useEffect(() => {
     }, [view]);
 
@@ -104,20 +104,25 @@ function App() {
                     )}
 
                     <button
-                        onClick={() => setView(view === 'ADMIN' ? 'DISCOVERY' : 'ADMIN')}
-                        style={{ background: view === 'ADMIN' ? 'hsl(var(--accent-primary))' : 'transparent', border: 'none', color: view === 'ADMIN' ? 'black' : '#333', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        title="Admin Access"
+                        onClick={() => {
+                            const newMode = !isAdminMode;
+                            setIsAdminMode(newMode);
+                            if (newMode) setView('ADMIN');
+                            else if (view === 'ADMIN') setView('DISCOVERY');
+                        }}
+                        style={{ background: isAdminMode ? 'hsl(var(--accent-primary))' : 'transparent', border: 'none', color: isAdminMode ? 'white' : '#333', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        title="Toggle Admin Mode"
                     >
-                        <Shield size={16} />
+                        <Shield size={16} fill={isAdminMode ? "currentColor" : "none"} />
                     </button>
                 </div>
             </nav>
 
             {view === 'DISCOVERY' && <Onboarding onComplete={handleOnboardingComplete} />}
             {view === 'ANALYSIS' && <Analysis onComplete={handleAnalysisComplete} />}
-            {view === 'MATRIX' && <Matrix companyData={data} onUnlock={handleCaptureLead} />}
-            {view === 'LIBRARY' && <Library />}
-            {view === 'ROADMAP' && <Roadmap />}
+            {view === 'MATRIX' && <Matrix companyData={data} onUnlock={handleCaptureLead} isAdmin={isAdminMode} />}
+            {view === 'LIBRARY' && <Library isAdmin={isAdminMode} />}
+            {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} />}
             {view === 'ADMIN' && <AdminDashboard leads={leads} />}
         </div>
     );

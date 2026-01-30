@@ -13,6 +13,11 @@
         "strict": false,
         "noEmit": false
     },
+    "ts-node": {
+        "compilerOptions": {
+            "module": "CommonJS"
+        }
+    },
     "include": [
         "server/**/*"
     ],

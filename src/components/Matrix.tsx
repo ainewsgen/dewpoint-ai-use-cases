@@ -120,9 +120,13 @@ function RecipeCard({ opp, onUnlock }: { opp: Opportunity, onUnlock: () => void 
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <button
-                    onClick={() => setShowAdmin(!showAdmin)}
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowAdmin(!showAdmin);
+                    }}
                     className="btn-secondary"
-                    style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', position: 'relative', zIndex: 10 }}
                 >
                     {showAdmin ? <ChevronUp size={14} /> : <ChevronDown size={14} />} Specs
                 </button>

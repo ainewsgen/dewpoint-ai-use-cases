@@ -112,20 +112,41 @@ export function Library() {
 
             <div className="matrix-grid">
                 {filteredRecipes.map((opp, idx) => (
-                    <div key={idx} className="glass-panel recipe-card">
-                        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                            <span className="badge" style={{ background: 'rgba(255,255,255,0.1)' }}>{opp.department}</span>
-                            <span style={{ color: 'hsl(var(--accent-primary))', fontSize: '0.8rem', fontWeight: 600 }}>{opp.public_view.roi_estimate}</span>
-                        </div>
-                        <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>{opp.public_view.solution_narrative}</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
-                            <button className="btn-secondary" style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%' }}>
-                                View Blueprint
-                            </button>
-                        </div>
-                    </div>
+                    <LibraryCard key={idx} opp={opp} />
                 ))}
+            </div>
+        </div>
+    );
+}
+
+function LibraryCard({ opp }: { opp: Opportunity }) {
+    const [showSpecs, setShowSpecs] = useState(false);
+
+    return (
+        <div className="glass-panel recipe-card">
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <span className="badge" style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--text-muted)' }}>{opp.department}</span>
+                <span style={{ color: 'hsl(var(--accent-primary))', fontSize: '0.8rem', fontWeight: 600 }}>{opp.public_view.roi_estimate}</span>
+            </div>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>{opp.public_view.solution_narrative}</p>
+
+            {showSpecs && (
+                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.03)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                    <p><strong>Workflow:</strong> {opp.admin_view.workflow_steps}</p>
+                    <p style={{ marginTop: '0.5rem' }}><strong>Stack:</strong> {opp.admin_view.tech_stack.join(', ')}</p>
+                </div>
+            )}
+
+            <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+                <button
+                    type="button"
+                    onClick={() => setShowSpecs(!showSpecs)}
+                    className="btn-secondary"
+                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%', position: 'relative', zIndex: 10 }}
+                >
+                    {showSpecs ? 'Hide Blueprint' : 'View Blueprint'}
+                </button>
             </div>
         </div>
     );

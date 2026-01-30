@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessageSquare, ArrowRight, Globe, User, Sparkles, Briefcase } from 'lucide-react';
+import { MessageSquare, ArrowRight, Globe, Sparkles, Briefcase } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
 interface OnboardingProps {
@@ -118,7 +118,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         <div className="input-group">
                             <input
                                 type="text" placeholder="example.com"
-                                value={url} onChange={e => { setUrl(e.target.value); setError(false); }}
+                                value={url} onChange={e => {
+                                    setUrl(e.target.value);
+                                    setError(false);
+                                    // Simulated Tech Detection
+                                    if (e.target.value.includes('.')) {
+                                        setTimeout(() => {
+                                            if (!stack.includes('Gmail/GSuite')) setStack(prev => [...prev, 'Gmail/GSuite']);
+                                        }, 1000);
+                                    }
+                                }}
                                 style={{ borderColor: error ? 'salmon' : undefined }}
                             />
                             <Globe className="input-icon" size={20} />
@@ -138,31 +147,63 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </div>
                     </div>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your Role</label>
-                        <div className="input-group">
-                            <input type="text" placeholder="Founder, CTO, Ops Manager..." value={role} onChange={e => setRole(e.target.value)} />
-                            <User className="input-icon" size={20} />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company Size</label>
-                        <div className="segment-control">
-                            {['Solopreneur', '1-10', '11-50', '50+'].map(s => (
-                                <button
-                                    key={s}
-                                    className={`segment-btn ${size === s ? 'active' : ''}`}
-                                    onClick={() => setSize(s)}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your Role</label>
+                            <div className="input-group">
+                                <select
+                                    value={role}
+                                    onChange={e => setRole(e.target.value)}
+                                    style={{ width: '100%', padding: '0.9rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: 'white', color: 'hsl(var(--text-main))', fontSize: '1rem' }}
                                 >
-                                    {s}
-                                </button>
-                            ))}
+                                    <option value="" disabled>Select Role...</option>
+                                    <option value="Founder">Founder / CEO</option>
+                                    <option value="CTO">CTO / Technical Lead</option>
+                                    <option value="Ops Manager">Operations Manager</option>
+                                    <option value="marketing">Marketing Director</option>
+                                    <option value="sales">Sales Leader</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company Size</label>
+                            <div className="input-group">
+                                <select
+                                    value={size}
+                                    onChange={e => setSize(e.target.value)}
+                                    style={{ width: '100%', padding: '0.9rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: 'white', color: 'hsl(var(--text-main))', fontSize: '1rem' }}
+                                >
+                                    <option value="Solopreneur">Solopreneur (1)</option>
+                                    <option value="1-10">Micro (1-10)</option>
+                                    <option value="11-50">Small (11-50)</option>
+                                    <option value="50+">Mid-Sized (50+)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Tech Stack</label>
+
+                        {/* Custom Tech Input */}
+                        <div className="input-group" style={{ marginBottom: '1rem' }}>
+                            <input
+                                type="text"
+                                placeholder="Add custom tech (Press Enter)..."
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        const val = e.currentTarget.value.trim();
+                                        if (val && !stack.includes(val)) {
+                                            setStack(prev => [...prev, val]);
+                                            e.currentTarget.value = '';
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+
                         <div className="chips-grid">
                             {techOptions.map(t => (
                                 <button
@@ -171,6 +212,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     onClick={() => toggleTech(t)}
                                 >
                                     {t}
+                                </button>
+                            ))}
+                            {/* Render Custom Chips */}
+                            {stack.filter(s => !techOptions.includes(s)).map(s => (
+                                <button
+                                    key={s}
+                                    className="chip active"
+                                    onClick={() => toggleTech(s)}
+                                >
+                                    {s}
                                 </button>
                             ))}
                         </div>

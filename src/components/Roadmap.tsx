@@ -36,40 +36,66 @@ export function Roadmap() {
             ) : (
                 <div className="matrix-grid">
                     {savedRecipes.map((opp, idx) => (
-                        <div key={idx} className="glass-panel recipe-card" style={{ borderTopColor: 'hsl(var(--accent-secondary))' }}>
-                            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                <span className={`badge ${opp.public_view.roi_estimate.includes('$') ? 'cost' : 'eff'}`}>{opp.department}</span>
-                                <span style={{ color: 'hsl(var(--accent-gold))', fontSize: '0.8rem', fontWeight: 700 }}>{opp.public_view.roi_estimate}</span>
-                            </div>
-                            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
-
-                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                                <Frown size={16} style={{ color: 'salmon', minWidth: '16px', marginTop: '4px' }} />
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>{opp.public_view.problem}</p>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                                <Sparkles size={16} className="text-gold" style={{ minWidth: '16px', marginTop: '4px' }} />
-                                <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>{opp.public_view.solution_narrative}</p>
-                            </div>
-
-                            <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem' }}>
-                                <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    View Specs <ArrowRight size={14} />
-                                </button>
-                                <button
-                                    onClick={() => removeRecipe(idx)}
-                                    className="btn-secondary"
-                                    style={{ borderColor: 'salmon', color: 'salmon', padding: '0.5rem' }}
-                                    title="Remove from Roadmap"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-                        </div>
+                        <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} />
                     ))}
                 </div>
             )}
+        </div>
+    );
+}
+
+function RoadmapCard({ opp, onRemove }: { opp: Opportunity, onRemove: () => void }) {
+    const [showAdmin, setShowAdmin] = useState(false);
+
+    return (
+        <div className="glass-panel recipe-card" style={{ borderTopColor: 'hsl(var(--accent-secondary))' }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <span className={`badge ${opp.public_view.roi_estimate.includes('$') ? 'cost' : 'eff'}`}>{opp.department}</span>
+                <span style={{ color: 'hsl(var(--accent-gold))', fontSize: '0.8rem', fontWeight: 700 }}>{opp.public_view.roi_estimate}</span>
+            </div>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <Frown size={16} style={{ color: 'salmon', minWidth: '16px', marginTop: '4px' }} />
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>{opp.public_view.problem}</p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <Sparkles size={16} className="text-gold" style={{ minWidth: '16px', marginTop: '4px' }} />
+                <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>{opp.public_view.solution_narrative}</p>
+            </div>
+
+            {/* Admin View Toggle */}
+            {showAdmin && (
+                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.05)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                    <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Technical Specs:</p>
+                    <p style={{ color: 'var(--text-muted)' }}>{opp.admin_view.workflow_steps}</p>
+                    <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {opp.admin_view.tech_stack.map(t => (
+                            <span key={t} className="chip active" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>{t}</span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem' }}>
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowAdmin(!showAdmin); }}
+                    className="btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', position: 'relative', zIndex: 10 }}
+                >
+                    View Specs <ArrowRight size={14} />
+                </button>
+                <button
+                    onClick={onRemove}
+                    className="btn-secondary"
+                    style={{ borderColor: 'salmon', color: 'salmon', padding: '0.5rem' }}
+                    title="Remove from Roadmap"
+                >
+                    <Trash2 size={16} />
+                </button>
+            </div>
         </div>
     );
 }

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateOpportunities, CompanyData, Opportunity } from '../lib/engine';
-import { BadgeCheck, Frown, Sparkles, Server, Terminal, ChevronDown, ChevronUp } from 'lucide-react';
+import { BadgeCheck, Frown, Sparkles, Server, Terminal, ChevronDown, ChevronUp, Bookmark } from 'lucide-react';
 
 interface MatrixProps {
     companyData: CompanyData;
@@ -33,12 +33,49 @@ export function Matrix({ companyData, onUnlock }: MatrixProps) {
 
 function RecipeCard({ opp, onUnlock }: { opp: Opportunity, onUnlock: () => void }) {
     const [showAdmin, setShowAdmin] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+
+    // Check if saved on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('dpg_roadmap');
+        if (saved) {
+            const recipes = JSON.parse(saved);
+            const found = recipes.find((r: Opportunity) => r.title === opp.title);
+            if (found) setIsSaved(true);
+        }
+    }, [opp.title]);
+
+    const toggleSave = () => {
+        const saved = localStorage.getItem('dpg_roadmap');
+        let recipes = saved ? JSON.parse(saved) : [];
+
+        if (isSaved) {
+            // Remove
+            recipes = recipes.filter((r: Opportunity) => r.title !== opp.title);
+            setIsSaved(false);
+        } else {
+            // Add
+            recipes.push(opp);
+            setIsSaved(true);
+        }
+        localStorage.setItem('dpg_roadmap', JSON.stringify(recipes));
+    };
 
     return (
         <div className="glass-panel recipe-card">
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <span className="badge rev" style={{ background: 'hsla(var(--accent-primary)/0.15)', color: 'hsl(var(--accent-primary))', border: '1px solid hsla(var(--accent-primary)/0.3)' }}>{opp.public_view.roi_estimate}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <span className="badge rev" style={{ background: 'hsla(var(--accent-gold)/0.15)', color: 'hsl(var(--accent-gold))', border: '1px solid hsla(var(--accent-gold)/0.3)' }}>{opp.public_view.roi_estimate}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
+                </div>
+                {/* Save Button */}
+                <button
+                    onClick={toggleSave}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: isSaved ? 'hsl(var(--accent-gold))' : 'var(--text-muted)' }}
+                    title={isSaved ? "Saved to Roadmap" : "Save to Roadmap"}
+                >
+                    <Bookmark size={20} fill={isSaved ? "currentColor" : "none"} />
+                </button>
             </div>
 
             <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
@@ -50,7 +87,7 @@ function RecipeCard({ opp, onUnlock }: { opp: Opportunity, onUnlock: () => void 
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <Sparkles size={16} className="text-accent" style={{ minWidth: '16px', marginTop: '4px' }} />
+                <Sparkles size={16} className="text-gold" style={{ minWidth: '16px', marginTop: '4px' }} />
                 <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>{opp.public_view.solution_narrative}</p>
             </div>
 
@@ -76,18 +113,16 @@ function RecipeCard({ opp, onUnlock }: { opp: Opportunity, onUnlock: () => void 
                 </div>
             )}
 
-            <div className="metrics" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div>
-                    <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Value Prop</label>
-                    <span style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>"{opp.public_view.value_proposition}"</span>
-                </div>
+            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', marginBottom: '1rem' }}>
+                <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Value Prop</label>
+                <span style={{ fontSize: '0.95rem', fontStyle: 'italic', color: 'hsl(var(--accent-secondary))' }}>"{opp.public_view.value_proposition}"</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <button
                     onClick={() => setShowAdmin(!showAdmin)}
                     className="btn-secondary"
-                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                     {showAdmin ? <ChevronUp size={14} /> : <ChevronDown size={14} />} Specs
                 </button>

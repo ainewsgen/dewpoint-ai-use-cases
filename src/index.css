@@ -1,23 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
 :root {
-    /* HSL Color Palette - Cyber Consultant Theme */
-    --bg-dark: 220 30% 8%;
-    /* Very dark blue-grey */
-    --bg-card: 220 25% 12%;
-    /* Slightly lighter for cards */
-    --accent-primary: 180 100% 35%;
-    /* Teal/Cyan for "DewPoint" login */
-    --accent-glow: 180 100% 50%;
-    --text-main: 220 10% 95%;
-    --text-muted: 220 10% 70%;
-    --border-glass: 220 20% 25%;
+    /* HSL Color Palette - The DewPoint Group (DPG) */
+    /* Primary Blue: #2064B9 -> hsl(213, 70%, 42%) */
+    /* Secondary Blue: #84BBEF -> hsl(209, 75%, 73%) */
+    /* Accent Gold: #DBB00C -> hsl(47, 90%, 45%) */
+    /* Highlight Orange: #E4812A -> hsl(28, 78%, 53%) */
 
-    --font-heading: 'Outfit', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    /* Deep Navy Backgrounds for Trust */
+    --bg-dark: 215 40% 10%;
+    /* Darker Navy */
+    --bg-card: 215 35% 15%;
+    /* Lighter Navy */
 
-    --radius-lg: 16px;
-    --radius-md: 8px;
+    --accent-primary: 213 70% 42%;
+    /* DPG Blue - Core Brand */
+    --accent-secondary: 209 75% 73%;
+    /* DPG Light Blue */
+    --accent-gold: 47 90% 45%;
+    /* DPG Gold */
+    --accent-orange: 28 78% 53%;
+    /* DPG Orange */
 
-    --shadow-glow: 0 0 20px -5px hsla(var(--accent-primary) / 0.3);
+    --text-main: 0 0% 100%;
+    --text-muted: 215 20% 80%;
+    --border-glass: 215 30% 25%;
+
+    --font-heading: 'Open Sans', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
+
+    --radius-lg: 12px;
+    --radius-md: 6px;
 }
 
 * {
@@ -43,45 +56,74 @@ h4,
 h5 {
     font-family: var(--font-heading);
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+}
+
+.text-accent {
+    color: hsl(var(--accent-secondary));
+}
+
+/* Use Light Blue for text contrast on dark */
+.text-gold {
+    color: hsl(var(--accent-gold));
+}
+
+.text-orange {
+    color: hsl(var(--accent-orange));
 }
 
 /* Utilities */
 .glass-panel {
-    background: hsla(var(--bg-card) / 0.7);
+    background: hsla(var(--bg-card) / 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid hsla(var(--border-glass) / 0.5);
     border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .btn-primary {
-    background: hsl(var(--accent-primary));
+    background: hsl(var(--accent-gold));
+    /* Gold for Primary Actions */
     color: hsl(var(--bg-dark));
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px hsla(var(--accent-primary) / 0.2);
+    box-shadow: 0 4px 12px hsla(var(--accent-gold) / 0.2);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
 }
 
 .btn-primary:hover {
-    background: hsl(var(--accent-glow));
-    box-shadow: 0 0 15px hsla(var(--accent-primary) / 0.5);
+    background: hsl(47, 100%, 55%);
+    box-shadow: 0 0 15px hsla(var(--accent-gold) / 0.4);
     transform: translateY(-1px);
 }
 
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-secondary:hover {
+    border-color: hsl(var(--accent-secondary));
+    color: hsl(var(--accent-secondary));
+    background: hsla(var(--accent-secondary) / 0.05);
 }
 
 .container {
@@ -117,152 +159,94 @@ h5 {
     padding: 2rem;
 }
 
-.logo-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.logo-header.sm {
-    margin-bottom: 2rem;
-}
-
-.logo-header.sm h3 {
-    font-size: 1.5rem;
-    color: var(--text-muted);
-}
-
-.text-accent {
-    color: hsl(var(--accent-primary));
-}
-
-.input-group {
-    position: relative;
-    width: 100%;
-}
-
 .input-group input {
     width: 100%;
     padding: 1rem 1rem 1rem 3rem;
-    background: hsla(0, 0%, 0%, 0.3);
+    background: hsla(215, 30%, 12%, 0.8);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-md);
     color: white;
     font-size: 1rem;
+    transition: border-color 0.2s;
 }
 
 .input-group input:focus {
     outline: none;
-    border-color: hsl(var(--accent-primary));
-}
-
-.input-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
+    border-color: hsl(var(--accent-secondary));
 }
 
 /* Matrix Styles */
 .matrix-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    /* Slightly wider cards */
+    gap: 2rem;
 }
 
 .recipe-card {
-    padding: 1.5rem;
-    transition: transform 0.2s;
+    padding: 2rem;
+    /* More breathing room */
+    transition: transform 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
+    border-top: 4px solid transparent;
+    /* Prepare for accent border */
 }
 
 .recipe-card:hover {
     transform: translateY(-5px);
-    border-color: hsl(var(--accent-primary) / 0.5);
+    border-top-color: hsl(var(--accent-gold));
+    /* Gold highlight on hover */
 }
 
+/* Badges */
 .badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    /* Full pill shape */
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .badge.rev {
-    background: hsla(140, 70%, 50%, 0.15);
-    color: hsl(140, 70%, 50%);
+    /* Revenue -> Gold */
+    background: hsla(var(--accent-gold) / 0.15);
+    color: hsl(var(--accent-gold));
+    border: 1px solid hsla(var(--accent-gold) / 0.3);
 }
 
 .badge.cost {
-    background: hsla(30, 90%, 60%, 0.15);
-    color: hsl(30, 90%, 60%);
+    /* Cost -> Orange */
+    background: hsla(var(--accent-orange) / 0.15);
+    color: hsl(var(--accent-orange));
+    border: 1px solid hsla(var(--accent-orange) / 0.3);
 }
 
 .badge.eff {
-    background: hsla(200, 70%, 50%, 0.15);
-    color: hsl(200, 70%, 50%);
+    /* Efficiency -> Blue */
+    background: hsla(var(--accent-secondary) / 0.15);
+    color: hsl(var(--accent-secondary));
+    border: 1px solid hsla(var(--accent-secondary) / 0.3);
 }
 
-.stars {
-    display: flex;
-    gap: 2px;
-}
-
-.star {
-    fill: transparent;
-    color: var(--border-glass);
-}
-
-.star.fill {
-    fill: hsl(var(--accent-primary));
-    color: hsl(var(--accent-primary));
-}
-
-.segment-control {
-    display: flex;
-    background: hsla(0, 0%, 0%, 0.3);
-    padding: 4px;
-    border-radius: var(--radius-md);
-}
-
-.segment-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: 0.5rem;
-    cursor: pointer;
-    border-radius: 6px;
-}
-
-.segment-btn.active {
-    background: hsla(var(--accent-primary) / 0.15);
-    color: hsl(var(--accent-primary));
-    font-weight: 600;
-}
-
-.chips-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
+/* Chips */
 .chip {
     background: transparent;
     border: 1px solid var(--border-glass);
     color: var(--text-muted);
-    padding: 0.4rem 0.8rem;
-    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    /* More 'technical' less 'bubbly' */
     cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
 }
 
 .chip.active {
     background: hsl(var(--accent-primary));
     border-color: hsl(var(--accent-primary));
-    color: hsl(var(--bg-dark));
+    color: white;
     font-weight: 600;
 }

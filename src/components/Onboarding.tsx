@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrainCircuit, MessageSquare, ArrowRight, Globe, User, Sparkles } from 'lucide-react';
+import { MessageSquare, ArrowRight, Globe, User, Sparkles } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
 interface OnboardingProps {
@@ -52,8 +52,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         return (
             <div className="center-stage animate-fade-in">
                 <div className="logo-header">
-                    <BrainCircuit size={48} className="text-accent" />
-                    <h1>DewPoint <span className="text-accent">Strategy Core</span></h1>
+                    <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '80px' }} />
                 </div>
 
                 <p className="subtitle" style={{ marginBottom: '3rem', color: 'var(--text-muted)' }}>
@@ -96,8 +95,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     return (
         <div className="center-stage animate-fade-in">
             <div className="logo-header sm">
-                <BrainCircuit size={32} className="text-accent" />
-                <h3>DewPoint Strategy Core</h3>
+                <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '50px' }} />
             </div>
 
             <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>

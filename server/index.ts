@@ -14,28 +14,24 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Health Check (before other API routes for priority)
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api', leadsRoutes);
 app.use('/api', cmsRoutes);
 
-// Health Check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Serve static frontend files in production
+// Serve static frontend files in production (AFTER API routes)
 if (process.env.NODE_ENV === 'production') {
-    const staticPath = path.join(__dirname, '../../dist');
-    app.use(express.static(staticPath));
+    const staticPath = path.join(__dirname, '../..');
+    app.use(express.static(path.join(staticPath, 'dist')));
 
-    // Catch-all: send index.html for any non-API routes (SPA routing)
-    app.use((req, res, next) => {
-        if (!req.path.startsWith('/api')) {
-            res.sendFile(path.join(staticPath, 'index.html'));
-        } else {
-            next();
-        }
+    // Catch-all: send index.html for any remaining routes (SPA routing)
+    app.use((req, res) => {
+        res.sendFile(path.join(staticPath, 'dist', 'index.html'));
     });
 }
 

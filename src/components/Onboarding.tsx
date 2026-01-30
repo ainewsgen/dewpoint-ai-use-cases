@@ -1,5 +1,4 @@
-// ... Inside Onboarding
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageSquare, ArrowRight, Globe, Sparkles, Briefcase, Loader2 } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
@@ -17,6 +16,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [stack, setStack] = useState<string[]>([]);
     const [error, setError] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
+
+    // CMS state
+    const [announcement, setAnnouncement] = useState('');
+
+    useEffect(() => {
+        const msg = localStorage.getItem('dpg_announcement');
+        if (msg) setAnnouncement(msg);
+    }, []);
 
     const techOptions = [
         'Salesforce', 'HubSpot', 'Zoho', 'Pipedrive',
@@ -81,11 +88,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         }, 1500);
     };
 
-    // ... scanUrl
-
     if (step === 1) {
         return (
             <div className="center-stage animate-fade-in">
+                {announcement && (
+                    <div className="announcement-banner" style={{
+                        background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
+                        color: 'white', padding: '0.75rem 1.5rem', borderRadius: '50px',
+                        marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)'
+                    }}>
+                        <Sparkles size={16} />
+                        {announcement}
+                    </div>
+                )}
                 <div className="logo-header">
                     <div className="logo-pill">
                         <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '60px' }} />
@@ -132,9 +148,21 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     // Render Step 2
     return (
         <div className="center-stage animate-fade-in">
-            {/* ... header */}
+            {announcement && (
+                <div className="announcement-banner" style={{
+                    background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
+                    color: 'white', padding: '0.75rem 1.5rem', borderRadius: '50px',
+                    marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)'
+                }}>
+                    <Sparkles size={16} />
+                    {announcement}
+                </div>
+            )}
             <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>
-                {/* ... progress bar */}
+                <div className="progress-bar" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)' }}>
+                    <div className="fill" style={{ width: '100%', height: '100%', background: 'hsl(var(--accent-primary))' }}></div>
+                </div>
 
                 <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Business Context</h2>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>I need to know who I'm advising to generate relevant "Recipes".</p>
@@ -169,7 +197,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             </button>
                         </div>
                     </div>
-                    {/* ... Rest of form */}
 
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Industry (if no URL)</label>

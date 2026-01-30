@@ -105,42 +105,51 @@ function App() {
                         <button onClick={() => setView('DISCOVERY')} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>New Search</button>
                     )}
 
-                    {view !== 'ADMIN' && (
-                        <>
-                            <button
-                                onClick={() => setView(view === 'LIBRARY' ? 'DISCOVERY' : 'LIBRARY')}
-                                style={{
-                                    background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
-                                    border: '1px solid var(--border-glass)',
-                                    color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
-                                    padding: '0.4rem 1rem',
-                                    borderRadius: '50px',
-                                    cursor: 'pointer',
-                                    backdropFilter: 'blur(10px)',
-                                    fontSize: '0.85rem',
-                                    fontWeight: 500
-                                }}
-                            >
-                                Library
-                            </button>
-                            <button
-                                onClick={() => setView(view === 'ROADMAP' ? 'DISCOVERY' : 'ROADMAP')}
-                                style={{
-                                    background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',
-                                    border: '1px solid var(--border-glass)',
-                                    color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
-                                    fontWeight: 'bold',
-                                    padding: '0.4rem 1rem',
-                                    borderRadius: '50px',
-                                    cursor: 'pointer',
-                                    backdropFilter: 'blur(10px)',
-                                    fontSize: '0.85rem'
-                                }}
-                            >
-                                My Roadmap
-                            </button>
-                        </>
-                    )}
+                    {/* Global Navigation - Always Visible */}
+                    <button
+                        onClick={() => setView(view === 'LIBRARY' ? 'DISCOVERY' : 'LIBRARY')}
+                        style={{
+                            background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                            border: '1px solid var(--border-glass)',
+                            color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
+                            padding: '0.4rem 1rem',
+                            borderRadius: '50px',
+                            cursor: 'pointer',
+                            backdropFilter: 'blur(10px)',
+                            fontSize: '0.85rem',
+                            fontWeight: 500
+                        }}
+                    >
+                        Library
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (view === 'ROADMAP') {
+                                setView('DISCOVERY');
+                                return;
+                            }
+                            // Gating Logic
+                            const email = localStorage.getItem('dpg_user_email');
+                            if (!email) {
+                                setShowLoginModal(true);
+                            } else {
+                                setView('ROADMAP');
+                            }
+                        }}
+                        style={{
+                            background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',
+                            border: '1px solid var(--border-glass)',
+                            color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
+                            fontWeight: 'bold',
+                            padding: '0.4rem 1rem',
+                            borderRadius: '50px',
+                            cursor: 'pointer',
+                            backdropFilter: 'blur(10px)',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        My Roadmap
+                    </button>
 
                     <button
                         onClick={() => {
@@ -150,7 +159,7 @@ function App() {
                             else if (view === 'ADMIN') setView('DISCOVERY');
                         }}
                         style={{ background: isAdminMode ? 'hsl(var(--accent-primary))' : 'transparent', border: 'none', color: isAdminMode ? 'white' : '#333', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        title="Toggle Admin Mode"
+                        title={isAdminMode ? "Exit Admin Mode" : "Enter Admin Mode"}
                     >
                         <Shield size={16} fill={isAdminMode ? "currentColor" : "none"} />
                     </button>

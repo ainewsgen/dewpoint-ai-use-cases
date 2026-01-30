@@ -10,6 +10,8 @@ export interface CompanyData {
     size: string;
     stack: string[];
     painPoint: string;
+    name?: string;
+    email?: string;
 }
 
 export interface Opportunity {

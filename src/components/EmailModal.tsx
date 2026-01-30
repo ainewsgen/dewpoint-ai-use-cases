@@ -10,11 +10,13 @@ interface EmailModalProps {
 
 export function EmailModal({ onClose, onSuccess, title, description }: EmailModalProps) {
     const [emailInput, setEmailInput] = useState('');
+    const [nameInput, setNameInput] = useState('');
 
     const submitEmail = () => {
         if (!emailInput.includes('@')) return;
         localStorage.setItem('dpg_user_email', emailInput);
-        onSuccess(emailInput);
+        if (nameInput) localStorage.setItem('dpg_user_name', nameInput);
+        onSuccess(emailInput); // passing email for legacy comp
     };
 
     return (
@@ -26,16 +28,30 @@ export function EmailModal({ onClose, onSuccess, title, description }: EmailModa
                 <h3 style={{ marginBottom: '0.5rem', color: 'hsl(var(--bg-dark))' }}>{title || "Save Your Roadmap"}</h3>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>{description || "To persist your strategies and unlock full blueprints, please verify your email."}</p>
 
-                <div className="input-group" style={{ marginBottom: '1.5rem' }}>
+                <div className="input-group" style={{ marginBottom: '1rem', textAlign: 'left' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.25rem', display: 'block' }}>Name</label>
                     <input
-                        type="email"
-                        placeholder="name@company.com"
-                        value={emailInput}
-                        onChange={e => setEmailInput(e.target.value)}
-                        style={{ width: '100%' }}
-                        autoFocus
+                        type="text"
+                        placeholder="Your Name"
+                        value={nameInput}
+                        onChange={e => setNameInput(e.target.value)}
+                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
                     />
-                    <Mail size={18} className="input-icon" />
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.25rem', display: 'block' }}>Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                        <input
+                            type="email"
+                            placeholder="name@company.com"
+                            value={emailInput}
+                            onChange={e => setEmailInput(e.target.value)}
+                            style={{ width: '100%', padding: '0.5rem', paddingRight: '2.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                            autoFocus
+                        />
+                        <Mail size={18} className="input-icon" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                    </div>
                 </div>
 
                 <button onClick={submitEmail} className="btn-primary" style={{ width: '100%' }}>

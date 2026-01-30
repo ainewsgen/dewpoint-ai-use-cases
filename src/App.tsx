@@ -40,15 +40,25 @@ function App() {
     };
 
     const handleCaptureLead = (recipes: Opportunity[]) => {
+        // Collect latest data
+        const currentEmail = localStorage.getItem('dpg_user_email');
+        const currentName = localStorage.getItem('dpg_user_name');
+
+        const finalData = {
+            ...data,
+            email: currentEmail || undefined,
+            name: currentName || undefined
+        };
+
         // Simulate saving to DB
         const newLead: Lead = {
             id: Math.random().toString(36).substr(2, 9),
             timestamp: new Date().toISOString(),
-            company: data,
+            company: finalData,
             recipes: recipes
         };
         setLeads(prev => [newLead, ...prev]);
-        alert("Blueprint Unlocked! DewPoint Team has been notified.");
+        alert("Blueprint unlocked and saved to My Roadmap.");
     };
 
     // ... Inside App component
@@ -57,6 +67,10 @@ function App() {
     // ... existing handlers
 
     const handleLoginSuccess = (email: string) => {
+        const name = localStorage.getItem('dpg_user_name');
+        // Update local data state with user info
+        setData(prev => ({ ...prev, email, name: name || undefined }));
+
         setShowLoginModal(false);
         // If they have data, maybe take them to roadmap?
         const saved = localStorage.getItem('dpg_roadmap');

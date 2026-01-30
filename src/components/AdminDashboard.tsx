@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Lock, Unlock, Database, Eye, Trash2, Megaphone, Save, UserX, Settings, Key, Edit, Plus, X } from 'lucide-react';
+import { Lock, Unlock, Database, Eye, Megaphone, Save, Key, Edit, Plus, X, Trash, Globe, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface AdminDashboardProps {
     leads: Array<{
@@ -23,8 +23,11 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [passcode, setPasscode] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+
     // CMS State
     const [announcement, setAnnouncement] = useState('');
+    const [cmsStatus, setCmsStatus] = useState<'draft' | 'published'>('draft');
+    const [isEditingCms, setIsEditingCms] = useState(false);
     const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
     // Integrations State
@@ -37,7 +40,9 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     useEffect(() => {
         const storedAnn = localStorage.getItem('dpg_announcement');
+        const storedStatus = localStorage.getItem('dpg_announcement_status');
         if (storedAnn) setAnnouncement(storedAnn);
+        if (storedStatus) setCmsStatus(storedStatus as 'draft' | 'published');
 
         const storedInt = localStorage.getItem('dpg_integrations');
         if (storedInt) {
@@ -52,13 +57,41 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         }
     }, []);
 
-    const handleSaveAnnouncement = () => {
+    const handleSaveDraft = () => {
         localStorage.setItem('dpg_announcement', announcement);
+        localStorage.setItem('dpg_announcement_status', 'draft');
+        setCmsStatus('draft');
+        setIsEditingCms(false);
         setShowSaveConfirm(true);
         setTimeout(() => setShowSaveConfirm(false), 2000);
     };
 
-    const handleAddIntegration = () => {
+    const handlePublish = () => {
+        localStorage.setItem('dpg_announcement', announcement);
+        localStorage.setItem('dpg_announcement_status', 'published');
+        setCmsStatus('published');
+        setIsEditingCms(false);
+        setShowSaveConfirm(true);
+        setTimeout(() => setShowSaveConfirm(false), 2000);
+    };
+
+    const handleUnpublish = () => {
+        localStorage.setItem('dpg_announcement_status', 'draft');
+        setCmsStatus('draft');
+    };
+
+    const handleDeleteMessage = () => {
+        if (confirm('Are you sure you want to delete this message?')) {
+            setAnnouncement('');
+            setCmsStatus('draft');
+            localStorage.removeItem('dpg_announcement');
+            localStorage.removeItem('dpg_announcement_status');
+            setIsEditingCms(false);
+        }
+    };
+
+    const handleAddIntegration = (e: React.FormEvent) => {
+        e.preventDefault();
         if (!newIntegrationName.trim()) return;
         const newInt: Integration = {
             id: Date.now().toString(),
@@ -84,6 +117,28 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         setIntegrations(updated);
         localStorage.setItem('dpg_integrations', JSON.stringify(updated));
     };
+
+    // ... User Management handlers ... 
+    // (Note: Skipping re-implementation of user mgmt handlers as they are outside the chunk, 
+    // wait, I need to make sure I don't delete them. The chunk end line is 272, which is before user mgmt.
+    // Actually the chunk I selected covers lines 26 to 272.
+    // I need to be careful. I will include the user mgmt handlers in the replacement to be safe 
+    // or just target the specific blocks.
+    // Let's constrain the chunk to just the CMS and Integration logic replacement.
+
+    // RE-EVALUATING CHUNK STRATEGY
+    // I will use replace_file_content for lines 26-86 (State + Logic) and 193-272 (Render)
+    // Actually, I can do it in one go if I include everything in between or use multi_replace.
+    // I will use multi_replace_file_content.
+
+    // ERROR: I cannot change tool inside decision.
+    // I will proceed with replace_file_content but I need to be careful about boundaries.
+
+    // Let's do multi_replace.
+
+    // WAIT, I am generating `replace_file_content`. I should use `multi_replace_file_content` instead.
+
+
 
     // User Management
     const handleDeleteUser = (id: string, e?: React.MouseEvent) => {
@@ -143,7 +198,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         );
     }
 
-    const activeLead = leads.find(l => l.id === selectedLead);
+
 
     return (
         <div className="container animate-fade-in" style={{ paddingTop: '2rem', position: 'relative' }}>
@@ -194,9 +249,9 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             {activeTab === 'integrations' && (
                 <div className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
                     <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Settings size={20} /> Global Integrations
+                        <Globe size={20} /> Global Integrations
                     </h3>
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+                    <form onSubmit={handleAddIntegration} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
                         <input
                             type="text"
                             placeholder="New Integration Name..."
@@ -204,10 +259,10 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             onChange={e => setNewIntegrationName(e.target.value)}
                             style={{ flex: 1, padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
                         />
-                        <button onClick={handleAddIntegration} className="btn-primary">
+                        <button type="submit" className="btn-primary">
                             <Plus size={18} /> Add
                         </button>
-                    </div>
+                    </form>
 
                     <div style={{ display: 'grid', gap: '1rem' }}>
                         {integrations.map(int => (
@@ -231,9 +286,10 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                     </button>
                                     <button
                                         onClick={() => handleDeleteIntegration(int.id)}
+                                        title="Delete Integration"
                                         style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid salmon', background: 'transparent', color: 'salmon', cursor: 'pointer' }}
                                     >
-                                        Delete
+                                        <Trash size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -244,149 +300,239 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
             {activeTab === 'cms' && (
                 <div className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-                    <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Megaphone size={20} /> Landing Page Announcement
-                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Megaphone size={20} /> Landing Page Announcement
+                        </h3>
+                        <div className="badge" style={{
+                            background: cmsStatus === 'published' ? 'hsl(140, 70%, 20%)' : 'hsl(0, 0%, 20%)',
+                            color: cmsStatus === 'published' ? 'hsl(140, 70%, 80%)' : 'var(--text-muted)',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem'
+                        }}>
+                            {cmsStatus === 'published' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+                            {cmsStatus === 'published' ? 'Live' : 'Draft'}
+                        </div>
+                    </div>
+
                     <p style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
                         This message will be displayed prominently on the landing (onboarding) page for all users.
-                        Leave empty to disable.
                     </p>
-                    <textarea
-                        value={announcement}
-                        onChange={(e) => setAnnouncement(e.target.value)}
-                        placeholder="e.g., 'Maintenance scheduled for Saturday' or 'Welcome to our generic Beta!'"
-                        style={{
-                            width: '100%', minHeight: '150px', padding: '1rem',
-                            background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)',
-                            color: 'white', borderRadius: '8px', marginBottom: '1rem',
-                            fontSize: '1rem'
-                        }}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
-                        {showSaveConfirm && <span style={{ color: 'hsl(var(--accent-gold))' }}>Saved successfully!</span>}
-                        <button onClick={handleSaveAnnouncement} className="btn-primary">
-                            <Save size={18} /> Save Message
-                        </button>
-                    </div>
-                </div>
-            )}
 
-            {activeTab === 'leads' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
-                    {/* Sidebar List */}
-                    <div className="glass-panel" style={{ padding: '1rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-                        <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>Registered Leads</h3>
-                        {leads.length === 0 && <p style={{ color: '#666', fontStyle: 'italic' }}>No leads captured yet.</p>}
-                        {leads.map(lead => (
-                            <div
-                                key={lead.id}
-                                onClick={() => setSelectedLead(lead.id)}
+                    {isEditingCms ? (
+                        <div className="animate-fade-in">
+                            <textarea
+                                value={announcement}
+                                onChange={(e) => setAnnouncement(e.target.value)}
+                                placeholder="e.g., 'Maintenance scheduled for Saturday' or 'Welcome to our generic Beta!'"
                                 style={{
-                                    padding: '1rem',
-                                    borderBottom: '1px solid var(--border-glass)',
-                                    cursor: 'pointer',
-                                    background: selectedLead === lead.id ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    borderRadius: '8px',
-                                    marginBottom: '0.5rem',
-                                    position: 'relative'
+                                    width: '100%', minHeight: '150px', padding: '1rem',
+                                    background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)',
+                                    color: 'white', borderRadius: '8px', marginBottom: '1rem',
+                                    fontSize: '1rem', fontFamily: 'inherit'
                                 }}
-                                className="admin-user-row"
-                            >
-                                <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{lead.company.url || "Unknown Company"}</h4>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lead.company.role}</p>
-                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                    <button
-                                        onClick={(e) => openEditUser(lead, e)}
-                                        title="Edit User"
-                                        style={{ background: 'transparent', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', opacity: 0.8 }}
-                                    >
-                                        <Edit size={14} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => handleResetPassword(lead.id, e)}
-                                        title="Reset Password"
-                                        style={{ background: 'transparent', border: 'none', color: 'orange', cursor: 'pointer', opacity: 0.8 }}
-                                    >
-                                        <Key size={14} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => handleDeleteUser(lead.id, e)}
-                                        title="Ban/Delete User"
-                                        style={{ background: 'transparent', border: 'none', color: 'salmon', cursor: 'pointer', opacity: 0.8 }}
-                                    >
-                                        <UserX size={14} />
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+                                <button onClick={() => setIsEditingCms(false)} className="btn-secondary">
+                                    Cancel
+                                </button>
+                                <button onClick={handleSaveDraft} className="btn-secondary">
+                                    <Save size={18} /> Save Draft
+                                </button>
+                                <button onClick={handlePublish} className="btn-primary">
+                                    <Globe size={18} /> Publish Now
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="animate-fade-in">
+                            <div style={{
+                                padding: '1.5rem', background: 'rgba(255,255,255,0.05)',
+                                borderRadius: '8px', marginBottom: '1.5rem', minHeight: '100px',
+                                display: 'flex', alignItems: announcement ? 'flex-start' : 'center',
+                                justifyContent: announcement ? 'flex-start' : 'center'
+                            }}>
+                                {announcement ? (
+                                    <p style={{ whiteSpace: 'pre-wrap' }}>{announcement}</p>
+                                ) : (
+                                    <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No announcement set.</p>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <button
+                                    onClick={handleDeleteMessage}
+                                    style={{ color: 'salmon', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                >
+                                    <Trash size={16} /> Delete Message
+                                </button>
+
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    {cmsStatus === 'published' && (
+                                        <button onClick={handleUnpublish} className="btn-secondary">
+                                            Unpublish (Hide)
+                                        </button>
+                                    )}
+                                    {cmsStatus === 'draft' && announcement && (
+                                        <button onClick={handlePublish} className="btn-primary">
+                                            Publish
+                                        </button>
+                                    )}
+                                    <button onClick={() => setIsEditingCms(true)} className="btn-secondary">
+                                        <Edit size={16} /> Edit Message
                                     </button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            {showSaveConfirm && <p style={{ textAlign: 'right', marginTop: '0.5rem', color: 'hsl(140, 70%, 50%)', fontSize: '0.9rem' }}>Changes saved!</p>}
+                        </div>
+                    )}
+                </div>
+            )}
 
-                    {/* Main Detail View */}
-                    <div className="glass-panel" style={{ padding: '2rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-                        {activeLead ? (
-                            <div className="animate-fade-in">
-                                <div style={{ borderBottom: '1px solid var(--border-glass)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <h1 style={{ marginBottom: '0.5rem' }}>{activeLead.company.url}</h1>
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <button onClick={(e) => openEditUser(activeLead, e)} className="btn-secondary">
-                                                <Edit size={16} /> Edit Profile
-                                            </button>
-                                            <button onClick={(e) => handleDeleteUser(activeLead.id, e)} className="btn-secondary" style={{ borderColor: 'salmon', color: 'salmon' }}>
-                                                <Trash2 size={16} /> Ban User
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                        <span><strong>Role:</strong> {activeLead.company.role}</span>
-                                        <span><strong>Size:</strong> {activeLead.company.size}</span>
-                                        <span><strong>Pain:</strong> "{activeLead.company.painPoint}"</span>
+            {/* Logic for Grouping Leads */}
+            {activeTab === 'leads' && (() => {
+                // Group duplicates by Email (or URL if no email)
+                const uniqueUsers = leads.reduce((acc, lead) => {
+                    const key = lead.company.email || lead.company.url;
+                    if (!acc[key]) {
+                        acc[key] = {
+                            ...lead,
+                            allRecipes: [...lead.recipes],
+                            interactionCount: 1
+                        };
+                    } else {
+                        // Merge recipes
+                        acc[key].allRecipes.push(...lead.recipes);
+                        acc[key].interactionCount += 1;
+                        // Update to latest timestamp/data if newer? (Optional, kept simple here)
+                    }
+                    return acc;
+                }, {} as Record<string, any>);
+
+                const userList = Object.values(uniqueUsers);
+                const activeUser = userList.find(u => u.id === selectedLead) || (selectedLead ? leads.find(l => l.id === selectedLead) : null); // Fallback
+
+                return (
+                    <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+                        {/* Sidebar List */}
+                        <div className="glass-panel" style={{ padding: '1rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                            <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>Registered Users</h3>
+                            {userList.length === 0 && <p style={{ color: '#666', fontStyle: 'italic' }}>No users found.</p>}
+                            {userList.map((user: any) => (
+                                <div
+                                    key={user.id}
+                                    onClick={() => setSelectedLead(user.id)} // Using first ID as the key for selection
+                                    style={{
+                                        padding: '1rem',
+                                        borderBottom: '1px solid var(--border-glass)',
+                                        cursor: 'pointer',
+                                        background: selectedLead === user.id ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                        borderRadius: '8px',
+                                        marginBottom: '0.5rem',
+                                        position: 'relative'
+                                    }}
+                                    className="admin-user-row"
+                                >
+                                    <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>{user.company.name || "Anonymous"}</h4>
+                                    <p style={{ fontSize: '0.85rem', color: 'hsl(var(--accent-primary))' }}>{user.company.email || user.company.url}</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                                        {user.company.role} • {user.allRecipes.length} Blueprints
+                                    </p>
+
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                        <button
+                                            onClick={(e) => openEditUser(user, e)}
+                                            title="Edit Profile"
+                                            style={{ background: 'transparent', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', opacity: 0.8 }}
+                                        >
+                                            <Edit size={14} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDeleteUser(user.id, e)}
+                                            title="Delete User"
+                                            style={{ background: 'transparent', border: 'none', color: 'salmon', cursor: 'pointer', opacity: 0.8 }}
+                                        >
+                                            <X size={14} />
+                                        </button>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
 
-                                <h3 style={{ marginBottom: '1rem', color: 'hsl(var(--accent-primary))' }}>Generated Blueprints (Admin View)</h3>
-                                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                    {activeLead.recipes.map((r, idx) => (
-                                        <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                <h4 style={{ fontSize: '1.1rem' }}>{r.title}</h4>
-                                                <span className="badge" style={{ background: '#333' }}>{r.admin_view.implementation_difficulty} Difficulty</span>
+                        {/* Main Detail View */}
+                        <div className="glass-panel" style={{ padding: '2rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                            {activeUser ? (
+                                <div className="animate-fade-in">
+                                    <div style={{ borderBottom: '1px solid var(--border-glass)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div>
+                                                <h1 style={{ marginBottom: '0.5rem' }}>{activeUser.company.name || "Anonymous User"}</h1>
+                                                <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem' }}>{activeUser.company.email}</p>
+                                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>{activeUser.company.url}</p>
                                             </div>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <button onClick={(e) => openEditUser(activeUser, e)} className="btn-secondary">
+                                                    <Edit size={16} /> Edit Profile
+                                                </button>
+                                                <button onClick={(e) => handleResetPassword(activeUser.id, e)} className="btn-secondary">
+                                                    <Key size={16} /> Reset PWD
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Role</label>
+                                                <p>{activeUser.company.role}</p>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Company Size</label>
+                                                <p>{activeUser.company.size}</p>
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Primary Pain Point</label>
+                                                <p>"{activeUser.company.painPoint}"</p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
-                                                <div>
-                                                    <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
-                                                    <div className="chips-grid" style={{ gap: '0.25rem' }}>
-                                                        {r.admin_view.tech_stack.map(t => (
-                                                            <span key={t} style={{ background: '#222', padding: '2px 8px', borderRadius: '4px', border: '1px solid #444', fontSize: '0.75rem' }}>{t}</span>
-                                                        ))}
+                                    <h3 style={{ marginBottom: '1rem', color: 'hsl(var(--accent-primary))' }}>
+                                        Unlocked Blueprints ({activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes.length})
+                                    </h3>
+                                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                        {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
+                                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                    <h4 style={{ fontSize: '1.1rem' }}>{r.title}</h4>
+                                                    <span className="badge" style={{ background: '#333' }}>{r.department}</span>
+                                                </div>
+                                                {/* ... recipes details ... */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
+                                                    <div>
+                                                        <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
+                                                        <div className="chips-grid" style={{ gap: '0.25rem' }}>
+                                                            {r.admin_view.tech_stack.map((t: string) => (
+                                                                <span key={t} style={{ background: '#222', padding: '2px 8px', borderRadius: '4px', border: '1px solid #444', fontSize: '0.75rem' }}>{t}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Upsell Opp</label>
+                                                        <p style={{ color: 'hsl(140, 70%, 50%)' }}>{r.admin_view.upsell_opportunity}</p>
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Upsell Opp</label>
-                                                    <p style={{ color: 'hsl(140, 70%, 50%)' }}>{r.admin_view.upsell_opportunity}</p>
-                                                </div>
                                             </div>
-
-                                            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed #444' }}>
-                                                <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Workflow Logic</label>
-                                                <code style={{ fontFamily: 'monospace', color: '#ccc', background: '#111', padding: '0.5rem', display: 'block', borderRadius: '4px' }}>
-                                                    {r.admin_view.workflow_steps}
-                                                </code>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                                <Eye size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                                <p>Select a user to view their data.</p>
-                            </div>
-                        )}
+                            ) : (
+                                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                    <Eye size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                                    <p>Select a user to view their activity history.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Edit User Modal */}
             {editingUser && (

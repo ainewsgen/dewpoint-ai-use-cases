@@ -29,7 +29,9 @@ export function Analysis({ onComplete }: AnalysisProps) {
                 return;
             }
 
-            setLogs(prev => [...prev, `> ${logSteps[step]}`]);
+            if (logSteps[step]) {
+                setLogs(prev => [...prev, `> ${logSteps[step]}`]);
+            }
             step++;
         }, 800);
 

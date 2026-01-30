@@ -90,56 +90,98 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
     if (step === 1) {
         return (
-            <div className="center-stage animate-fade-in">
+            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '12vh' }}>
                 {announcement && (
                     <div className="announcement-banner" style={{
                         background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
-                        color: 'white', padding: '0.75rem 1.5rem', borderRadius: '50px',
-                        marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)'
+                        color: 'white', padding: '0.4rem 1rem', borderRadius: '50px',
+                        marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        fontWeight: 600, fontSize: '0.8rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)'
                     }}>
-                        <Sparkles size={16} />
+                        <Sparkles size={14} />
                         {announcement}
                     </div>
                 )}
-                <div className="logo-header">
-                    <div className="logo-pill">
-                        <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '60px' }} />
-                    </div>
+
+                <div style={{ textAlign: 'center', marginBottom: '3rem', padding: '0 1rem' }}>
+                    <h1 style={{
+                        fontSize: 'clamp(3rem, 6vw, 5rem)',
+                        fontWeight: 800,
+                        lineHeight: 1.05,
+                        marginBottom: '1.25rem',
+                        maxWidth: '1000px',
+                        margin: '0 auto 1.5rem auto',
+                        letterSpacing: '-0.03em',
+                    }}>
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Turn "I hate doing this"</span><br />
+                        <span style={{
+                            background: 'linear-gradient(135deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-gold)) 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            display: 'inline-block',
+                            paddingBottom: '0.5rem' // Prevent descender clipping
+                        }}>into "It's already done."</span>
+                    </h1>
+
+                    <p className="subtitle" style={{
+                        color: 'hsl(var(--text-main))',
+                        fontSize: '1.25rem',
+                        lineHeight: 1.6,
+                        maxWidth: '720px',
+                        margin: '0 auto',
+                        opacity: 0.85
+                    }}>
+                        Tell us a little about your business and the tools you use. We’ll instantly map out exactly where AI can save you time, money, and sanity—customized to how you actually work.
+                    </p>
                 </div>
 
-                <p className="subtitle" style={{ marginBottom: '3rem', color: 'var(--text-muted)' }}>
-                    The AI Agency in a Box. We analyze your business DNA to uncover hidden automation revenue.
-                </p>
-
-                <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>
-                    <div className="progress-bar" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)' }}>
-                        <div className="fill" style={{ width: '50%', height: '100%', background: 'hsl(var(--accent-primary))' }}></div>
+                <div className="glass-panel form-card" style={{
+                    width: '100%', maxWidth: '600px', padding: '2.5rem',
+                    boxShadow: '0 25px 60px -15px rgba(32, 100, 185, 0.25)',
+                    border: '1px solid white',
+                    background: 'rgba(255,255,255,0.8)',
+                    borderRadius: '16px'
+                }}>
+                    <div className="progress-bar" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'rgba(0,0,0,0.05)' }}>
+                        <div className="fill" style={{ width: '50%', height: '100%', background: 'hsl(var(--accent-gold))' }}></div>
                     </div>
 
-                    <label className="input-label" style={{ display: 'block', fontWeight: 600, color: 'hsl(var(--accent-primary))', marginBottom: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase' }}>
-                        First, a diagnostic question:
+                    <label className="input-label" style={{
+                        display: 'block', fontWeight: 700, color: 'hsl(var(--accent-primary))',
+                        marginBottom: '0.75rem', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em'
+                    }}>
+                        Let's start here
                     </label>
-                    <p className="question-text" style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: 500 }}>
-                        "What is the one weekly task that your most expensive employee hates doing?"
+                    <p className="question-text" style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 600, lineHeight: 1.3, color: 'hsl(var(--text-main))' }}>
+                        What is the one weekly task that your most expensive employee hates doing?
                     </p>
 
-                    <div className="input-group" style={{ marginBottom: '1.5rem' }}>
+                    <div className="input-group" style={{ marginBottom: '2rem' }}>
                         <input
                             type="text"
                             placeholder="e.g. Reconciliation, Scheduling, Lead Gen..."
                             value={painPoint}
                             onChange={(e) => { setPainPoint(e.target.value); setError(false); }}
-                            style={{ borderColor: error ? 'salmon' : undefined }}
+                            style={{
+                                borderColor: error ? 'salmon' : 'var(--border-glass)',
+                                padding: '1.25rem 1rem 1.25rem 3.5rem',
+                                fontSize: '1.1rem',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                                borderRadius: '8px'
+                            }}
                             onKeyDown={(e) => e.key === 'Enter' && handleNext()}
                             autoFocus
                         />
-                        <MessageSquare className="input-icon" size={20} />
+                        <MessageSquare className="input-icon" size={20} style={{ top: '50%', transform: 'translateY(-50%)', left: '1.25rem', color: 'var(--text-muted)' }} />
                     </div>
 
-                    <button onClick={handleNext} className="btn-primary" style={{ width: '100%' }}>
-                        Continue <ArrowRight size={18} />
+                    <button onClick={handleNext} className="btn-primary" style={{ width: '100%', padding: '1.1rem', fontSize: '1rem', borderRadius: '8px' }}>
+                        Continue <ArrowRight size={20} />
                     </button>
+
+                    <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        Takes less than 2 minutes • Completely free
+                    </p>
                 </div>
             </div>
         );

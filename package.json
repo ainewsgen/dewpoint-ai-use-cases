@@ -14,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
@@ -21,7 +22,8 @@
     "lucide-react": "^0.300.0",
     "pg": "^8.18.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "vite": "^5.0.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -30,10 +32,8 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
     "drizzle-kit": "^0.31.8",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vite": "^5.0.8"
+    "typescript": "^5.9.3"
   }
 }

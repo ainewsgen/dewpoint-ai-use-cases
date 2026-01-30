@@ -70,13 +70,33 @@ function App() {
                         <>
                             <button
                                 onClick={() => setView(view === 'LIBRARY' ? 'DISCOVERY' : 'LIBRARY')}
-                                style={{ background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.8)', border: '1px solid var(--border-glass)', color: 'white', padding: '0.4rem 1rem', borderRadius: '50px', cursor: 'pointer', backdropFilter: 'blur(10px)', fontSize: '0.85rem' }}
+                                style={{
+                                    background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                                    border: '1px solid var(--border-glass)',
+                                    color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
+                                    padding: '0.4rem 1rem',
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                    backdropFilter: 'blur(10px)',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 500
+                                }}
                             >
                                 Library
                             </button>
                             <button
                                 onClick={() => setView(view === 'ROADMAP' ? 'DISCOVERY' : 'ROADMAP')}
-                                style={{ background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.8)', border: '1px solid var(--border-glass)', color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'white', fontWeight: view === 'ROADMAP' ? 'bold' : 'normal', padding: '0.4rem 1rem', borderRadius: '50px', cursor: 'pointer', backdropFilter: 'blur(10px)', fontSize: '0.85rem' }}
+                                style={{
+                                    background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',
+                                    border: '1px solid var(--border-glass)',
+                                    color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
+                                    fontWeight: 'bold',
+                                    padding: '0.4rem 1rem',
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                    backdropFilter: 'blur(10px)',
+                                    fontSize: '0.85rem'
+                                }}
                             >
                                 My Roadmap
                             </button>

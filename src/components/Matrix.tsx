@@ -65,7 +65,7 @@ function RecipeCard({ opp, onUnlock }: { opp: Opportunity, onUnlock: () => void 
         <div className="glass-panel recipe-card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span className="badge rev" style={{ background: 'hsla(var(--accent-gold)/0.15)', color: 'hsl(var(--accent-gold))', border: '1px solid hsla(var(--accent-gold)/0.3)' }}>{opp.public_view.roi_estimate}</span>
+                    <span className="badge rev" style={{ background: 'hsla(var(--accent-gold)/0.2)', color: 'hsl(var(--accent-primary))', border: '1px solid hsla(var(--accent-gold)/0.4)' }}>{opp.public_view.roi_estimate}</span>
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
                 </div>
                 {/* Save Button */}

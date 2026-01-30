@@ -128,9 +128,9 @@ h5 {
 }
 
 .btn-secondary:hover {
-    border-color: hsl(var(--accent-secondary));
-    color: hsl(var(--accent-secondary));
-    background: hsla(var(--accent-secondary) / 0.05);
+    border-color: hsl(var(--accent-primary));
+    color: hsl(var(--accent-primary));
+    background: hsla(var(--accent-primary) / 0.05);
 }
 
 .container {
@@ -275,6 +275,7 @@ h5 {
     color: white;
     font-weight: 600;
 }
+
 /* Logo Container - simplified for Light Mode */
 .logo-pill {
     padding: 0.5rem 0;

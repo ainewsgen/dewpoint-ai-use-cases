@@ -5,6 +5,7 @@
 
 export interface CompanyData {
     url: string;
+    industry?: string;
     role: string;
     size: string;
     stack: string[];
@@ -29,7 +30,7 @@ export interface Opportunity {
 }
 
 export function generateOpportunities(companyData: CompanyData): Opportunity[] {
-    const { stack, painPoint } = companyData;
+    const { stack, painPoint, role, industry } = companyData;
 
     const opportunities: Opportunity[] = [];
 
@@ -135,7 +136,7 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
             problem: "Project updates require constantly nagging the team for status.",
             solution_narrative: "An observer that silently reads all project activity and automatically updates your client dashboard so they never have to ask 'where are we at?'.",
             value_proposition: "Improves client trust and retention.",
-            roi_estimate: "Invavlude client goodwill"
+            roi_estimate: "Invaluable client goodwill"
         },
         admin_view: {
             tech_stack: ["Slack API", "Jira API", "Client Portal"],
@@ -146,7 +147,17 @@ export function generateOpportunities(companyData: CompanyData): Opportunity[] {
     });
 
     // 5. ADVANCED: Data Asset Audit (Dormant Data)
-    const isProfessionalServices = companyData.role.toLowerCase().includes('partner') || companyData.role.toLowerCase().includes('legal') || companyData.role.toLowerCase().includes('consult');
+    // Check Role OR Industry for 'legal'/'consult'
+    const roleLower = role.toLowerCase();
+    const industryLower = (industry || '').toLowerCase();
+
+    const isProfessionalServices =
+        roleLower.includes('partner') ||
+        roleLower.includes('legal') ||
+        roleLower.includes('consult') ||
+        industryLower.includes('legal') ||
+        industryLower.includes('law') ||
+        industryLower.includes('consult');
 
     if (isProfessionalServices) {
         opportunities.push({

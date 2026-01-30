@@ -55,7 +55,9 @@ function App() {
             <nav style={{ position: 'fixed', top: 0, right: 0, left: 0, padding: '1rem', zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}>
                 {/* Brand - visible on larger screens */}
                 <div style={{ pointerEvents: 'auto', paddingLeft: '1rem' }}>
-                    <img src="/logo-icon.png" alt="DPG" style={{ height: '40px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                    <div className="logo-pill" style={{ padding: '0.25rem 0.5rem' }}>
+                        <img src="/logo-icon.png" alt="DPG" style={{ height: '32px' }} />
+                    </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>

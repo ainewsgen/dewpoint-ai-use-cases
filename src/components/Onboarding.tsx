@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessageSquare, ArrowRight, Globe, User, Sparkles } from 'lucide-react';
+import { MessageSquare, ArrowRight, Globe, User, Sparkles, Briefcase } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
 interface OnboardingProps {
@@ -10,6 +10,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [step, setStep] = useState(1);
     const [painPoint, setPainPoint] = useState('');
     const [url, setUrl] = useState('');
+    const [industry, setIndustry] = useState('');
     const [role, setRole] = useState('');
     const [size, setSize] = useState('Solopreneur');
     const [stack, setStack] = useState<string[]>([]);
@@ -34,12 +35,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     };
 
     const handleSubmit = () => {
-        if (!url.trim()) {
+        if (!url.trim() && !industry.trim()) {
             setError(true);
             // Shake effect placeholder
             return;
         }
-        onComplete({ painPoint, url, role, size, stack });
+        onComplete({ painPoint, url, industry, role, size, stack });
     };
 
     const toggleTech = (tech: string) => {
@@ -52,7 +53,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         return (
             <div className="center-stage animate-fade-in">
                 <div className="logo-header">
-                    <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '80px' }} />
+                    <div className="logo-pill">
+                        <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '60px' }} />
+                    </div>
                 </div>
 
                 <p className="subtitle" style={{ marginBottom: '3rem', color: 'var(--text-muted)' }}>
@@ -95,7 +98,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     return (
         <div className="center-stage animate-fade-in">
             <div className="logo-header sm">
-                <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '50px' }} />
+                <div className="logo-pill">
+                    <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '40px' }} />
+                </div>
             </div>
 
             <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>
@@ -109,7 +114,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <div className="form-grid" style={{ display: 'grid', gap: '1.5rem' }}>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company URL</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company URL (Optional)</label>
                         <div className="input-group">
                             <input
                                 type="text" placeholder="example.com"
@@ -117,6 +122,19 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 style={{ borderColor: error ? 'salmon' : undefined }}
                             />
                             <Globe className="input-icon" size={20} />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Industry (if no URL)</label>
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                placeholder="e.g. Legal, Manufacturing, Dental..."
+                                value={industry}
+                                onChange={e => setIndustry(e.target.value)}
+                            />
+                            <Briefcase className="input-icon" size={20} />
                         </div>
                     </div>
 

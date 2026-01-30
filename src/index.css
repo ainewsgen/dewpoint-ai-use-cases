@@ -23,7 +23,8 @@
     /* DPG Orange */
 
     --text-main: 0 0% 100%;
-    --text-muted: 215 20% 80%;
+    --text-muted: 215 15% 75%;
+    /* Lighter gray for better contrast on dark bg */
     --border-glass: 215 30% 25%;
 
     --font-heading: 'Open Sans', sans-serif;
@@ -31,6 +32,19 @@
 
     --radius-lg: 12px;
     --radius-md: 6px;
+}
+
+/* ... existing styles ... */
+
+/* Logo Container */
+.logo-pill {
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 * {

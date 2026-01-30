@@ -1,27 +1,89 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server } from 'lucide-react';
+import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server, Lock, ArrowDownUp } from 'lucide-react';
+import { EmailModal } from './EmailModal';
 
 interface RoadmapProps {
     isAdmin: boolean;
 }
 
+type SortOption = 'ROI' | 'DEPARTMENT' | 'NEWEST';
+
 export function Roadmap({ isAdmin }: RoadmapProps) {
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
+    const [isLocked, setIsLocked] = useState(true);
+    const [sortBy, setSortBy] = useState<SortOption>('ROI');
 
     useEffect(() => {
-        const saved = localStorage.getItem('dpg_roadmap');
-        if (saved) {
-            setSavedRecipes(JSON.parse(saved));
+        // Gating Check
+        const email = localStorage.getItem('dpg_user_email');
+        if (email) {
+            setIsLocked(false);
+            const saved = localStorage.getItem('dpg_roadmap');
+            if (saved) {
+                setSavedRecipes(JSON.parse(saved));
+            }
         }
     }, []);
 
+    const handleLoginSuccess = () => {
+        setIsLocked(false);
+        const saved = localStorage.getItem('dpg_roadmap');
+        if (saved) setSavedRecipes(JSON.parse(saved));
+    };
+
     const removeRecipe = (index: number) => {
-        const updated = savedRecipes.filter((_, i) => i !== index);
+        // Note: Removing by index might be buggy if sorted. Better to remove by Title.
+        // But for now, we'll filter the current list and re-save.
+        // Actually, to be safe with sorting, we should find the item in the master list.
+        // Let's assume title is unique enough for this demo.
+        const targetTitle = sortedRecipes[index].title;
+        const updated = savedRecipes.filter(r => r.title !== targetTitle);
         setSavedRecipes(updated);
         localStorage.setItem('dpg_roadmap', JSON.stringify(updated));
     };
+
+    // Sorting Logic
+    const sortedRecipes = [...savedRecipes].sort((a, b) => {
+        if (sortBy === 'DEPARTMENT') {
+            return a.department.localeCompare(b.department);
+        }
+        if (sortBy === 'ROI') {
+            // Heuristic: Extract first number. If '$', prioritize.
+            const getVal = (s: string) => {
+                const num = parseInt(s.replace(/\D/g, '')) || 0;
+                return s.includes('$') ? num * 1000 : num; // Weight $ amounts higher
+            };
+            return getVal(b.public_view.roi_estimate) - getVal(a.public_view.roi_estimate);
+        }
+        return 0; // Newest (default order in array is usually oldest first pushed? actually push adds to end. So reverse for newest.)
+    });
+
+    if (sortBy === 'NEWEST') {
+        sortedRecipes.reverse();
+    }
+
+    if (isLocked) {
+        return (
+            <div className="container animate-fade-in" style={{ paddingTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ background: 'hsla(var(--accent-gold)/0.1)', padding: '2rem', borderRadius: '50%', marginBottom: '2rem' }}>
+                    <Lock size={64} className="text-gold" />
+                </div>
+                <h2 style={{ marginBottom: '1rem' }}>Roadmap Locked</h2>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', textAlign: 'center', maxWidth: '400px' }}>
+                    Please verify your email address to access your saved strategic roadmap.
+                </p>
+                <div style={{ width: '100%', maxWidth: '400px' }}>
+                    {/* Reuse EmailModal logic but inline or trigger it? Let's just inline a simple button to trigger standard modal if we want, or just render the modal form directly. 
+                         Since we have the EmailModal component, let's just render it but maybe tweaking it to be inline? 
+                         Actually, let's just use the EmailModal as a "gate". 
+                      */}
+                    <EmailModal onClose={() => { }} onSuccess={handleLoginSuccess} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>
@@ -33,6 +95,25 @@ export function Roadmap({ isAdmin }: RoadmapProps) {
                 <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Your curated list of high-impact AI strategies.</p>
             </header>
 
+            {/* Toolbar */}
+            {savedRecipes.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', paddingRight: '1rem' }}>
+                    <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <ArrowDownUp size={16} color="var(--text-muted)" />
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Sort by:</span>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as SortOption)}
+                            style={{ background: 'transparent', border: 'none', color: 'hsl(var(--text-main))', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
+                        >
+                            <option value="ROI">Highest ROI</option>
+                            <option value="DEPARTMENT">Department</option>
+                            <option value="NEWEST">Newest Added</option>
+                        </select>
+                    </div>
+                </div>
+            )}
+
             {savedRecipes.length === 0 ? (
                 <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
                     <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Your roadmap is currently empty.</p>
@@ -40,7 +121,7 @@ export function Roadmap({ isAdmin }: RoadmapProps) {
                 </div>
             ) : (
                 <div className="matrix-grid">
-                    {savedRecipes.map((opp, idx) => (
+                    {sortedRecipes.map((opp, idx) => (
                         <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
                     ))}
                 </div>

@@ -7,6 +7,7 @@ import { Roadmap } from './components/Roadmap';
 import { AdminDashboard } from './components/AdminDashboard';
 import { CompanyData, Opportunity } from './lib/engine';
 import { Shield } from 'lucide-react';
+import { EmailModal } from './components/EmailModal';
 
 type ViewState = 'DISCOVERY' | 'ANALYSIS' | 'MATRIX' | 'LIBRARY' | 'ROADMAP' | 'ADMIN';
 
@@ -50,6 +51,23 @@ function App() {
         alert("Blueprint Unlocked! DewPoint Team has been notified.");
     };
 
+    // ... Inside App component
+    const [showLoginModal, setShowLoginModal] = useState(false);
+
+    // ... existing handlers
+
+    const handleLoginSuccess = (email: string) => {
+        setShowLoginModal(false);
+        // If they have data, maybe take them to roadmap?
+        const saved = localStorage.getItem('dpg_roadmap');
+        if (saved && JSON.parse(saved).length > 0) {
+            setView('ROADMAP');
+        } else {
+            // Stay on discovery but maybe show a toast?
+            alert(`Welcome back, ${email}`);
+        }
+    };
+
     return (
         <div className="app-shell">
             <nav style={{ position: 'fixed', top: 0, right: 0, left: 0, padding: '1rem', zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}>
@@ -61,6 +79,16 @@ function App() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>
+
+                    {/* User Login for Discovery Mode */}
+                    {view === 'DISCOVERY' && (
+                        <button
+                            onClick={() => setShowLoginModal(true)}
+                            style={{ background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', padding: '0.3rem 0.8rem', borderRadius: '4px' }}
+                        >
+                            Login
+                        </button>
+                    )}
 
                     {view !== 'DISCOVERY' && view !== 'ADMIN' && (
                         <button onClick={() => setView('DISCOVERY')} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>New Search</button>
@@ -124,6 +152,15 @@ function App() {
             {view === 'LIBRARY' && <Library isAdmin={isAdminMode} />}
             {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} />}
             {view === 'ADMIN' && <AdminDashboard leads={leads} />}
+
+            {showLoginModal && (
+                <EmailModal
+                    onClose={() => setShowLoginModal(false)}
+                    onSuccess={handleLoginSuccess}
+                    title="Welcome Back"
+                    description="Enter your email to access your saved roadmap."
+                />
+            )}
         </div>
     );
 }

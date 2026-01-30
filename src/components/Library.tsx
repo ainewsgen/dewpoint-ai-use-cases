@@ -1,7 +1,7 @@
-// ... imports
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { BookOpen, Server } from 'lucide-react';
+import { BookOpen, Server, Plus, BadgeCheck } from 'lucide-react';
+import { EmailModal } from './EmailModal';
 
 // We'll move the recipe data to a shared source in engine.ts soon.
 const LIBRARY_RECIPES: Opportunity[] = [
@@ -87,6 +87,48 @@ export function Library({ isAdmin }: LibraryProps) {
     const [filter, setFilter] = useState('All');
     const departments = ['All', 'Finance', 'Sales', 'Operations', 'Marketing'];
 
+    // Save/Load Logic
+    const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [pendingRecipe, setPendingRecipe] = useState<Opportunity | null>(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('dpg_roadmap');
+        if (saved) {
+            setSavedRecipes(JSON.parse(saved));
+        }
+    }, []);
+
+    const updateStorage = (newRecipes: Opportunity[]) => {
+        setSavedRecipes(newRecipes);
+        localStorage.setItem('dpg_roadmap', JSON.stringify(newRecipes));
+    };
+
+    const handleToggleSave = (opp: Opportunity) => {
+        const exists = savedRecipes.find(r => r.title === opp.title);
+        if (exists) {
+            // Remove
+            updateStorage(savedRecipes.filter(r => r.title !== opp.title));
+        } else {
+            // Add - Check for Email logic?
+            const email = localStorage.getItem('dpg_user_email');
+            if (!email) {
+                setPendingRecipe(opp);
+                setShowEmailModal(true);
+            } else {
+                updateStorage([...savedRecipes, opp]);
+            }
+        }
+    };
+
+    const handleEmailSuccess = () => {
+        if (pendingRecipe) {
+            updateStorage([...savedRecipes, pendingRecipe]);
+            setPendingRecipe(null);
+        }
+        setShowEmailModal(false);
+    };
+
     const filteredRecipes = filter === 'All'
         ? LIBRARY_RECIPES
         : LIBRARY_RECIPES.filter(r => r.department === filter);
@@ -109,7 +151,7 @@ export function Library({ isAdmin }: LibraryProps) {
                         style={{
                             padding: '0.5rem 1.5rem',
                             background: filter === dept ? 'hsl(var(--accent-primary))' : 'transparent',
-                            color: filter === dept ? 'hsl(var(--bg-dark))' : 'var(--text-muted)',
+                            color: filter === dept ? 'white' : 'var(--text-muted)', // Fixed: White text on blue
                             border: `1px solid ${filter === dept ? 'hsl(var(--accent-primary))' : 'var(--border-glass)'}`,
                             borderRadius: '50px',
                             cursor: 'pointer',
@@ -124,14 +166,27 @@ export function Library({ isAdmin }: LibraryProps) {
 
             <div className="matrix-grid">
                 {filteredRecipes.map((opp, idx) => (
-                    <LibraryCard key={idx} opp={opp} isAdmin={isAdmin} />
+                    <LibraryCard
+                        key={idx}
+                        opp={opp}
+                        isAdmin={isAdmin}
+                        isSaved={savedRecipes.some(r => r.title === opp.title)}
+                        onToggle={() => handleToggleSave(opp)}
+                    />
                 ))}
             </div>
+
+            {showEmailModal && (
+                <EmailModal
+                    onClose={() => setShowEmailModal(false)}
+                    onSuccess={handleEmailSuccess}
+                />
+            )}
         </div>
     );
 }
 
-function LibraryCard({ opp, isAdmin }: { opp: Opportunity, isAdmin: boolean }) {
+function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, isAdmin: boolean, isSaved: boolean, onToggle: () => void }) {
     const [showSpecs, setShowSpecs] = useState(false);
 
     return (
@@ -169,14 +224,31 @@ function LibraryCard({ opp, isAdmin }: { opp: Opportunity, isAdmin: boolean }) {
                 </div>
             )}
 
-            <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+            <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    className="btn-primary"
+                    style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        fontSize: '0.9rem',
+                        background: isSaved ? 'hsl(var(--accent-gold))' : undefined,
+                        color: isSaved ? 'hsl(var(--bg-dark))' : undefined,
+                        borderColor: isSaved ? 'hsl(var(--accent-gold))' : undefined
+                    }}
+                >
+                    {isSaved ? <BadgeCheck size={16} /> : <Plus size={16} />} {isSaved ? 'On Roadmap' : 'Add'}
+                </button>
+
                 <button
                     type="button"
                     onClick={() => setShowSpecs(!showSpecs)}
                     className="btn-secondary"
-                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%', position: 'relative', zIndex: 10 }}
+                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', cursor: 'pointer', width: 'auto' }}
+                    title={showSpecs ? "Hide details" : "View details"}
                 >
-                    {showSpecs ? 'Hide Blueprint' : 'View Blueprint'}
+                    {showSpecs ? 'Hide' : 'Info'}
                 </button>
             </div>
         </div>

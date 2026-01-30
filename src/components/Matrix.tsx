@@ -1,7 +1,8 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { generateOpportunities, CompanyData, Opportunity } from '../lib/engine';
-import { BadgeCheck, Frown, Sparkles, Server, ChevronDown, ChevronUp, Bookmark, Mail, Lock } from 'lucide-react';
+import { BadgeCheck, Frown, Sparkles, Server, ChevronDown, ChevronUp, Bookmark, Plus } from 'lucide-react';
+import { EmailModal } from './EmailModal';
 
 interface MatrixProps {
     companyData: CompanyData;
@@ -13,7 +14,6 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
     const opportunities = generateOpportunities(companyData);
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
     const [showEmailModal, setShowEmailModal] = useState(false);
-    const [emailInput, setEmailInput] = useState('');
     const [pendingRecipe, setPendingRecipe] = useState<Opportunity | null>(null);
 
     // Sync from LocalStorage on mount
@@ -25,6 +25,12 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
     const updateStorage = (newRecipes: Opportunity[]) => {
         setSavedRecipes(newRecipes);
         localStorage.setItem('dpg_roadmap', JSON.stringify(newRecipes));
+        // Also trigger the "Unlock" callback if it's the first time saving something? 
+        // Or just let them save.
+        if (newRecipes.length > 0) {
+            // We could call onUnlock here if we want to simulate the data capture immediately
+            onUnlock(newRecipes);
+        }
     };
 
     const handleToggleSave = (opp: Opportunity) => {
@@ -43,11 +49,7 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
         }
     };
 
-    const submitEmail = () => {
-        if (!emailInput.includes('@')) return;
-        localStorage.setItem('dpg_user_email', emailInput);
-
-        // Save the pending recipe
+    const handleEmailSuccess = () => {
         if (pendingRecipe) {
             updateStorage([...savedRecipes, pendingRecipe]);
             setPendingRecipe(null);
@@ -57,7 +59,6 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
 
     return (
         <div className="container animate-fade-in" style={{ position: 'relative' }}>
-            {/* Header ... */}
             <header className="matrix-header" style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h2 className="text-accent">Opportunity Matrix</h2>
@@ -73,7 +74,6 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
                     <RecipeCard
                         key={idx}
                         opp={opp}
-                        onUnlock={() => onUnlock(opportunities)}
                         isAdmin={isAdmin}
                         isSaved={!!savedRecipes.find(r => r.title === opp.title)}
                         onToggleSave={() => handleToggleSave(opp)}
@@ -81,42 +81,14 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
                 ))}
             </div>
 
-            {/* Email Capture Modal */}
             {showEmailModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
-                    <div className="glass-panel animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '2rem', textAlign: 'center', background: 'white' }}>
-                        <div style={{ background: 'hsla(var(--accent-gold)/0.1)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                            <Lock size={30} className="text-gold" />
-                        </div>
-                        <h3 style={{ marginBottom: '0.5rem', color: 'hsl(var(--bg-dark))' }}>Save Your Roadmap</h3>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>To persist your strategies and unlock full blueprints, please verify your email.</p>
-
-                        <div className="input-group" style={{ marginBottom: '1.5rem' }}>
-                            <input
-                                type="email"
-                                placeholder="name@company.com"
-                                value={emailInput}
-                                onChange={e => setEmailInput(e.target.value)}
-                                style={{ width: '100%' }}
-                                autoFocus
-                            />
-                            <Mail size={18} className="input-icon" />
-                        </div>
-
-                        <button onClick={submitEmail} className="btn-primary" style={{ width: '100%' }}>
-                            Save & Continue
-                        </button>
-                        <button onClick={() => setShowEmailModal(false)} style={{ marginTop: '1rem', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.9rem' }}>
-                            Cancel
-                        </button>
-                    </div>
-                </div>
+                <EmailModal onClose={() => setShowEmailModal(false)} onSuccess={handleEmailSuccess} />
             )}
         </div>
     );
 }
 
-function RecipeCard({ opp, onUnlock, isAdmin, isSaved, onToggleSave }: { opp: Opportunity, onUnlock: () => void, isAdmin: boolean, isSaved: boolean, onToggleSave: () => void }) {
+function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity, isAdmin: boolean, isSaved: boolean, onToggleSave: () => void }) {
     const [showDetails, setShowDetails] = useState(false);
 
     return (
@@ -207,11 +179,11 @@ function RecipeCard({ opp, onUnlock, isAdmin, isSaved, onToggleSave }: { opp: Op
                     {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {showDetails ? 'Hide' : 'Blueprint'}
                 </button>
                 <button
-                    onClick={onUnlock}
+                    onClick={onToggleSave}
                     className="btn-primary"
-                    style={{ padding: '0.5rem', fontSize: '0.9rem' }}
+                    style={{ padding: '0.5rem', fontSize: '0.9rem', background: isSaved ? 'hsl(var(--accent-gold))' : undefined, color: isSaved ? 'hsl(var(--bg-dark))' : undefined, borderColor: isSaved ? 'hsl(var(--accent-gold))' : undefined }}
                 >
-                    <BadgeCheck size={16} /> Unlock
+                    {isSaved ? <BadgeCheck size={16} /> : <Plus size={16} />} {isSaved ? 'On Roadmap' : 'Add to Roadmap'}
                 </button>
             </div>
         </div>

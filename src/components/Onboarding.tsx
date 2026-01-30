@@ -1,5 +1,6 @@
+// ... Inside Onboarding
 import { useState } from 'react';
-import { MessageSquare, ArrowRight, Globe, Sparkles, Briefcase } from 'lucide-react';
+import { MessageSquare, ArrowRight, Globe, Sparkles, Briefcase, Loader2 } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
 interface OnboardingProps {
@@ -15,6 +16,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [size, setSize] = useState('Solopreneur');
     const [stack, setStack] = useState<string[]>([]);
     const [error, setError] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
 
     const techOptions = [
         'Salesforce', 'HubSpot', 'Zoho', 'Pipedrive',
@@ -48,6 +50,38 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]
         );
     };
+
+    const scanUrl = () => {
+        if (!url.includes('.')) {
+            setError(true);
+            return;
+        }
+        setIsScanning(true);
+        setError(false);
+
+        // Simulate scanning
+        setTimeout(() => {
+            setIsScanning(false);
+
+            // Heuristic Stuff
+            const u = url.toLowerCase();
+            if (u.includes('law') || u.includes('legal')) setIndustry('Legal');
+            else if (u.includes('tech') || u.includes('soft') || u.includes('io') || u.includes('ai')) setIndustry('Technology');
+            else if (u.includes('shop') || u.includes('store')) setIndustry('E-Commerce');
+            else if (u.includes('med') || u.includes('clinic')) setIndustry('Healthcare');
+
+            const newStack = [...stack];
+            // Guessing Tech
+            if (!newStack.includes('Gmail/GSuite')) newStack.push('Gmail/GSuite'); // Safe bet for most
+            if (u.includes('shopify')) newStack.push('Shopify');
+            if (u.includes('wordpress')) newStack.push('WordPress');
+
+            setStack(newStack);
+
+        }, 1500);
+    };
+
+    // ... scanUrl
 
     if (step === 1) {
         return (
@@ -95,18 +129,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         );
     }
 
+    // Render Step 2
     return (
         <div className="center-stage animate-fade-in">
-            <div className="logo-header sm">
-                <div className="logo-pill">
-                    <img src="/logo-full.png" alt="DewPoint Group" style={{ height: '40px' }} />
-                </div>
-            </div>
-
+            {/* ... header */}
             <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>
-                <div className="progress-bar" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)' }}>
-                    <div className="fill" style={{ width: '100%', height: '100%', background: 'hsl(var(--accent-primary))' }}></div>
-                </div>
+                {/* ... progress bar */}
 
                 <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Business Context</h2>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>I need to know who I'm advising to generate relevant "Recipes".</p>
@@ -115,24 +143,33 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company URL (Optional)</label>
-                        <div className="input-group">
-                            <input
-                                type="text" placeholder="example.com"
-                                value={url} onChange={e => {
-                                    setUrl(e.target.value);
-                                    setError(false);
-                                    // Simulated Tech Detection
-                                    if (e.target.value.includes('.')) {
-                                        setTimeout(() => {
-                                            if (!stack.includes('Gmail/GSuite')) setStack(prev => [...prev, 'Gmail/GSuite']);
-                                        }, 1000);
-                                    }
-                                }}
-                                style={{ borderColor: error ? 'salmon' : undefined }}
-                            />
-                            <Globe className="input-icon" size={20} />
+                        <div className="input-group" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem', background: 'transparent', border: 'none', padding: 0 }}>
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <input
+                                    type="text" placeholder="example.com"
+                                    value={url} onChange={e => {
+                                        setUrl(e.target.value);
+                                        setError(false);
+                                    }}
+                                    style={{ borderColor: error ? 'salmon' : undefined, width: '100%', paddingLeft: '2.5rem' }}
+                                />
+                                <Globe className="input-icon" size={20} style={{ left: '0.8rem' }} />
+                            </div>
+                            <button
+                                onClick={scanUrl}
+                                disabled={isScanning || !url}
+                                className="btn-secondary"
+                                style={{ height: '100%', padding: '0 1.25rem', borderColor: 'var(--accent-primary)', color: 'hsl(var(--accent-primary))', minWidth: '100px' }}
+                            >
+                                {isScanning ? <Loader2 className="spin" size={18} /> : (
+                                    <>
+                                        <Sparkles size={16} style={{ marginRight: '5px' }} /> Scan
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
+                    {/* ... Rest of form */}
 
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Industry (if no URL)</label>

@@ -5,7 +5,12 @@ export const users = pgTable('users', {
     id: serial('id').primaryKey(),
     email: text('email').unique().notNull(),
     name: text('name'),
+    passwordHash: text('password_hash'), // bcrypt hashed password
     role: text('role').default('user'), // 'user' | 'admin'
+    isActive: boolean('is_active').default(true), // for soft delete
+    lastLogin: timestamp('last_login'),
+    resetToken: text('reset_token'),
+    resetTokenExpiry: timestamp('reset_token_expiry'),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -39,7 +44,13 @@ export const cmsContents = pgTable('cms_contents', {
 
 export const integrations = pgTable('integrations', {
     id: serial('id').primaryKey(),
+    userId: serial('user_id').references(() => users.id), // who configured it
     name: text('name').notNull(),
+    authType: text('auth_type').default('api_key'), // 'api_key' | 'oauth' | 'basic'
+    baseUrl: text('base_url'),
+    apiKey: text('api_key'), // encrypted
+    apiSecret: text('api_secret'), // encrypted  
+    metadata: jsonb('metadata'), // additional config
     enabled: boolean('enabled').default(true),
     createdAt: timestamp('created_at').defaultNow(),
 });

@@ -18,7 +18,7 @@ interface Integration {
 }
 
 export function AdminDashboard({ leads }: AdminDashboardProps) {
-    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations'>('leads');
+    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     const [passcode, setPasscode] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,9 +34,38 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [integrations, setIntegrations] = useState<Integration[]>([]);
     const [newIntegrationName, setNewIntegrationName] = useState('');
 
-    // User Edit State
-    const [editingUser, setEditingUser] = useState<string | null>(null);
+    // User Management State (Real Auth Users)
+    const [users, setUsers] = useState<any[]>([]);
+    const [isEditingRealUser, setIsEditingRealUser] = useState(false);
+    const [currentRealUser, setCurrentRealUser] = useState<any>(null);
+    const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
+
+    // Lead Edit State (Mock/Simulation for Leads View)
+    const [editingUser, setEditingUser] = useState<string | null>(null); // This is "Lead ID"
+    // Rename 'editForm' usage in leads view to 'leadEditForm' via find/replace or restore original name if possible
+    // To avoid massive refactor of existing code, let's keep 'editForm' for Leads if possible, but I already overwrote it.
+    // I need to check where 'editForm' is used.
+    // Existing code uses 'editForm' for LEADS.
+    // So I should name my NEW state 'userEditForm' and restore 'editForm' for LEADS.
     const [editForm, setEditForm] = useState<Partial<CompanyData>>({});
+
+    useEffect(() => {
+        if (activeTab === 'users') {
+            fetchUsers();
+        }
+    }, [activeTab]);
+
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch('https://dewpoint-ai-use-cases.onrender.com/api/admin/users');
+            if (res.ok) {
+                const data = await res.json();
+                setUsers(data.users);
+            }
+        } catch (error) {
+            console.error('Failed to fetch users', error);
+        }
+    };
 
     useEffect(() => {
         const storedAnn = localStorage.getItem('dpg_announcement');
@@ -140,7 +169,62 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
 
 
-    // User Management
+    const handleSaveUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (currentRealUser) {
+                // Update
+                const res = await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/admin/users/${currentRealUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...userEditForm, password: userEditForm.password || undefined })
+                });
+                if (res.ok) {
+                    fetchUsers();
+                    setIsEditingRealUser(false);
+                    setCurrentRealUser(null);
+                }
+            } else {
+                // Create
+                const res = await fetch('https://dewpoint-ai-use-cases.onrender.com/api/admin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userEditForm)
+                });
+                if (res.ok) {
+                    fetchUsers();
+                    setIsEditingRealUser(false);
+                    setUserEditForm({ email: '', name: '', role: 'user', password: '' });
+                }
+            }
+        } catch (error) {
+            console.error('Save user failed', error);
+        }
+    };
+
+    const handleDeleteUserReal = async (id: number) => {
+        if (confirm('Are you sure you want to deactivate this user?')) {
+            try {
+                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/admin/users/${id}`, { method: 'DELETE' });
+                fetchUsers();
+            } catch (error) {
+                console.error('Delete user failed', error);
+            }
+        }
+    };
+
+    const openEditUserModal = (user?: any) => {
+        if (user) {
+            setCurrentRealUser(user);
+            setUserEditForm({ email: user.email, name: user.name || '', role: user.role, password: '' });
+        } else {
+            setCurrentRealUser(null);
+            setUserEditForm({ email: '', name: '', role: 'user', password: '' });
+        }
+        setIsEditingRealUser(true);
+    };
+
+    // User Management (MOCK for Leads View)
     const handleDeleteUser = (id: string, e?: React.MouseEvent) => {
         e?.stopPropagation();
         if (confirm('Are you sure you want to ban/delete this user? This action cannot be undone.')) {
@@ -241,6 +325,17 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                         }}
                     >
                         Integrations
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('users')}
+                        style={{
+                            background: activeTab === 'users' ? 'hsl(var(--accent-primary))' : 'transparent',
+                            color: activeTab === 'users' ? 'white' : 'var(--text-muted)',
+                            border: '1px solid var(--border-glass)',
+                            padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer'
+                        }}
+                    >
+                        Users
                     </button>
                 </div>
             </header>
@@ -578,6 +673,119 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             <button onClick={() => setEditingUser(null)} className="btn-secondary">Cancel</button>
                             <button onClick={saveEditUser} className="btn-primary">Save Changes</button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Users Tab - Real User Management */}
+            {activeTab === 'users' && (
+                <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <h3>Registered Users</h3>
+                        <button onClick={() => openEditUserModal()} className="btn-primary">
+                            <Plus size={18} /> Add User
+                        </button>
+                    </div>
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
+                                <th style={{ padding: '1rem' }}>Name</th>
+                                <th style={{ padding: '1rem' }}>Email</th>
+                                <th style={{ padding: '1rem' }}>Role</th>
+                                <th style={{ padding: '1rem' }}>Status</th>
+                                <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map(u => (
+                                <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '1rem' }}>{u.name || '-'}</td>
+                                    <td style={{ padding: '1rem' }}>{u.email}</td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span style={{
+                                            background: u.role === 'admin' ? 'hsl(var(--accent-gold))' : '#333',
+                                            color: u.role === 'admin' ? 'black' : 'white',
+                                            padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600
+                                        }}>
+                                            {u.role}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span style={{ color: u.isActive ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
+                                            {u.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                        <button onClick={() => openEditUserModal(u)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
+                                            <Edit size={16} />
+                                        </button>
+                                        <button onClick={() => handleDeleteUserReal(u.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
+                                            <Trash size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Edit/Create User Modal */}
+            {isEditingRealUser && (
+                <div className="modal-overlay">
+                    <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                            <h3>{currentRealUser ? 'Edit User' : 'Add New User'}</h3>
+                            <button onClick={() => setIsEditingRealUser(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
+                        </div>
+                        <form onSubmit={handleSaveUser} style={{ display: 'grid', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={userEditForm.email}
+                                    onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
+                                <input
+                                    type="text"
+                                    value={userEditForm.name}
+                                    onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Role</label>
+                                <select
+                                    value={userEditForm.role}
+                                    onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#222', color: 'white' }}
+                                >
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                    {currentRealUser ? 'New Password (leave blank to keep)' : 'Password'}
+                                </label>
+                                <input
+                                    type="password"
+                                    required={!currentRealUser}
+                                    value={userEditForm.password}
+                                    onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                                <button type="button" onClick={() => setIsEditingRealUser(false)} className="btn-secondary">Cancel</button>
+                                <button type="submit" className="btn-primary">{currentRealUser ? 'Save Changes' : 'Create User'}</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
 import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server, Lock, ArrowDownUp } from 'lucide-react';
-import { EmailModal } from './EmailModal';
+
 
 interface RoadmapProps {
     isAdmin: boolean;
@@ -79,7 +79,17 @@ export function Roadmap({ isAdmin }: RoadmapProps) {
                          Since we have the EmailModal component, let's just render it but maybe tweaking it to be inline? 
                          Actually, let's just use the EmailModal as a "gate". 
                       */}
-                    <EmailModal onClose={() => { }} onSuccess={handleLoginSuccess} />
+                    {/* Simple Unlock Button */}
+                    <button
+                        onClick={() => {
+                            localStorage.setItem('dpg_user_email', 'guest@demo.com');
+                            handleLoginSuccess();
+                        }}
+                        className="btn-primary"
+                        style={{ width: '100%', padding: '1rem' }}
+                    >
+                        Unlock Roadmap (Demo)
+                    </button>
                 </div>
             </div>
         );

@@ -6,8 +6,11 @@ import { Library } from './components/Library';
 import { Roadmap } from './components/Roadmap';
 import { AdminDashboard } from './components/AdminDashboard';
 import { CompanyData, Opportunity } from './lib/engine';
-import { Shield } from 'lucide-react';
-import { EmailModal } from './components/EmailModal';
+import { Login } from './components/auth/Login';
+import { Signup } from './components/auth/Signup';
+import { useAuth } from './context/AuthContext';
+import { Shield, LogOut, User } from 'lucide-react';
+
 
 type ViewState = 'DISCOVERY' | 'ANALYSIS' | 'MATRIX' | 'LIBRARY' | 'ROADMAP' | 'ADMIN';
 
@@ -20,12 +23,14 @@ interface Lead {
 }
 
 function App() {
+    const { user, logout } = useAuth();
     const [view, setView] = useState<ViewState>('DISCOVERY');
     const [data, setData] = useState<CompanyData>({
         url: '', role: '', size: 'Solopreneur', stack: [], painPoint: ''
     });
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isAdminMode, setIsAdminMode] = useState(false);
+    const [authModal, setAuthModal] = useState<'LOGIN' | 'SIGNUP' | null>(null);
 
     useEffect(() => {
     }, [view]);
@@ -41,13 +46,10 @@ function App() {
 
     const handleCaptureLead = (recipes: Opportunity[]) => {
         // Collect latest data
-        const currentEmail = localStorage.getItem('dpg_user_email');
-        const currentName = localStorage.getItem('dpg_user_name');
-
         const finalData = {
             ...data,
-            email: currentEmail || undefined,
-            name: currentName || undefined
+            email: user?.email,
+            name: user?.name || undefined
         };
 
         // Simulate saving to DB
@@ -62,23 +64,17 @@ function App() {
     };
 
     // ... Inside App component
-    const [showLoginModal, setShowLoginModal] = useState(false);
 
     // ... existing handlers
 
-    const handleLoginSuccess = (email: string) => {
-        const name = localStorage.getItem('dpg_user_name');
-        // Update local data state with user info
-        setData(prev => ({ ...prev, email, name: name || undefined }));
-
-        setShowLoginModal(false);
+    const handleLoginSuccess = () => {
+        setAuthModal(null);
         // If they have data, maybe take them to roadmap?
         const saved = localStorage.getItem('dpg_roadmap');
         if (saved && JSON.parse(saved).length > 0) {
             setView('ROADMAP');
         } else {
-            // Stay on discovery but maybe show a toast?
-            alert(`Welcome back, ${email}`);
+            // Stay on discovery 
         }
     };
 
@@ -94,25 +90,54 @@ function App() {
 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>
 
-                    {/* User Login for Discovery Mode */}
                     {/* User Login - Global */}
-                    {view !== 'ADMIN' && (
-                        <button
-                            onClick={() => setShowLoginModal(true)}
-                            style={{
-                                background: 'transparent',
-                                border: '1px solid var(--border-glass)',
-                                color: 'var(--text-muted)',
-                                marginRight: '0.5rem',
-                                cursor: 'pointer',
-                                fontSize: '0.85rem',
-                                padding: '0.3rem 0.8rem',
-                                borderRadius: '4px',
-                                display: localStorage.getItem('dpg_user_email') ? 'none' : 'block' // Hide if logged in
-                            }}
-                        >
-                            Login
-                        </button>
+                    {!user && view !== 'ADMIN' && (
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setAuthModal('LOGIN')}
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid var(--border-glass)',
+                                    color: 'var(--text-muted)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    padding: '0.3rem 0.8rem',
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                Login
+                            </button>
+                            <button
+                                onClick={() => setAuthModal('SIGNUP')}
+                                style={{
+                                    background: 'hsl(var(--accent-primary))',
+                                    border: 'none',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    padding: '0.3rem 0.8rem',
+                                    borderRadius: '4px',
+                                    fontWeight: 500
+                                }}
+                            >
+                                Sign Up
+                            </button>
+                        </div>
+                    )}
+
+                    {user && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.5rem' }}>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                {user.name || user.email}
+                            </div>
+                            <button
+                                onClick={() => logout()}
+                                title="Logout"
+                                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
+                            >
+                                <LogOut size={16} />
+                            </button>
+                        </div>
                     )}
 
                     {view !== 'DISCOVERY' && view !== 'ADMIN' && (
@@ -143,9 +168,8 @@ function App() {
                                 return;
                             }
                             // Gating Logic
-                            const email = localStorage.getItem('dpg_user_email');
-                            if (!email) {
-                                setShowLoginModal(true);
+                            if (!user) {
+                                setAuthModal('LOGIN');
                             } else {
                                 setView('ROADMAP');
                             }
@@ -187,12 +211,19 @@ function App() {
             {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} />}
             {view === 'ADMIN' && <AdminDashboard leads={leads} />}
 
-            {showLoginModal && (
-                <EmailModal
-                    onClose={() => setShowLoginModal(false)}
+            {authModal === 'LOGIN' && (
+                <Login
+                    onClose={() => setAuthModal(null)}
                     onSuccess={handleLoginSuccess}
-                    title="Welcome Back"
-                    description="Enter your email to access your saved roadmap."
+                    switchToSignup={() => setAuthModal('SIGNUP')}
+                />
+            )}
+
+            {authModal === 'SIGNUP' && (
+                <Signup
+                    onClose={() => setAuthModal(null)}
+                    onSuccess={handleLoginSuccess}
+                    switchToLogin={() => setAuthModal('LOGIN')}
                 />
             )}
         </div>

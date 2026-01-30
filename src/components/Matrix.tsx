@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { generateOpportunities, CompanyData, Opportunity } from '../lib/engine';
 import { BadgeCheck, Frown, Sparkles, Server, ChevronDown, ChevronUp, Plus } from 'lucide-react';
-import { EmailModal } from './EmailModal';
+
 
 interface MatrixProps {
     companyData: CompanyData;
@@ -13,9 +13,6 @@ interface MatrixProps {
 export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
     const opportunities = generateOpportunities(companyData);
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
-    const [showEmailModal, setShowEmailModal] = useState(false);
-    const [pendingRecipe, setPendingRecipe] = useState<Opportunity | null>(null);
-
     // Sync from LocalStorage on mount
     useEffect(() => {
         const saved = localStorage.getItem('dpg_roadmap');
@@ -38,24 +35,12 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
         if (exists) {
             updateStorage(savedRecipes.filter(r => r.title !== opp.title));
         } else {
-            // Check for lead capture
-            const email = localStorage.getItem('dpg_user_email');
-            if (!email) {
-                setPendingRecipe(opp);
-                setShowEmailModal(true);
-            } else {
-                updateStorage([...savedRecipes, opp]);
-            }
+            // Add directly
+            updateStorage([...savedRecipes, opp]);
         }
     };
 
-    const handleEmailSuccess = () => {
-        if (pendingRecipe) {
-            updateStorage([...savedRecipes, pendingRecipe]);
-            setPendingRecipe(null);
-        }
-        setShowEmailModal(false);
-    };
+
 
     return (
         <div className="container animate-fade-in" style={{ position: 'relative' }}>
@@ -81,9 +66,7 @@ export function Matrix({ companyData, onUnlock, isAdmin }: MatrixProps) {
                 ))}
             </div>
 
-            {showEmailModal && (
-                <EmailModal onClose={() => setShowEmailModal(false)} onSuccess={handleEmailSuccess} />
-            )}
+            {/* Modal Logic Removed */}
         </div>
     );
 }

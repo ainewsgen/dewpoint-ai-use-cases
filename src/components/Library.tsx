@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
 import { BookOpen, Server, Plus, BadgeCheck, Frown, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
-import { EmailModal } from './EmailModal';
+
 
 // We'll move the recipe data to a shared source in engine.ts soon.
 const LIBRARY_RECIPES: Opportunity[] = [
@@ -89,8 +89,6 @@ export function Library({ isAdmin }: LibraryProps) {
 
     // Save/Load Logic
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
-    const [showEmailModal, setShowEmailModal] = useState(false);
-    const [pendingRecipe, setPendingRecipe] = useState<Opportunity | null>(null);
 
     useEffect(() => {
         const saved = localStorage.getItem('dpg_roadmap');
@@ -110,23 +108,9 @@ export function Library({ isAdmin }: LibraryProps) {
             // Remove
             updateStorage(savedRecipes.filter(r => r.title !== opp.title));
         } else {
-            // Add - Check for Email logic?
-            const email = localStorage.getItem('dpg_user_email');
-            if (!email) {
-                setPendingRecipe(opp);
-                setShowEmailModal(true);
-            } else {
-                updateStorage([...savedRecipes, opp]);
-            }
+            // Add (Simplified, no modal)
+            updateStorage([...savedRecipes, opp]);
         }
-    };
-
-    const handleEmailSuccess = () => {
-        if (pendingRecipe) {
-            updateStorage([...savedRecipes, pendingRecipe]);
-            setPendingRecipe(null);
-        }
-        setShowEmailModal(false);
     };
 
     const filteredRecipes = filter === 'All'
@@ -175,13 +159,6 @@ export function Library({ isAdmin }: LibraryProps) {
                     />
                 ))}
             </div>
-
-            {showEmailModal && (
-                <EmailModal
-                    onClose={() => setShowEmailModal(false)}
-                    onSuccess={handleEmailSuccess}
-                />
-            )}
         </div>
     );
 }

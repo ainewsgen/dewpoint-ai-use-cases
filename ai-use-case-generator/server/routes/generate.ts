@@ -62,6 +62,11 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
         // 1. Prepare Prompt (Simple Injection for Phase 1)
         let systemPrompt = promptDetails?.systemPromptOverride || defaultSystemPrompt;
 
+        // Safety: Enforce "JSON" keyword for OpenAI json_object mode
+        if (!systemPrompt.toLowerCase().includes('json')) {
+            systemPrompt += " \n\nIMPORTANT: You must output strictly valid JSON.";
+        }
+
         // Basic variable replacement
         const replacements: Record<string, string> = {
             '{{role}}': companyData.role,
@@ -133,12 +138,16 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
                 console.warn("Budget Limit Hit:", err.message);
                 return res.status(429).json({ error: 'Daily AI Budget Exceeded. Falling back to static templates.' });
             }
-            throw err;
+            // Propagate specific API errors (like 400 Bad Request from OpenAI)
+            console.error('AI Provider Error:', err);
+            const status = err.status || 500;
+            const message = err.message || 'Unknown AI Error';
+            return res.status(status).json({ error: `AI Generation Failed: ${message}`, details: err.error || err });
         }
 
-    } catch (error) {
-        console.error('Generation Error:', error);
-        res.status(500).json({ error: 'Failed to generate blueprints' });
+    } catch (error: any) {
+        console.error('Generation Handler Error:', error);
+        res.status(500).json({ error: `Failed to generate blueprints: ${error.message}` });
     }
 });
 

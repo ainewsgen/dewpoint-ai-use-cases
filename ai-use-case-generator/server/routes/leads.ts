@@ -178,9 +178,11 @@ router.get('/admin/leads', async (req, res) => {
             company: companies,
         })
             .from(leads)
-            .leftJoin(users, eq(leads.userId, users.id))
-            .leftJoin(companies, eq(leads.companyId, companies.id));
+            .innerJoin(users, eq(leads.userId, users.id))
+            .leftJoin(companies, eq(leads.companyId, companies.id))
+            .where(eq(users.isActive, true));
 
+        // Format for frontend (optional, or do it there);
         res.json({ leads: allLeads });
     } catch (error: any) {
         console.error('Get all leads error:', error);

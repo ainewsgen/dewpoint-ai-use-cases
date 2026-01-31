@@ -89,7 +89,13 @@ router.post('/integrations', requireAuth, async (req: AuthRequest, res) => {
         });
     } catch (error: any) {
         console.error('Create integration error:', error);
-        res.status(500).json({ error: `Failed to create integration: ${error.message}` });
+        // Better error logging for debugging
+        const errorDetail = error.detail || error.message || 'Unknown error';
+        const errorCode = error.code || 'NoCode';
+        res.status(500).json({
+            error: `Failed to create integration: ${error.message}`,
+            details: `DB Error ${errorCode}: ${errorDetail}`
+        });
     }
 });
 

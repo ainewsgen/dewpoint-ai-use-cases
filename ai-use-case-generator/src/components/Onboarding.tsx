@@ -72,21 +72,41 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
             // Heuristic Stuff
             const u = url.toLowerCase();
-            if (u.includes('law') || u.includes('legal')) setIndustry('Legal');
-            else if (u.includes('tech') || u.includes('soft') || u.includes('io') || u.includes('ai')) setIndustry('Technology');
-            else if (u.includes('shop') || u.includes('store')) setIndustry('E-Commerce');
-            else if (u.includes('med') || u.includes('clinic')) setIndustry('Healthcare');
+            if (u.includes('law') || u.includes('legal') || u.includes('attorney')) setIndustry('Legal');
+            else if (u.includes('tech') || u.includes('soft') || u.includes('io') || u.includes('ai') || u.includes('app')) setIndustry('Technology');
+            else if (u.includes('shop') || u.includes('store') || u.includes('cart')) setIndustry('E-Commerce');
+            else if (u.includes('med') || u.includes('clinic') || u.includes('health') || u.includes('dr')) setIndustry('Healthcare');
+            else if (u.includes('real') || u.includes('estate') || u.includes('home') || u.includes('prop')) setIndustry('Real Estate');
+            else if (u.includes('fin') || u.includes('capital') || u.includes('invest') || u.includes('bank')) setIndustry('Finance');
+            else if (u.includes('edu') || u.includes('school') || u.includes('learn') || u.includes('academy')) setIndustry('Education');
+            else if (u.includes('build') || u.includes('construct') || u.includes('contract')) setIndustry('Construction');
+            else if (u.includes('consult') || u.includes('advisor') || u.includes('agency')) setIndustry('Consulting');
 
             const newStack = [...stack];
             // Guessing Tech
             if (!newStack.includes('Gmail/GSuite')) newStack.push('Gmail/GSuite'); // Safe bet for most
             if (u.includes('shopify')) newStack.push('Shopify');
-            if (u.includes('wordpress')) newStack.push('WordPress');
+            if (u.includes('wordpress') || u.includes('wp')) newStack.push('WordPress');
+            if (u.includes('salesforce')) newStack.push('Salesforce');
+            if (u.includes('hubspot')) newStack.push('HubSpot');
 
             setStack(newStack);
 
         }, 1500);
     };
+
+    if (step === 1) {
+        // ... (Keep Step 1 Render Logic identical, just skipping it in replace block to target Step 2 logic/render) ...
+        // Wait, replace_file_content replaces the BLOCK.
+        // I need to be careful not to delete Step 1 render if I start my replacement early.
+        // The instruction targets lines 61-290.
+        // This includes Step 1 render.
+        // I should split this into two replacements or use a precise range.
+
+        // Strategy: First update the logic (lines 61-90), then update the CSS (lines 260+).
+        // Let's do logic first.
+    }
+
 
     if (step === 1) {
         return (
@@ -260,7 +280,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 <select
                                     value={role}
                                     onChange={e => setRole(e.target.value)}
-                                    style={{ width: '100%', padding: '0.9rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: 'white', color: 'hsl(var(--text-main))', fontSize: '1rem' }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.9rem',
+                                        borderRadius: '6px',
+                                        border: '1px solid var(--border-glass)',
+                                        background: 'var(--bg-card)', // Use card background instead of white
+                                        color: 'hsl(var(--text-main))',
+                                        fontSize: '1rem',
+                                        // Ensure dropdown arrow is visible (browser default usually fine, but custom bg might need generic appearance)
+                                    }}
                                 >
                                     <option value="" disabled>Select Role...</option>
                                     <option value="Founder">Founder / CEO</option>
@@ -279,7 +308,15 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 <select
                                     value={size}
                                     onChange={e => setSize(e.target.value)}
-                                    style={{ width: '100%', padding: '0.9rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: 'white', color: 'hsl(var(--text-main))', fontSize: '1rem' }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.9rem',
+                                        borderRadius: '6px',
+                                        border: '1px solid var(--border-glass)',
+                                        background: 'var(--bg-card)',
+                                        color: 'hsl(var(--text-main))',
+                                        fontSize: '1rem'
+                                    }}
                                 >
                                     <option value="Solopreneur">Solopreneur (1)</option>
                                     <option value="1-10">Micro (1-10)</option>

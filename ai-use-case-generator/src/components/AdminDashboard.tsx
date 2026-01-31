@@ -631,30 +631,6 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                 reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
                             }
 
-                            const [isDiagnosing, setIsDiagnosing] = useState(false);
-
-                            const runDiagnostics = async () => {
-                                setIsDiagnosing(true);
-                                try {
-                                    const res = await fetch('/api/admin/usage/readiness-check', { method: 'POST' });
-                                    const report = await res.json();
-
-                                    let msg = `Diagnostic Report:\n`;
-                                    msg += `------------------\n`;
-                                    msg += `Integration: ${report.integration?.status === 'ok' ? '✅' : '❌'} (${report.integration?.details})\n`;
-                                    msg += `Budget: ${report.budget?.status === 'ok' ? '✅' : '❌'} (${report.budget?.details})\n`;
-                                    msg += `API Check: ${report.api_connection?.status === 'ok' ? '✅' : '❌'} (${report.api_connection?.details})\n`;
-                                    msg += `------------------\n`;
-                                    msg += `Overall Result: ${report.overall ? 'PASSED ✅' : 'FAILED ❌'}`;
-
-                                    alert(msg);
-                                } catch (err) {
-                                    alert("Diagnostic Failed: " + err);
-                                } finally {
-                                    setIsDiagnosing(false);
-                                }
-                            };
-
                             return (
                                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
                                     <div style={{
@@ -674,7 +650,27 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                             {reason}
                                         </p>
                                         <button
-                                            onClick={runDiagnostics}
+                                            onClick={async () => {
+                                                setIsDiagnosing(true);
+                                                try {
+                                                    const res = await fetch('/api/admin/usage/readiness-check', { method: 'POST' });
+                                                    const report = await res.json();
+
+                                                    let msg = `Diagnostic Report:\n`;
+                                                    msg += `------------------\n`;
+                                                    msg += `Integration: ${report.integration?.status === 'ok' ? '✅' : '❌'} (${report.integration?.details})\n`;
+                                                    msg += `Budget: ${report.budget?.status === 'ok' ? '✅' : '❌'} (${report.budget?.details})\n`;
+                                                    msg += `API Check: ${report.api_connection?.status === 'ok' ? '✅' : '❌'} (${report.api_connection?.details})\n`;
+                                                    msg += `------------------\n`;
+                                                    msg += `Overall Result: ${report.overall ? 'PASSED ✅' : 'FAILED ❌'}`;
+
+                                                    alert(msg);
+                                                } catch (err) {
+                                                    alert("Diagnostic Failed: " + err);
+                                                } finally {
+                                                    setIsDiagnosing(false);
+                                                }
+                                            }}
                                             disabled={isDiagnosing}
                                             className="btn-secondary"
                                             style={{ marginTop: '0.75rem', fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}

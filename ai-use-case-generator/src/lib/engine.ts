@@ -46,7 +46,6 @@ export interface Opportunity {
     model?: string;
     timestamp?: string;
     fallback_reason?: string;
-};
 }
 
 export async function generateOpportunities(companyData: CompanyData, promptDetails?: any): Promise<Opportunity[]> {

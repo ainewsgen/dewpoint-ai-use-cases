@@ -161,6 +161,47 @@ app.post('/api/debug/fix-schema', async (req, res) => {
     }
 });
 
+app.get('/api/debug/leads-check', async (req, res) => {
+    try {
+        // 1. Raw Schema Check (What actually exists?)
+        const schemaResult = await db.execute(sql`
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns 
+            WHERE table_name = 'leads';
+        `);
+
+        // 2. Raw Data Check (Can we read it with SQL?)
+        let rawData: any[] = [];
+        let rawError: string | null = null;
+        try {
+            const result = await db.execute(sql`SELECT * FROM leads LIMIT 3`);
+            rawData = result.rows;
+        } catch (e: any) {
+            rawError = e.message;
+        }
+
+        // 3. Drizzle ORM Check (Can code read it?)
+        let drizzleData: any[] = [];
+        let drizzleError: string | null = null;
+        try {
+            // @ts-ignore
+            drizzleData = await db.select().from(schema.leads).limit(3);
+        } catch (e: any) {
+            drizzleError = e.message;
+        }
+
+        res.json({
+            status: 'diagnostic_complete',
+            table_columns: schemaResult.rows,
+            raw_sql_check: rawError ? { error: rawError } : { success: true, count: rawData.length, sample: rawData },
+            drizzle_check: drizzleError ? { error: drizzleError } : { success: true, count: drizzleData.length }
+        });
+
+    } catch (error: any) {
+        res.status(500).json({ fatal_error: error.message, stack: error.stack });
+    }
+});
+
 // Deep DB Diagnostic
 app.get('/api/debug/db-check', async (req, res) => {
     try {

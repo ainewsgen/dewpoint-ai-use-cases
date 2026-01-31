@@ -46,6 +46,33 @@ app.use('/api', scanRoutes); // Server-side scanning
 app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 
+app.use('/api/admin', usageRoutes); // Observability & Usage Stats
+
+// Temporary Debug Routes
+app.get('/api/debug/schema', async (req, res) => {
+    try {
+        const result = await db.execute(sql`
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns 
+            WHERE table_name = 'integrations';
+        `);
+        res.json({ columns: result.rows });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/debug/fix-schema', async (req, res) => {
+    try {
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
+        await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
+        res.json({ status: 'Schema patched successfully' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Serve static frontend files in production (AFTER API routes)
 if (process.env.NODE_ENV === 'production') {
     const staticPath = path.join(__dirname, '../..');
@@ -56,24 +83,6 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(staticPath, 'dist', 'index.html'));
     });
 }
-
-// Temporary Debug Route to inspect DB schema
-app.get('/api/debug/schema', async (req, res) => {
-    try {
-        // Raw query to check columns
-        const result = await db.execute(sql`
-            SELECT column_name, data_type 
-            FROM information_schema.columns 
-            WHERE table_name = 'integrations';
-        `);
-        res.json({
-            columns: result.rows,
-            env: process.env.NODE_ENV
-        });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 // Start server immediately
 const server = app.listen(PORT, () => {

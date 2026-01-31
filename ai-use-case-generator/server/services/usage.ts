@@ -81,9 +81,9 @@ export class UsageService {
         console.log(`[UsageStats] Found Integration: ${openAIInt?.id}, Name: ${openAIInt?.name}`);
         console.log(`[UsageStats] Metadata RAW:`, openAIInt?.metadata);
 
-        // Ensure default of 5.00 if strictly undefined, but respect 0 if set
+        // Ensure default of 5.00 if strictly undefined or null, but allow 0 if explicitly set (and not null)
         const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
-        const limit = metaLimit !== undefined ? Number(metaLimit) : 5.00;
+        const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
 
         return {
             spend: Number(result[0]?.totalSpend || 0),

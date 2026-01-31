@@ -210,12 +210,10 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
-                        {opp.industry && (
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>
-                                <span style={{ opacity: 0.5, margin: '0 0.5rem' }}>|</span>
-                                Industry: {opp.industry}
-                            </span>
-                        )}
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>
+                            <span style={{ opacity: 0.5, margin: '0 0.5rem' }}>|</span>
+                            Industry: {opp.industry || 'General'}
+                        </span>
                     </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
                 </div>

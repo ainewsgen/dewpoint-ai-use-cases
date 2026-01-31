@@ -67,10 +67,16 @@ export class UsageService {
             .from(apiUsage)
             .where(gte(apiUsage.timestamp, startOfDay));
 
-        const openAIInt = await db.query.integrations.findFirst({
-            where: eq(integrations.name, 'OpenAI')
+        const openAIIntegrations = await db.query.integrations.findMany({
+            where: eq(integrations.name, 'OpenAI'),
+            orderBy: (integrations, { desc }) => [desc(integrations.id)],
+            limit: 1
         });
-        const limit = (openAIInt?.metadata as any)?.daily_limit_usd || 5.00;
+        const openAIInt = openAIIntegrations[0];
+
+        // Ensure default of 5.00 if strictly undefined, but respect 0 if set
+        const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
+        const limit = metaLimit !== undefined ? Number(metaLimit) : 5.00;
 
         return {
             spend: Number(result[0]?.totalSpend || 0),

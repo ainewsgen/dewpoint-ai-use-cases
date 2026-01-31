@@ -172,7 +172,11 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
             if (res.ok) {
                 // Optimistically update local state immediately
-                setUsageStats(prev => prev ? { ...prev, limit: newLimit } : null);
+                setUsageStats(prev => ({
+                    spend: prev?.spend || 0,
+                    requests: prev?.requests || 0,
+                    limit: newLimit
+                }));
 
                 // Fetch latest to confirm
                 await fetchUsageStats();

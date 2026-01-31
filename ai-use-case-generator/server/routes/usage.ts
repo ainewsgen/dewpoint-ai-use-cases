@@ -28,12 +28,16 @@ router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Invalid limit value' });
         }
 
-        // Find OpenAI Integration
-        const openAIInt = await db.query.integrations.findFirst({
-            where: eq(integrations.name, 'OpenAI')
+        // Find OpenAI Integration (Get latest created if multiple)
+        const openAIIntegrations = await db.query.integrations.findMany({
+            where: eq(integrations.name, 'OpenAI'),
+            orderBy: (integrations, { desc }) => [desc(integrations.id)],
+            limit: 1
         });
+        const openAIInt = openAIIntegrations[0];
 
         if (!openAIInt) {
+            console.warn("Update Limit: OpenAI integration not found");
             return res.status(404).json({ error: 'OpenAI integration not found. Please connect it first.' });
         }
 
@@ -44,6 +48,8 @@ router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
         await db.update(integrations)
             .set({ metadata: newMeta })
             .where(eq(integrations.id, openAIInt.id));
+
+        console.log(`[Admin] Updated Daily Limit to $${newLimit} for Integration ID ${openAIInt.id}`);
 
         res.json({ success: true, limit: newLimit });
 

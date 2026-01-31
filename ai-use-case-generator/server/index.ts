@@ -46,7 +46,7 @@ app.use('/api', scanRoutes); // Server-side scanning
 app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 
-app.use('/api/admin', usageRoutes); // Observability & Usage Stats
+
 
 // Temporary Debug Routes
 app.get('/api/debug/schema', async (req, res) => {

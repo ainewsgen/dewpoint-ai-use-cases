@@ -617,7 +617,16 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
                     {/* Debug Panel for Persistence Issues */}
                     <div style={{ marginTop: '2rem', padding: '1rem', border: '1px dashed #444', borderRadius: '8px', opacity: 0.7 }}>
-                        <h5 style={{ color: '#888', marginBottom: '0.5rem', fontSize: '0.8rem' }}>🛠️ Debug: Integration Persistence</h5>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <h5 style={{ color: '#888', margin: 0, fontSize: '0.8rem' }}>🛠️ Debug: Integration Persistence</h5>
+                            <button
+                                onClick={fetchUsageStats}
+                                className="btn-secondary"
+                                style={{ padding: '0.15rem 0.5rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center' }}
+                            >
+                                <RefreshCw size={12} style={{ marginRight: '4px' }} /> Refresh
+                            </button>
+                        </div>
                         <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#aaa' }}>
                             <p>DB Count: <span style={{ color: 'white' }}>{(usageStats as any)?.integrationCount ?? '?'}</span></p>
                             <p>Integration ID: <span style={{ color: 'white' }}>{usageStats?.integrationId || 'Values not found'}</span></p>

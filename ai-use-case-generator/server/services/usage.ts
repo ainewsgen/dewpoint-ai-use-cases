@@ -43,18 +43,22 @@ export class UsageService {
     /**
      * Logs usage and cost to the DB.
      */
-    static async logUsage(promptTokens: number, completionTokens: number, model = 'gpt-4o') {
+    static async logUsage(userId: number, promptTokens: number, completionTokens: number, model = 'gpt-4o') {
         const cost = (promptTokens * this.GPT4O_INPUT_COST) + (completionTokens * this.GPT4O_OUTPUT_COST);
 
-        await db.insert(apiUsage).values({
-            model,
-            promptTokens,
-            completionTokens,
-            totalCost: cost.toFixed(6), // Store as string/decimal
-            timestamp: new Date()
-        });
-
-        console.log(`[Usage] Logged: $${cost.toFixed(6)} (${promptTokens}in/${completionTokens}out)`);
+        try {
+            await db.insert(apiUsage).values({
+                userId, // Now mapping correctly to user_id column
+                model,
+                promptTokens,
+                completionTokens,
+                totalCost: cost.toFixed(6), // Store as string/decimal
+                timestamp: new Date()
+            });
+            console.log(`[Usage] Logged: $${cost.toFixed(6)} (${promptTokens}in/${completionTokens}out) for User ${userId}`);
+        } catch (e) {
+            console.error("Failed to insert api_usage log (non-fatal):", e);
+        }
     }
 
     /**

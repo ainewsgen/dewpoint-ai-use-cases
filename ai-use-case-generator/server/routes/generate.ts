@@ -115,7 +115,8 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
             const promptTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(JSON.stringify(companyData).length / 4);
             const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
 
-            UsageService.logUsage(promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
+            // Pass userId to ensure DB integrity
+            UsageService.logUsage(userId, promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
 
             // 3. Return Blueprints with Metadata
             const finalBlueprints = Array.isArray(result.blueprints || result.opportunities)

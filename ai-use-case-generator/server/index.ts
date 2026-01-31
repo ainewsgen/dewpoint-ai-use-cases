@@ -36,6 +36,28 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', version: 'v3.17', timestamp: new Date().toISOString() });
 });
 
+// Deep DB Diagnostic (Priority)
+app.get('/api/debug/db-check', async (req, res) => {
+    try {
+        // Raw SQL check
+        const rawResult = await db.execute(sql`SELECT id, name, enabled, metadata FROM integrations ORDER BY id DESC`);
+
+        // Drizzle Select check
+        // @ts-ignore
+        const selectResult = await db.select().from(schema.integrations).limit(5);
+
+        res.json({
+            status: 'ok',
+            raw_count: rawResult.rows.length,
+            raw_rows: rawResult.rows,
+            drizzle_rows: selectResult,
+            db_url_set: !!process.env.DATABASE_URL
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 // API Routes
 app.use('/api/auth', authEnhancedRoutes); // Enhanced auth with JWT
 app.use('/api/auth', authRoutes); // Legacy auth routes (if needed)

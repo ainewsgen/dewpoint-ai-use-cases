@@ -53,11 +53,12 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
             return a.department.localeCompare(b.department);
         }
         if (sortBy === 'ROI') {
-            const getVal = (s: string) => {
+            const getVal = (s: string | undefined) => {
+                if (!s) return 0;
                 const num = parseInt(s.replace(/\D/g, '')) || 0;
                 return s.includes('$') ? num * 1000 : num;
             };
-            return getVal(b.public_view.roi_estimate) - getVal(a.public_view.roi_estimate);
+            return getVal(b.public_view?.roi_estimate) - getVal(a.public_view?.roi_estimate);
         }
         return 0;
     });

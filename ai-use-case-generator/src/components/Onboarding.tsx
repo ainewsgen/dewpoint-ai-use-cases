@@ -58,41 +58,66 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         );
     };
 
-    const scanUrl = () => {
-        if (!url.includes('.')) {
+    const scanUrl = async () => {
+        let cleanUrl = url.trim();
+        if (!cleanUrl.includes('.')) {
             setError(true);
             return;
         }
         setIsScanning(true);
         setError(false);
 
-        // Simulate scanning
-        setTimeout(() => {
+        try {
+            // Attempt server-side "AI" scan which reads the actual page content
+            const response = await fetch(`${import.meta.env.PROD ? '/api' : 'http://localhost:3000/api'}/scan-url`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: cleanUrl })
+            });
+
+            if (response.ok) {
+                const { data } = await response.json();
+
+                if (data.industry) setIndustry(data.industry);
+                if (data.stack && data.stack.length > 0) {
+                    // Merge distinct
+                    setStack(prev => {
+                        const next = new Set([...prev, ...data.stack, 'Gmail/GSuite']); // Always assume GSuite
+                        return Array.from(next);
+                    });
+                } else {
+                    setStack(prev => prev.includes('Gmail/GSuite') ? prev : [...prev, 'Gmail/GSuite']);
+                }
+            } else {
+                // Fallback to client-side heuristics if server fails (e.g. timeout/block)
+                runClientHeuristics(cleanUrl);
+            }
+
+        } catch (err) {
+            console.warn("Server scan failed, using fallback.", err);
+            runClientHeuristics(cleanUrl);
+        } finally {
             setIsScanning(false);
+        }
+    };
 
-            // Heuristic Stuff
-            const u = url.toLowerCase();
-            if (u.includes('law') || u.includes('legal') || u.includes('attorney')) setIndustry('Legal');
-            else if (u.includes('tech') || u.includes('soft') || u.includes('io') || u.includes('ai') || u.includes('app')) setIndustry('Technology');
-            else if (u.includes('shop') || u.includes('store') || u.includes('cart')) setIndustry('E-Commerce');
-            else if (u.includes('med') || u.includes('clinic') || u.includes('health') || u.includes('dr')) setIndustry('Healthcare');
-            else if (u.includes('real') || u.includes('estate') || u.includes('home') || u.includes('prop')) setIndustry('Real Estate');
-            else if (u.includes('fin') || u.includes('capital') || u.includes('invest') || u.includes('bank')) setIndustry('Finance');
-            else if (u.includes('edu') || u.includes('school') || u.includes('learn') || u.includes('academy')) setIndustry('Education');
-            else if (u.includes('build') || u.includes('construct') || u.includes('contract')) setIndustry('Construction');
-            else if (u.includes('consult') || u.includes('advisor') || u.includes('agency')) setIndustry('Consulting');
+    const runClientHeuristics = (u: string) => {
+        // Fallback Heuristics
+        u = u.toLowerCase();
 
-            const newStack = [...stack];
-            // Guessing Tech
-            if (!newStack.includes('Gmail/GSuite')) newStack.push('Gmail/GSuite'); // Safe bet for most
-            if (u.includes('shopify')) newStack.push('Shopify');
-            if (u.includes('wordpress') || u.includes('wp')) newStack.push('WordPress');
-            if (u.includes('salesforce')) newStack.push('Salesforce');
-            if (u.includes('hubspot')) newStack.push('HubSpot');
+        if (u.includes('law') || u.includes('legal') || u.includes('attorney') || u.includes('esq')) setIndustry('Legal');
+        else if (u.includes('consult') || u.includes('advis') || u.includes('agency') || u.includes('partner')) setIndustry('Consulting');
+        else if (u.includes('market') || u.includes('brand') || u.includes('media') || u.includes('studio')) setIndustry('Marketing');
+        else if (u.includes('tech') || u.includes('soft') || u.includes('io') || u.includes('ai') || u.includes('app')) setIndustry('Technology');
+        else if (u.includes('shop') || u.includes('store') || u.includes('cart') || u.includes('retail')) setIndustry('E-Commerce');
+        else if (u.includes('med') || u.includes('clinic') || u.includes('health') || u.includes('dr')) setIndustry('Healthcare');
+        else if (u.includes('fin') || u.includes('capital') || u.includes('invest') || u.includes('bank')) setIndustry('Finance');
+        else if (u.includes('real') || u.includes('estate') || u.includes('home') || u.includes('prop')) setIndustry('Real Estate');
+        else if (u.includes('build') || u.includes('construct') || u.includes('contract')) setIndustry('Construction');
+        else if (u.includes('edu') || u.includes('school') || u.includes('learn')) setIndustry('Education');
 
-            setStack(newStack);
-
-        }, 1500);
+        // Basic Stack Guess
+        setStack(prev => prev.includes('Gmail/GSuite') ? prev : [...prev, 'Gmail/GSuite']);
     };
 
     if (step === 1) {

@@ -9,6 +9,7 @@ import leadsRoutes from './routes/leads';
 import cmsRoutes from './routes/cms';
 import usersRoutes from './routes/users';
 import integrationsRoutes from './routes/integrations';
+import scanRoutes from './routes/scan';
 import { runMigrations } from './db/migrate';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api', leadsRoutes);
 app.use('/api', cmsRoutes);
 app.use('/api/admin', usersRoutes); // User management
 app.use('/api', integrationsRoutes); // Enhanced integrations
+app.use('/api', scanRoutes); // Server-side scanning
 
 // Serve static frontend files in production (AFTER API routes)
 if (process.env.NODE_ENV === 'production') {

@@ -171,6 +171,10 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             });
 
             if (res.ok) {
+                // Optimistically update local state immediately
+                setUsageStats(prev => prev ? { ...prev, limit: newLimit } : null);
+
+                // Fetch latest to confirm
                 await fetchUsageStats();
                 alert("Daily budget limit updated!");
             } else {

@@ -3,8 +3,8 @@ import { Opportunity } from '../lib/engine';
 import { BookOpen, Server, Plus, BadgeCheck, Frown, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 
 
-// We'll move the recipe data to a shared source in engine.ts soon.
-const LIBRARY_RECIPES: Opportunity[] = [
+// Initial fallback data
+const DEFAULT_RECIPES: Opportunity[] = [
     {
         title: "The Silent Assistant",
         department: "Operations",
@@ -91,8 +91,33 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
 
     // Save/Load Logic
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
+    const [libRecipes, setLibRecipes] = useState<Opportunity[]>(DEFAULT_RECIPES);
 
     useEffect(() => {
+        // Fetch from Backend
+        const fetchLibrary = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.PROD ? '/api' : 'http://localhost:3000/api'}/library`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.recipes && data.recipes.length > 0) {
+                        // Merge defaults with fetched, deduping by title
+                        const merged = [...DEFAULT_RECIPES];
+                        data.recipes.forEach((r: Opportunity) => {
+                            if (!merged.find(m => m.title === r.title)) {
+                                merged.push(r);
+                            }
+                        });
+                        setLibRecipes(merged);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load library", err);
+            }
+        };
+        fetchLibrary();
+
+        // Load saved for toggle status
         const saved = localStorage.getItem('dpg_roadmap');
         if (saved) {
             setSavedRecipes(JSON.parse(saved));
@@ -127,8 +152,8 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
     };
 
     const filteredRecipes = filter === 'All'
-        ? LIBRARY_RECIPES
-        : LIBRARY_RECIPES.filter(r => r.department === filter);
+        ? libRecipes
+        : libRecipes.filter(r => r.department === filter);
 
     return (
         <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>

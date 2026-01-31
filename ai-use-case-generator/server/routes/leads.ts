@@ -122,4 +122,37 @@ router.get('/admin/leads', async (req, res) => {
     }
 });
 
+// Get Public Library (All Generated Recipes)
+router.get('/library', async (req, res) => {
+    try {
+        const allLeads = await db.select({
+            recipes: leads.recipes
+        }).from(leads);
+
+        // Flatten and Dedupe
+        const allRecipes: any[] = [];
+        const seenTitles = new Set();
+
+        // Add some default system recipes if DB is empty?
+        // For now, let's just return what we have. Frontend can keep defaults as fallback.
+
+        allLeads.forEach(row => {
+            const recipeList = row.recipes as any[];
+            if (Array.isArray(recipeList)) {
+                recipeList.forEach(r => {
+                    if (!seenTitles.has(r.title)) {
+                        seenTitles.add(r.title);
+                        allRecipes.push(r);
+                    }
+                });
+            }
+        });
+
+        res.json({ recipes: allRecipes });
+    } catch (error) {
+        console.error('Get library error:', error);
+        res.status(500).json({ error: 'Failed to get library' });
+    }
+});
+
 export default router;

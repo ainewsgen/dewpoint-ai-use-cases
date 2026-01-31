@@ -56,13 +56,13 @@ export const Login: React.FC<LoginProps> = ({ onClose, onSuccess, switchToSignup
                     <div>
                         <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Email</label>
                         <input
-                            type="email"
+                            type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value.trim())}
-                            required
                             className="glass-input"
                             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'white', border: '1px solid var(--border-glass)', color: 'var(--text-main)' }}
                             placeholder="you@company.com"
+                        // Removed required and type=email to prevent browser validation blocks
                         />
                     </div>
 
@@ -73,7 +73,6 @@ export const Login: React.FC<LoginProps> = ({ onClose, onSuccess, switchToSignup
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                required
                                 className="glass-input"
                                 style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', background: 'white', border: '1px solid var(--border-glass)', color: 'var(--text-main)' }}
                                 placeholder="••••••••"
@@ -137,6 +136,7 @@ export const Login: React.FC<LoginProps> = ({ onClose, onSuccess, switchToSignup
                         Sign up
                     </button>
                 </div>
+                <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.7rem', color: '#ccc' }}>v3.11</div>
             </div>
         </div>
     );

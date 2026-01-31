@@ -415,12 +415,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         )}
                     </div>
                 </div>
-            </div>
 
-            <button onClick={handleSubmit} className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
-                <Sparkles size={18} /> Generate Opportunity Matrix
-            </button>
+                <button onClick={handleSubmit} className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
+                    <Sparkles size={18} /> Generate Opportunity Matrix
+                </button>
+            </div>
         </div>
-        </div >
     );
 }

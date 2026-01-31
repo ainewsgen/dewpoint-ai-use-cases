@@ -567,25 +567,25 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             {/* Logic for Grouping Leads */}
             {activeTab === 'leads' && (() => {
                 // Group duplicates by Email (or URL if no email)
-                const uniqueUsers = adminLeads.reduce((acc, lead) => {
+                const uniqueUsers = adminLeads.reduce((acc: any, lead: any) => {
                     const key = lead.company?.email || lead.company?.url || 'unknown';
                     if (!acc[key]) {
                         acc[key] = {
                             ...lead,
-                            allRecipes: [...lead.recipes],
+                            allRecipes: [...(lead.recipes || [])],
                             interactionCount: 1
                         };
                     } else {
                         // Merge recipes
-                        acc[key].allRecipes.push(...lead.recipes);
+                        acc[key].allRecipes.push(...(lead.recipes || []));
                         acc[key].interactionCount += 1;
-                        // Update to latest timestamp/data if newer? (Optional, kept simple here)
                     }
                     return acc;
                 }, {} as Record<string, any>);
 
                 const userList = Object.values(uniqueUsers);
-                const activeUser = userList.find(u => u.id === selectedLead) || (selectedLead ? leads.find(l => l.id === selectedLead) : null); // Fallback
+                // Fix: Only look in userList (which comes from adminLeads), DO NOT fallback to 'leads' prop which might be malformed
+                const activeUser = userList.find((u: any) => u.id === selectedLead);
 
                 return (
                     <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>

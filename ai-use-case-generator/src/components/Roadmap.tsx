@@ -103,79 +103,44 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
     // Admin View Wrapper
     return (
         <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>
-
-            {/* Admin Tabs */}
-            {isAdmin && (
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
-                    <button
-                        onClick={() => setActiveTab('ROADMAP')}
-                        className={activeTab === 'ROADMAP' ? 'btn-primary' : 'btn-secondary'}
-                        style={{ minWidth: '150px' }}
-                    >
-                        My Blueprints
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('ADMIN')}
-                        className={activeTab === 'ADMIN' ? 'btn-primary' : 'btn-secondary'}
-                        style={{ minWidth: '150px' }}
-                    >
-                        Admin Console
-                    </button>
+            {/* Header Area */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Map size={32} className="text-accent" />
+                    <h2 className="text-accent" style={{ margin: 0 }}>
+                        {activeTab === 'ADMIN' ? 'Admin Console' : 'My Blueprints'}
+                    </h2>
                 </div>
-            )}
 
-            {/* TAB CONTENT: ADMIN */}
-            {isAdmin && activeTab === 'ADMIN' && (
-                <div className="animate-fade-in">
-                    <AdminDashboard leads={leads} />
-                </div>
-            )}
+                {isAdmin && (
+                    <button
+                        onClick={() => setActiveTab(activeTab === 'ADMIN' ? 'ROADMAP' : 'ADMIN')}
+                        className="btn-secondary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+                    >
+                        {activeTab === 'ADMIN' ? <Map size={16} /> : <Shield size={16} />}
+                        {activeTab === 'ADMIN' ? 'Return to Roadmap' : 'Admin Dashboard'}
+                    </button>
+                )}
+            </div>
 
-            {/* TAB CONTENT: ROADMAP */}
-            {(!isAdmin || activeTab === 'ROADMAP') && (
-                <>
-                    <header className="library-header" style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-gold)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-                            <Bookmark size={48} className="text-gold" />
-                        </div>
-                        <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>My Roadmap</h2>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Your curated list of high-impact AI strategies.</p>
-                    </header>
-
-                    {/* Toolbar */}
-                    {savedRecipes.length > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', paddingRight: '1rem' }}>
-                            <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <ArrowDownUp size={16} color="var(--text-muted)" />
-                                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Sort by:</span>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value as SortOption)}
-                                    style={{ background: 'transparent', border: 'none', color: 'hsl(var(--text-main))', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
-                                >
-                                    <option value="ROI">Highest ROI</option>
-                                    <option value="DEPARTMENT">Department</option>
-                                    <option value="NEWEST">Newest Added</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
-
+            {/* Content Switch */}
+            {activeTab === 'ROADMAP' ? (
+                <div className="roadmap-grid">
                     {savedRecipes.length === 0 ? (
-                        <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
-                            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Your roadmap is currently empty.</p>
-                            <p>Go back to the <strong>Generator</strong> or <strong>Library</strong> to find recipes to save.</p>
+                        <p>Go back to the <strong>Generator</strong> or <strong>Library</strong> to find recipes to save.</p>
                         </div>
-                    ) : (
-                        <div className="matrix-grid">
-                            {sortedRecipes.map((opp, idx) => (
-                                <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
-                            ))}
-                        </div>
-                    )}
-                </>
+            ) : (
+                <div className="matrix-grid">
+                    {sortedRecipes.map((opp, idx) => (
+                        <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
+                    ))}
+                </div>
             )}
-        </div>
+        </>
+    )
+}
+        </div >
     );
 }
 

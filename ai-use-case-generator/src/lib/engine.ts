@@ -52,6 +52,7 @@ export interface Opportunity {
 
 export async function generateOpportunities(companyData: CompanyData, promptDetails?: any): Promise<Opportunity[]> {
     const { stack, painPoint, role, industry } = companyData;
+    console.log("DEWPOINT ENGINE: v3.18 Loaded - Fallback Logic Patch Active", { industry });
 
     let fallbackReason = "Network Error or Offline";
 

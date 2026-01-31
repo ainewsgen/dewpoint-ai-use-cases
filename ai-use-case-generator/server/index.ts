@@ -87,7 +87,7 @@ import { OpenAIService } from './services/openai';
 import { GeminiService } from './services/gemini';
 import { UsageService } from './services/usage';
 
-import { requireAuth, requireAdmin, AuthRequest } from './middleware/auth'; // Import Auth Middleware
+
 
 // ...
 

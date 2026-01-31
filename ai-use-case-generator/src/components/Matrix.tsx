@@ -140,22 +140,8 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                                 textTransform: 'uppercase',
                                 fontWeight: 600
                             }}>
-                                {opp.industry}
+                                Industry: {opp.industry}
                             </span>
-                        )}
-
-                        {isAdmin && (opp.generation_metadata?.source || '').length > 0 && (
-                            <>
-                                <div style={{ width: '1px', height: '12px', background: 'var(--border-glass)' }}></div>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px' }}>
-                                    {opp.generation_metadata?.source || 'System'}
-                                </span>
-                                {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
-                                    <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
-                                        ⚠️ {opp.generation_metadata.fallback_reason}
-                                    </span>
-                                )}
-                            </>
                         )}
                     </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>

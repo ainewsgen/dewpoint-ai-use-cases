@@ -76,11 +76,21 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             const res = await fetch('/api/admin/leads');
             if (res.ok) {
                 const data = await res.json();
-                // Admin API returns { leads: [] }
-                // We need to shape it for the dashboard if structure differs, 
-                // but our API structure seems to match what we need (mostly).
-                // Let's store it in a local state for leads, ignoring the prop.
-                setAdminLeads(data.leads || []);
+                // Admin API returns { leads: [ { lead: {...}, company: {...}, user: {...} }, ... ] }
+                // Map to flat structure expected by the dashboard
+                const formattedLeads = (data.leads || []).map((row: any) => ({
+                    id: row.lead.id,
+                    timestamp: row.lead.createdAt || new Date().toISOString(),
+                    company: {
+                        ...row.company,
+                        email: row.user?.email || 'unknown', // Enrich with user email
+                        name: row.company?.name || row.user?.name || 'Anonymous'
+                    },
+                    recipes: row.lead.recipes || [],
+                    // Keep original user object if needed
+                    user: row.user
+                }));
+                setAdminLeads(formattedLeads);
             }
         } catch (error) {
             console.error('Failed to fetch admin leads', error);

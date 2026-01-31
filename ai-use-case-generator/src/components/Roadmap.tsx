@@ -112,7 +112,7 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
                         className={activeTab === 'ROADMAP' ? 'btn-primary' : 'btn-secondary'}
                         style={{ minWidth: '150px' }}
                     >
-                        My Roadmap
+                        My Blueprints
                     </button>
                     <button
                         onClick={() => setActiveTab('ADMIN')}

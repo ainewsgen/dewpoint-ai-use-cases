@@ -224,16 +224,20 @@ function RoadmapCard({ opp, onRemove, isAdmin }: { opp: Opportunity, onRemove: (
                     )}
 
                     {/* Step-by-Step Walkthrough */}
-                    {opp.public_view.walkthrough_steps && (
-                        <div style={{ marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '6px' }}>
-                            <p style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>Implementation Flow:</p>
-                            <ol style={{ paddingLeft: '1.2rem', color: 'var(--text-muted)', margin: 0 }}>
-                                {opp.public_view.walkthrough_steps.map((step, i) => (
-                                    <li key={i} style={{ marginBottom: '0.4rem' }}>{step}</li>
-                                ))}
-                            </ol>
-                        </div>
-                    )}
+                    <div style={{ marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '6px' }}>
+                        <p style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>Implementation Flow:</p>
+                        <ol style={{ paddingLeft: '1.2rem', color: 'var(--text-muted)', margin: 0 }}>
+                            {(opp.public_view.walkthrough_steps || [
+                                "Conduct initial data audit and security review.",
+                                "Configure API connectors for target platforms.",
+                                "Implement logic workflows and error handling.",
+                                "Run validation tests with sample data.",
+                                "Deploy to production and monitor performance."
+                            ]).map((step, i) => (
+                                <li key={i} style={{ marginBottom: '0.4rem' }}>{step}</li>
+                            ))}
+                        </ol>
+                    </div>
 
                     {/* Admin Only Stack */}
                     {isAdmin && (

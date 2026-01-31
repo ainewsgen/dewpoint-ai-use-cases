@@ -8,35 +8,36 @@ interface AnalysisProps {
 export function Analysis({ onComplete }: AnalysisProps) {
     const [logs, setLogs] = useState<string[]>([]);
 
-    const logSteps = [
-        "Reading Company URL context...",
-        "Identifying core revenue drivers...",
-        "Benchmarking against industry standards...",
-        "Searching for automation bottlenecks...",
-        "Synthesizing Opportunity Matrix...",
-        "Done."
-    ];
-
     useEffect(() => {
-        let step = 0;
+        const steps = [
+            "Reading Company URL context...",
+            "Identifying core revenue drivers...",
+            "Benchmarking against industry standards...",
+            "Searching for automation bottlenecks...",
+            "Synthesizing Opportunity Matrix...",
+            "Analysis complete."
+        ];
+
+        let currentStep = 0;
         // Initial log
         setLogs(['> Initializing agents...']);
 
         const interval = setInterval(() => {
-            if (step >= logSteps.length) {
+            if (currentStep >= steps.length) {
                 clearInterval(interval);
                 setTimeout(onComplete, 800);
                 return;
             }
 
-            if (logSteps[step]) {
-                setLogs(prev => [...prev, `> ${logSteps[step]}`]);
+            const msg = steps[currentStep];
+            if (msg) {
+                setLogs(prev => [...prev, `> ${msg}`]);
             }
-            step++;
+            currentStep++;
         }, 800);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [onComplete]);
 
     return (
         <div className="center-stage animate-fade-in" style={{ textAlign: 'center' }}>

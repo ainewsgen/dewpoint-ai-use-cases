@@ -809,22 +809,15 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
                                                     <div>
                                                         <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
-                                                        {r.admin_view.stack_details ? (
-                                                            <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                                                {r.admin_view.stack_details.map((detail: any, i: number) => (
-                                                                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', background: '#222', padding: '4px 8px', borderRadius: '4px', border: '1px solid #444' }}>
-                                                                        <span style={{ fontWeight: 600, color: 'white' }}>{detail.tool}</span>
-                                                                        <span style={{ color: '#888', fontSize: '0.75rem', fontStyle: 'italic' }}>{detail.role}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="chips-grid" style={{ gap: '0.25rem' }}>
-                                                                {r.admin_view.tech_stack.map((t: string) => (
-                                                                    <span key={t} style={{ background: '#222', padding: '2px 8px', borderRadius: '4px', border: '1px solid #444', fontSize: '0.75rem' }}>{t}</span>
-                                                                ))}
-                                                            </div>
-                                                        )}
+                                                        <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                                            {/* Shim: Use stack_details if available, else map tech_stack to generic details */}
+                                                            {(r.admin_view.stack_details || (r.admin_view.tech_stack || []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).map((detail: any, i: number) => (
+                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', background: '#222', padding: '4px 8px', borderRadius: '4px', border: '1px solid #444' }}>
+                                                                    <span style={{ fontWeight: 600, color: 'white' }}>{detail.tool}</span>
+                                                                    <span style={{ color: '#888', fontSize: '0.75rem', fontStyle: 'italic' }}>{detail.role}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Upsell Opp</label>

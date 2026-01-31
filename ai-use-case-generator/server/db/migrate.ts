@@ -9,16 +9,20 @@ export async function runMigrations() {
     });
 
     try {
-        const migrationSQL = fs.readFileSync(
-            path.join(__dirname, 'migrations.sql'),
-            'utf-8'
-        );
+        const filePath = path.join(__dirname, 'migrations.sql');
+        console.log('Looking for migrations at:', filePath);
+
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`Migration file NOT FOUND at: ${filePath}. Dir contents: ${fs.readdirSync(__dirname).join(', ')}`);
+        }
+
+        const migrationSQL = fs.readFileSync(filePath, 'utf-8');
 
         await pool.query(migrationSQL);
         console.log('✅ Database migrations completed successfully');
     } catch (error) {
         console.error('❌ Migration error:', error);
-        // Don't throw - allow server to start even if migrations fail
+        throw error; // Re-throw to be caught by the API
     } finally {
         await pool.end();
     }

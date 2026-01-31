@@ -257,9 +257,13 @@ router.get('/nuke-reset-db-secure-8857', async (req, res) => {
         }).returning();
 
         res.json({ message: 'Database wiped and Admin restored.', adminEmail: admin.email });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Nuke failed:', error);
-        res.status(500).json({ error: 'Nuke failed', details: error });
+        res.status(500).json({
+            error: 'Reset failed',
+            step: error.message.includes('Migration') ? 'Migration' : 'Wipe',
+            details: error.message || error
+        });
     }
 });
 

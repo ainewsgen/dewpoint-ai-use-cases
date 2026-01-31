@@ -334,57 +334,66 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
 
     return (
-        <div className="container animate-fade-in" style={{ paddingTop: '2rem', position: 'relative' }}>
-            <header className="library-header" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Database size={32} className="text-accent" />
-                    <h2 className="text-accent">Admin Console</h2>
+        <div className="container animate-fade-in" style={{ paddingTop: '8rem', position: 'relative' }}>
+            <header className="library-header" style={{ marginBottom: '3rem', textAlign: 'center' }}>
+                <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-secondary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
+                    <Shield size={48} className="text-secondary" />
                 </div>
+                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Admin Console</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>System Management & Overview</p>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem', flexWrap: 'wrap' }}>
                     <button
                         onClick={() => setActiveTab('leads')}
                         style={{
-                            background: activeTab === 'leads' ? 'hsl(var(--accent-primary))' : 'transparent',
+                            background: activeTab === 'leads' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
                             color: activeTab === 'leads' ? 'white' : 'var(--text-muted)',
                             border: '1px solid var(--border-glass)',
-                            padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer'
+                            padding: '0.5rem 1.5rem', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600,
+                            backdropFilter: 'blur(10px)'
                         }}
                     >
                         User Management
                     </button>
                     <button
-                        onClick={() => setActiveTab('cms')}
+                        onClick={() => setActiveTab('users')}
                         style={{
-                            background: activeTab === 'cms' ? 'hsl(var(--accent-primary))' : 'transparent',
-                            color: activeTab === 'cms' ? 'white' : 'var(--text-muted)',
+                            background: activeTab === 'users' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                            color: activeTab === 'users' ? 'white' : 'var(--text-muted)',
                             border: '1px solid var(--border-glass)',
-                            padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer'
+                            padding: '0.5rem 1.5rem', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600,
+                            backdropFilter: 'blur(10px)'
                         }}
                     >
-                        Content Management
+                        Platform Users
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('cms')}
+                        style={{
+                            background: activeTab === 'cms' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                            color: activeTab === 'cms' ? 'white' : 'var(--text-muted)',
+                            border: '1px solid var(--border-glass)',
+                            padding: '0.5rem 1.5rem', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600,
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        Announcements
                     </button>
                     <button
                         onClick={() => setActiveTab('integrations')}
                         style={{
-                            background: activeTab === 'integrations' ? 'hsl(var(--accent-primary))' : 'transparent',
+                            background: activeTab === 'integrations' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
                             color: activeTab === 'integrations' ? 'white' : 'var(--text-muted)',
                             border: '1px solid var(--border-glass)',
-                            padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer'
+                            padding: '0.5rem 1.5rem', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600,
+                            backdropFilter: 'blur(10px)'
                         }}
                     >
                         Integrations
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('users')}
-                        style={{
-                            background: activeTab === 'users' ? 'hsl(var(--accent-primary))' : 'transparent',
-                            color: activeTab === 'users' ? 'white' : 'var(--text-muted)',
-                            border: '1px solid var(--border-glass)',
-                            padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer'
-                        }}
-                    >
-                        Users
                     </button>
                 </div>
             </header>

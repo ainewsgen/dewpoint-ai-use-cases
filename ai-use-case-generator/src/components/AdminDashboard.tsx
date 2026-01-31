@@ -1459,6 +1459,23 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             <Save size={18} /> Save Connection
                         </button>
                     </div>
+
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', textAlign: 'center' }}>
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                if (!confirm("This will attempt to repair the database schema. Continue?")) return;
+                                try {
+                                    const res = await fetch('/api/debug/fix-schema', { method: 'POST' });
+                                    const data = await res.json();
+                                    alert('Result: ' + JSON.stringify(data));
+                                } catch (e) { alert('Error: ' + e); }
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#666', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                            Troubleshoot: Fix Database Schema
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

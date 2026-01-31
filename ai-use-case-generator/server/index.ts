@@ -37,20 +37,41 @@ app.get('/api/health', (req, res) => {
 });
 
 // NEW: Robust Schema Inspection Endpoint
+// NEW: Robust DB & ORM Diagnostic Endpoint
 app.get('/api/debug/schema-check', async (req, res) => {
     try {
-        const schemaResult = await db.execute(sql`
-            SELECT column_name, data_type 
-            FROM information_schema.columns 
-            WHERE table_name = 'integrations';
+        // 1. Raw SQL Check (Does data exist?)
+        const rawResult = await db.execute(sql`
+            SELECT id, name, is_active, metadata 
+            FROM integrations 
+            ORDER BY id DESC LIMIT 5
         `);
+
+        // 2. Drizzle ORM Check (Does the schema map correctly?)
+        let drizzleResult: any = "Not Run";
+        let drizzleError: any = null;
+        try {
+            drizzleResult = await db.select().from(schema.integrations).limit(5);
+        } catch (e: any) {
+            drizzleError = { message: e.message, stack: e.stack, hint: "ORM Mapping Failed" };
+        }
+
         res.json({
             status: 'ok',
-            columns: schemaResult.rows,
-            db_url_exists: !!process.env.DATABASE_URL
+            raw_count: rawResult.rows.length,
+            raw_sample: rawResult.rows,
+            drizzle_status: drizzleError ? "ERROR" : "SUCCESS",
+            drizzle_result: drizzleResult,
+            drizzle_error: drizzleError,
+            env_check: {
+                has_db_url: !!process.env.DATABASE_URL
+            }
         });
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            fatal_error: error.message,
+            stack: error.stack
+        });
     }
 });
 

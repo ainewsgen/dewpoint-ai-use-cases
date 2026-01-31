@@ -1466,9 +1466,17 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             onClick={async () => {
                                 if (!confirm("This will attempt to repair the database schema. Continue?")) return;
                                 try {
-                                    const res = await fetch('/api/debug/fix-schema', { method: 'POST' });
-                                    const data = await res.json();
-                                    alert('Result: ' + JSON.stringify(data));
+                                    // 1. Attempt Fix
+                                    const resFix = await fetch('/api/debug/fix-schema', { method: 'POST' });
+                                    const fixData = await resFix.json();
+
+                                    // 2. Report Status & Current Columns
+                                    const resSchema = await fetch('/api/debug/schema');
+                                    const schemaData = await resSchema.json();
+
+                                    const columns = schemaData.columns?.map((c: any) => `${c.column_name} (${c.data_type})`).join(', ');
+
+                                    alert(`Fix Result: ${JSON.stringify(fixData)}\n\nCurrent DB Columns:\n${columns || 'Error fetching columns'}`);
                                 } catch (e) { alert('Error: ' + e); }
                             }}
                             style={{ background: 'none', border: 'none', color: '#666', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}

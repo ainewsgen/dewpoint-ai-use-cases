@@ -36,9 +36,37 @@ export interface Opportunity {
     };
 }
 
-export function generateOpportunities(companyData: CompanyData): Opportunity[] {
+export async function generateOpportunities(companyData: CompanyData, promptDetails?: any): Promise<Opportunity[]> {
     const { stack, painPoint, role, industry } = companyData;
 
+    try {
+        // Try to fetch from Production AI Endpoint
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ companyData, promptDetails })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("AI Generation Successful:", data);
+
+            // Handle different potential response shapes from OpenAI
+            // It might be { blueprints: [...] } or just [...]
+            let blueprints = data.blueprints || data.opportunities || data;
+
+            if (Array.isArray(blueprints) && blueprints.length > 0) {
+                return blueprints;
+            }
+        } else {
+            console.warn("AI Generation failed, falling back to static templates.");
+        }
+    } catch (error) {
+        console.error("AI Generation Error:", error);
+        // Fallback to static
+    }
+
+    // --- FALLBACK: Static Template Logic (Original Code) ---
     const opportunities: Opportunity[] = [];
 
     // 1. ADD: The personalized "Pain Killer"

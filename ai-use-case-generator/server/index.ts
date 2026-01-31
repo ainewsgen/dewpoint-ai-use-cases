@@ -10,6 +10,8 @@ import cmsRoutes from './routes/cms';
 import usersRoutes from './routes/users';
 import integrationsRoutes from './routes/integrations';
 import scanRoutes from './routes/scan';
+import generateRoutes from './routes/generate';
+import usageRoutes from './routes/usage';
 import { runMigrations } from './db/migrate';
 
 dotenv.config();
@@ -28,7 +30,7 @@ app.use(cookieParser());
 
 // Health Check (before other API routes for priority)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: 'v3.14', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', version: 'v3.16', timestamp: new Date().toISOString() });
 });
 
 // API Routes
@@ -39,6 +41,8 @@ app.use('/api', cmsRoutes);
 app.use('/api/admin', usersRoutes); // User management
 app.use('/api', integrationsRoutes); // Enhanced integrations
 app.use('/api', scanRoutes); // Server-side scanning
+app.use('/api', generateRoutes); // AI Generation
+app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 
 // Serve static frontend files in production (AFTER API routes)
 if (process.env.NODE_ENV === 'production') {

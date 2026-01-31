@@ -25,14 +25,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         if (msg) setAnnouncement(msg);
     }, []);
 
-    const techOptions = [
-        'Salesforce', 'HubSpot', 'Zoho', 'Pipedrive',
-        'QuickBooks', 'Xero', 'NetSuite',
-        'Slack', 'Microsoft Teams',
-        'Jira', 'Asana', 'Trello', 'ClickUp',
-        'Shopify', 'WordPress', 'Webflow',
-        'Gmail/GSuite', 'Outlook'
-    ];
+    const techCategories = {
+        "CRM & Sales": ['Salesforce', 'HubSpot', 'Zoho CRM', 'Pipedrive', 'Monday.com Sales'],
+        "Communication": ['Slack', 'Microsoft Teams', 'Zoom', 'Google Meet', 'Intercom'],
+        "Productivity": ['Notion', 'Asana', 'Jira', 'Trello', 'ClickUp', 'Monday.com', 'Airtable'],
+        "Finance & HR": ['QuickBooks', 'Xero', 'NetSuite', 'Gusto', 'Rippling', 'Expensify'],
+        "Marketing": ['Mailchimp', 'Klaviyo', 'Buffer', 'Hootsuite', 'Canva', 'Shopify'],
+        "Cloud & IT": ['AWS', 'Google Cloud', 'Azure', 'Zapier', 'Make (Integromat)', 'Dropbox', 'Google Drive']
+    };
+    // Flatten for compatibility with existing logic if needed, but we'll iterate categories in render
+    const allTechOptions = Object.values(techCategories).flat();
 
     const handleNext = () => {
         if (!painPoint.trim()) {
@@ -372,34 +374,53 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             />
                         </div>
 
-                        <div className="chips-grid">
-                            {techOptions.map(t => (
-                                <button
-                                    key={t}
-                                    className={`chip ${stack.includes(t) ? 'active' : ''}`}
-                                    onClick={() => toggleTech(t)}
-                                >
-                                    {t}
-                                </button>
-                            ))}
-                            {/* Render Custom Chips */}
-                            {stack.filter(s => !techOptions.includes(s)).map(s => (
-                                <button
-                                    key={s}
-                                    className="chip active"
-                                    onClick={() => toggleTech(s)}
-                                >
-                                    {s}
-                                </button>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {Object.entries(techCategories).map(([category, tools]) => (
+                                <div key={category}>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'hsl(var(--accent-primary))', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {category}
+                                    </label>
+                                    <div className="chips-grid">
+                                        {tools.map(t => (
+                                            <button
+                                                key={t}
+                                                className={`chip ${stack.includes(t) ? 'active' : ''}`}
+                                                onClick={() => toggleTech(t)}
+                                            >
+                                                {t}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
                         </div>
+                        {/* Render Custom Chips */}
+                        {stack.filter(s => !allTechOptions.includes(s)).length > 0 && (
+                            <div style={{ marginTop: '1.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                                    Custom / Other
+                                </label>
+                                <div className="chips-grid">
+                                    {stack.filter(s => !allTechOptions.includes(s)).map(s => (
+                                        <button
+                                            key={s}
+                                            className="chip active"
+                                            onClick={() => toggleTech(s)}
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
-
-                <button onClick={handleSubmit} className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
-                    <Sparkles size={18} /> Generate Opportunity Matrix
-                </button>
             </div>
+
+            <button onClick={handleSubmit} className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
+                <Sparkles size={18} /> Generate Opportunity Matrix
+            </button>
         </div>
+        </div >
     );
 }

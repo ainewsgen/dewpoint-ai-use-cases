@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Lock, Unlock, Database, Eye, Megaphone, Save, Key, Edit, Plus, X, Trash, Globe, CheckCircle, AlertCircle, Shield, Sparkles } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity } from 'lucide-react';
 
 interface AdminDashboardProps {
     leads: Array<{
@@ -29,12 +29,14 @@ interface IntegrationModalProps {
 }
 
 export function AdminDashboard({ leads }: AdminDashboardProps) {
-    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints'>('leads');
+    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     // Local state for fetched leads (ignoring props now)
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
-    // Legacy mock auth removed - relying on App.tsx real auth
 
+    // Usage Stats State
+    const [usageStats, setUsageStats] = useState<{ spend: number; requests: number; limit: number } | null>(null);
+    const [isUpdatingLimit, setIsUpdatingLimit] = useState(false);
 
     // CMS State
     const [announcement, setAnnouncement] = useState('');
@@ -137,6 +139,46 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             }
         } catch (error) {
             console.error('Failed to fetch integrations', error);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'observability') {
+            fetchUsageStats();
+        }
+    }, [activeTab]);
+
+    const fetchUsageStats = async () => {
+        try {
+            const res = await fetch('/api/admin/usage/stats');
+            if (res.ok) {
+                const data = await res.json();
+                setUsageStats(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch usage stats', error);
+        }
+    };
+
+    const handleUpdateLimit = async (newLimit: number) => {
+        setIsUpdatingLimit(true);
+        try {
+            const res = await fetch('/api/admin/usage/limit', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ limit: newLimit })
+            });
+
+            if (res.ok) {
+                await fetchUsageStats();
+                alert("Daily budget limit updated!");
+            } else {
+                alert("Failed to update limit.");
+            }
+        } catch (error) {
+            console.error("Update limit error", error);
+        } finally {
+            setIsUpdatingLimit(false);
         }
     };
 
@@ -437,6 +479,19 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                         }}
                     >
                         Integrations
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('observability')}
+                        style={{
+                            background: activeTab === 'observability' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                            color: activeTab === 'observability' ? 'white' : 'var(--text-muted)',
+                            border: '1px solid var(--border-glass)',
+                            padding: '0.5rem 1.5rem', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600,
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        Observability
                     </button>
                 </div>
             </header>
@@ -962,6 +1017,63 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             <button onClick={saveEditUser} className="btn-primary">Save Changes</button>
                         </div>
                     </div>
+                </div>
+            )}
+            {activeTab === 'integrations' && (
+                <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <h3>Connected Tools & APIs</h3>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={() => {
+                                setCurrentIntegration({
+                                    id: 0, name: 'OpenAI', authType: 'api_key', baseUrl: '', enabled: true,
+                                });
+                                setIsEditingIntegration(true);
+                            }} className="btn-primary" style={{ background: 'hsl(var(--accent-primary))' }}>
+                                <Bot size={16} /> Connect OpenAI
+                            </button>
+                            <button onClick={() => {
+                                setCurrentIntegration(null);
+                                setIsEditingIntegration(true);
+                            }} className="btn-secondary">
+                                <Plus size={16} /> Add Custom
+                            </button>
+                        </div>
+                    </div>
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
+                                <th style={{ padding: '1rem' }}>Name</th>
+                                <th style={{ padding: '1rem' }}>Type</th>
+                                <th style={{ padding: '1rem' }}>Base URL</th>
+                                <th style={{ padding: '1rem' }}>Status</th>
+                                <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {integrations.map(i => (
+                                <tr key={i.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '1rem' }}>{i.name}</td>
+                                    <td style={{ padding: '1rem' }}>{i.authType === 'api_key' ? 'API Key' : 'OAuth'}</td>
+                                    <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
+                                            {i.enabled ? 'Active' : 'Disabled'}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                        <button onClick={() => openEditIntegration(i)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
+                                            <Edit size={16} />
+                                        </button>
+                                        <button onClick={() => handleDeleteIntegration(i.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
+                                            <Trash size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
             {/* Users Tab - Real User Management */}

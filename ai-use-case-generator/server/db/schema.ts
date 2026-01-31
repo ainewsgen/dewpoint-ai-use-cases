@@ -1,5 +1,5 @@
 
-import { pgTable, text, serial, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, timestamp, jsonb, boolean, integer, decimal } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),
@@ -13,6 +13,9 @@ export const users = pgTable('users', {
     resetTokenExpiry: timestamp('reset_token_expiry'),
     createdAt: timestamp('created_at').defaultNow(),
 });
+
+// ... (other tables remain unchanged, just showing imports updated above)
+
 
 export const companies = pgTable('companies', {
     id: serial('id').primaryKey(),
@@ -53,4 +56,14 @@ export const integrations = pgTable('integrations', {
     metadata: jsonb('metadata'), // additional config
     enabled: boolean('enabled').default(true),
     createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const apiUsage = pgTable('api_usage', {
+    id: serial('id').primaryKey(),
+    userId: serial('user_id').references(() => users.id),
+    model: text('model'),
+    promptTokens: integer('prompt_tokens'),
+    completionTokens: integer('completion_tokens'),
+    totalCost: decimal('total_cost', { precision: 10, scale: 6 }), // stores up to $9999.999999
+    timestamp: timestamp('timestamp').defaultNow(),
 });

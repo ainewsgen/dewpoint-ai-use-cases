@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { load } from 'cheerio';
 
 const router = Router();
 
@@ -18,9 +19,10 @@ router.post('/scan-url', async (req, res) => {
         // 1. Fetch the HTML
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; DewPointBot/1.0; +http://dewpoint.ai)'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
             },
-            signal: AbortSignal.timeout(5000) // 5s timeout
+            signal: AbortSignal.timeout(8000) // 8s timeout
         });
 
         if (!response.ok) {
@@ -28,45 +30,63 @@ router.post('/scan-url', async (req, res) => {
         }
 
         const html = await response.text();
+        const $ = load(html);
 
-        // 2. Simple Parse (Regex) - No Cheerio needed for this
-        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-        const title = titleMatch ? titleMatch[1].trim() : '';
+        // 2. Extract Metadata
+        const title = $('title').text().trim() || $('meta[property="og:title"]').attr('content') || '';
+        const description = $('meta[name="description"]').attr('content')
+            || $('meta[property="og:description"]').attr('content')
+            || '';
 
-        const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i)
-            || html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
-        const description = metaDescMatch ? metaDescMatch[1].trim() : '';
+        // 3. Extract Key Content (Headers & Body)
+        const h1 = $('h1').map((_, el) => $(el).text().trim()).get().join('; ');
+        const h2 = $('h2').slice(0, 5).map((_, el) => $(el).text().trim()).get().join('; ');
 
-        // Combine text for "AI" analysis
-        const combinedText = (title + ' ' + description + ' ' + url).toLowerCase();
+        // Get generic body text (first 1000 chars) for flavor
+        // Remove scripts/styles first
+        $('script').remove();
+        $('style').remove();
+        $('noscript').remove();
+        const bodyText = $('body').text().replace(/\s+/g, ' ').trim().substring(0, 1500);
 
-        // 3. Determine Industry (Keyword Heuristics on Content)
+        // 4. Detect Specific Signals (Advanced Logic Markers)
+        const signals = {
+            hasLogin: /login|sign in|portal|client area/i.test(html),
+            hasBooking: /book|schedule|appointment/i.test(html),
+            hasPricing: /pricing|plans|cost/i.test(html),
+            hasContactForm: /contact|get in touch/i.test(html) && !/book|schedule/i.test(html), // Only contact, no booking
+            isWordPress: /wp-content|wordpress/i.test(html),
+            isShopify: /shopify/i.test(html)
+        };
+
+        // Combine text for "AI" classification
+        const combinedText = `${title} ${description} ${h1} ${h2} ${bodyText}`.toLowerCase();
+
+        // 5. Determine Industry (Keyword Heuristics on Content)
         let industry = '';
-
         const heuristics: Record<string, string[]> = {
             'Legal': ['law', 'legal', 'attorney', 'lawyer', 'firm', 'litigation', 'counsel', 'juridical'],
-            'Medical': ['medical', 'clinic', 'health', 'doctor', 'patient', 'surgery', 'care', 'dental', 'pharmacy', 'hospital', 'wellness'],
-            'Real Estate': ['real estate', 'realty', 'property', 'properties', 'listings', 'home', 'housing', 'broker', 'agent', 'tenant', 'lease'],
-            'Construction': ['construction', 'build', 'contractor', 'renovation', 'roofing', 'hvac', 'plumbing', 'electric', 'engineering', 'civil'],
-            'Finance': ['finance', 'financial', 'invest', 'capital', 'wealth', 'bank', 'fund', 'asset', 'tax', 'accounting', 'cpa', 'ledger'],
-            'Marketing': ['marketing', 'agency', 'brand', 'digital', 'social media', 'creative', 'advertising', 'pr', 'media', 'seo', 'content'],
+            'Medical': ['medical', 'clinic', 'health', 'doctor', 'patient', 'surgery', 'care', 'dental', 'pharmacy', 'hospital'],
+            'Real Estate': ['real estate', 'realty', 'property', 'properties', 'listings', 'home', 'housing', 'broker', 'agent'],
+            'Construction': ['construction', 'build', 'contractor', 'renovation', 'roofing', 'hvac', 'plumbing', 'electric', 'engineering'],
+            'Finance': ['finance', 'financial', 'invest', 'capital', 'wealth', 'bank', 'fund', 'asset', 'tax', 'accounting', 'cpa'],
+            'Marketing': ['marketing', 'agency', 'brand', 'digital', 'social media', 'creative', 'advertising', 'pr', 'media', 'seo'],
             'Consulting': ['consulting', 'consultancy', 'advisory', 'advisor', 'strategy', 'management', 'solutions', 'partner'],
-            'Technology': ['software', 'technology', 'tech', 'saas', 'app', 'platform', 'cloud', 'cyber', 'data', 'ai', 'automation', 'developer'],
-            'Manufacturing': ['manufacturing', 'industrial', 'factory', 'production', 'machinery', 'automation', 'supply chain', 'logistics', 'equipment'],
+            'Technology': ['software', 'technology', 'tech', 'saas', 'app', 'platform', 'cloud', 'cyber', 'data', 'ai', 'automation'],
+            'Manufacturing': ['manufacturing', 'industrial', 'factory', 'production', 'machinery', 'automation', 'supply chain'],
             'Retail': ['shop', 'store', 'retail', 'fashion', 'clothing', 'apparel', 'boutique', 'ecommerce', 'cart'],
-            'Education': ['education', 'school', 'university', 'academy', 'learning', 'training', 'course', 'student', 'campus'],
-            'Hospitality': ['hotel', 'resort', 'travel', 'booking', 'restaurant', 'cafe', 'food', 'dining', 'hospitality', 'event']
+            'Education': ['education', 'school', 'university', 'academy', 'learning', 'training', 'course', 'student'],
+            'Hospitality': ['hotel', 'resort', 'travel', 'booking', 'restaurant', 'cafe', 'food', 'dining', 'hospitality']
         };
 
         // Score Matches
         let bestScore = 0;
-
         for (const [ind, keywords] of Object.entries(heuristics)) {
             let score = 0;
             keywords.forEach(kw => {
                 if (combinedText.includes(kw)) score++;
-                // Double points for title match
-                if (title.toLowerCase().includes(kw)) score += 2;
+                // Triple points for Title/H1 match
+                if (`${title} ${h1}`.toLowerCase().includes(kw)) score += 3;
             });
             if (score > bestScore) {
                 bestScore = score;
@@ -76,16 +96,14 @@ router.post('/scan-url', async (req, res) => {
 
         // Tech Stack Guessing
         const stack: string[] = [];
-        if (html.includes('wp-content') || html.includes('wordpress')) stack.push('WordPress');
-        if (html.includes('shopify')) stack.push('Shopify');
+        if (signals.isWordPress) stack.push('WordPress');
+        if (signals.isShopify) stack.push('Shopify');
         if (html.includes('squarespace')) stack.push('Squarespace');
         if (html.includes('wix')) stack.push('Wix');
         if (html.includes('hubspot')) stack.push('HubSpot');
-
-        // Defaults if nothing found
-        if (!industry) {
-            // Try to guess from text density? No, just return empty or "Other" logic on frontend
-        }
+        if (html.includes('salesforce')) stack.push('Salesforce');
+        if (html.includes('calendly')) stack.push('Calendly');
+        if (html.includes('intercom')) stack.push('Intercom');
 
         res.json({
             success: true,
@@ -93,7 +111,14 @@ router.post('/scan-url', async (req, res) => {
                 industry,
                 title,
                 description,
-                stack
+                stack,
+                // Pass back rich context for the frontend to store -> send to Generate API
+                context: {
+                    h1,
+                    h2,
+                    bodySnippet: bodyText.substring(0, 500),
+                    signals
+                }
             }
         });
 

@@ -10,6 +10,13 @@ export interface CompanyData {
     size: string;
     stack: string[];
     painPoint: string;
+    description?: string; // from meta
+    context?: {
+        h1?: string;
+        h2?: string;
+        bodySnippet?: string;
+        signals?: Record<string, boolean>;
+    };
     name?: string;
     email?: string;
 }

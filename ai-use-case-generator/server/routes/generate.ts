@@ -47,8 +47,12 @@ User Profile:
 - Role: {{role}}
 - Tech Stack: {{stack}}
 - Primary Pain Point: {{painPoint}}
+- Website Summary: {{description}}
+- Deep Site Analysis: {{pageContext}}
 
-Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title, Department, Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.`;
+Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title, Department, Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.
+
+CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "dormant data" opportunities or "competitor gaps" (e.g. if they lack online booking, suggest an AI scheduler).`;
 
         // 1. Prepare Prompt (Simple Injection for Phase 1)
         let systemPrompt = promptDetails?.systemPromptOverride || defaultSystemPrompt;
@@ -60,7 +64,9 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             '{{painPoint}}': companyData.painPoint,
             '{{stack}}': Array.isArray(companyData.stack) ? companyData.stack.join(', ') : companyData.stack || '',
             '{{url}}': companyData.url || '',
-            '{{size}}': companyData.size || ''
+            '{{size}}': companyData.size || '',
+            '{{description}}': companyData.description || 'N/A',
+            '{{pageContext}}': companyData.context ? JSON.stringify(companyData.context, null, 2) : 'No deep context available.'
         };
 
         Object.entries(replacements).forEach(([key, value]) => {

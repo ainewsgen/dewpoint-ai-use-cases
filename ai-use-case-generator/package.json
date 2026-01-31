@@ -15,6 +15,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
     "@vitejs/plugin-react": "^4.2.1",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

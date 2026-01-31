@@ -14,6 +14,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [role, setRole] = useState('');
     const [size, setSize] = useState('Solopreneur');
     const [stack, setStack] = useState<string[]>([]);
+
+    // Scraped Context
+    const [description, setDescription] = useState('');
+    const [scrapedContext, setScrapedContext] = useState<any>(null);
+
     const [error, setError] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
 
@@ -51,7 +56,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             // Shake effect placeholder
             return;
         }
-        onComplete({ painPoint, url, industry, role, size, stack });
+        onComplete({ painPoint, url, industry, role, size, stack, description, context: scrapedContext });
     };
 
     const toggleTech = (tech: string) => {
@@ -81,6 +86,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 const { data } = await response.json();
 
                 if (data.industry) setIndustry(data.industry);
+                if (data.description) setDescription(data.description);
+                if (data.context) setScrapedContext(data.context);
+
                 if (data.stack && data.stack.length > 0) {
                     // Merge distinct
                     setStack(prev => {

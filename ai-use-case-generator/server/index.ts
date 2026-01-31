@@ -202,6 +202,48 @@ app.get('/api/debug/leads-check', async (req, res) => {
     }
 });
 
+app.get('/api/debug/reset-leads-schema', async (req, res) => {
+    try {
+        // 1. Drop the incorrect table
+        await db.execute(sql`DROP TABLE IF EXISTS leads CASCADE;`);
+        await db.execute(sql`DROP TABLE IF EXISTS companies CASCADE;`); // Clean slate for relationships
+
+        // 2. Create Companies Table (Parent)
+        await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS companies (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                url TEXT,
+                industry TEXT,
+                role TEXT,
+                size TEXT,
+                pain_point TEXT,
+                stack JSONB,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+        `);
+
+        // 3. Create Leads Table (Child) - Matches schema.ts definition
+        await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS leads (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                company_id INTEGER REFERENCES companies(id),
+                recipes JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+        `);
+
+        res.json({
+            success: true,
+            message: "Schema Reset Complete. Leads and Companies tables recreated."
+        });
+
+    } catch (error: any) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 // Deep DB Diagnostic
 app.get('/api/debug/db-check', async (req, res) => {
     try {

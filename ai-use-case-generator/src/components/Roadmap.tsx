@@ -22,30 +22,45 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
     const [activeTab, setActiveTab] = useState<Tab>('ROADMAP');
 
     useEffect(() => {
-        // Gating Check
-        // If user is passed as prop (authenticated in App), we are good.
-        if (user || localStorage.getItem('dpg_user_email')) {
-            setIsLocked(false);
-            const saved = localStorage.getItem('dpg_roadmap');
-            if (saved) {
-                setSavedRecipes(JSON.parse(saved));
+        const fetchRoadmap = async () => {
+            if (user?.email) {
+                setIsLocked(false);
+                try {
+                    const res = await fetch(`${import.meta.env.PROD ? '/api' : 'http://localhost:3000/api'}/roadmap/${user.email}`);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        // Backend returns 'leads' object with 'recipes' array
+                        // Need to flatten recipes from all leads
+                        const allRecipes = data.roadmap.flatMap((l: any) => l.recipes);
+                        setSavedRecipes(allRecipes);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch roadmap", error);
+                    // Fallback to local storage
+                    const saved = localStorage.getItem('dpg_roadmap');
+                    if (saved) setSavedRecipes(JSON.parse(saved));
+                }
+            } else if (localStorage.getItem('dpg_user_email')) {
+                // Weak auth fallback (mostly for dev)
+                setIsLocked(false);
+                const saved = localStorage.getItem('dpg_roadmap');
+                if (saved) setSavedRecipes(JSON.parse(saved));
             }
-        }
+        };
+
+        fetchRoadmap();
     }, [user]);
 
     const handleLoginSuccess = () => {
-        setIsLocked(false);
-        const saved = localStorage.getItem('dpg_roadmap');
-        if (saved) setSavedRecipes(JSON.parse(saved));
+        // ... handled by App.tsx passed prop now
     };
 
     const removeRecipe = (index: number) => {
-        const targetTitle = sortedRecipes[index].title;
-        const updated = savedRecipes.filter(r => r.title !== targetTitle);
-        setSavedRecipes(updated);
-        localStorage.setItem('dpg_roadmap', JSON.stringify(updated));
-        window.dispatchEvent(new Event('roadmap-updated'));
+        alert("Removing items needs backend support (Implementation Pending). Blocking for now to prevent sync issues.");
+        // TODO: Implement DELETE /api/roadmap endpoint
     };
+
 
     // Sorting Logic
     const sortedRecipes = [...savedRecipes].sort((a, b) => {

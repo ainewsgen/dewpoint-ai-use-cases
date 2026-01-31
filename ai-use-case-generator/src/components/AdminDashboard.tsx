@@ -54,6 +54,9 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [currentRealUser, setCurrentRealUser] = useState<any>(null);
     const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
 
+    // Blueprint Edit State
+    const [editingBlueprint, setEditingBlueprint] = useState<Opportunity | null>(null);
+
     // Lead Edit State (Mock/Simulation for Leads View)
     const [editingUser, setEditingUser] = useState<string | null>(null); // This is "Lead ID"
     // Rename 'editForm' usage in leads view to 'leadEditForm' via find/replace or restore original name if possible

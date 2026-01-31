@@ -127,19 +127,11 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
         <div className="glass-panel recipe-card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', marginBottom: '0.2rem' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
-
-                        {/* Separator Line */}
-                        <div style={{ width: '1px', height: '12px', background: 'var(--border-glass)' }}></div>
-
                         {opp.industry && (
-                            <span style={{
-                                color: 'var(--text-muted)',
-                                fontSize: '0.75rem',
-                                textTransform: 'uppercase',
-                                fontWeight: 600
-                            }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>
+                                <span style={{ opacity: 0.5, margin: '0 0.5rem' }}>|</span>
                                 Industry: {opp.industry}
                             </span>
                         )}

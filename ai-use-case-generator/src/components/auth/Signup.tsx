@@ -55,7 +55,7 @@ export const Signup: React.FC<SignupProps> = ({ onClose, onSuccess, switchToLogi
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div>
                         <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Full Name</label>
                         <input
@@ -74,7 +74,7 @@ export const Signup: React.FC<SignupProps> = ({ onClose, onSuccess, switchToLogi
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value.trim())}
                             required
                             className="glass-input"
                             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'white', border: '1px solid var(--border-glass)', color: 'var(--text-main)' }}

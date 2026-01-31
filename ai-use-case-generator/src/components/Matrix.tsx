@@ -78,13 +78,20 @@ export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user }: 
 
     return (
         <div className="container animate-fade-in" style={{ position: 'relative' }}>
-            <header className="matrix-header" style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h2 className="text-accent">Opportunity Matrix</h2>
-                    <p style={{ color: 'var(--text-muted)' }}>Generated for <strong>{companyData.url || "Your Business"}</strong></p>
+            <header style={{ textAlign: 'center', marginBottom: '3rem', marginTop: '1rem' }}>
+                <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
+                    <Sparkles size={48} className="text-accent" />
                 </div>
-                <div className="glass-panel" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', color: 'hsl(var(--accent-primary))', fontWeight: 500 }}>
-                    <span>{isLoading ? 'Synthesizing...' : `${opportunities.length} High-Value Workflows Found`}</span>
+                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Opportunity Matrix</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>
+                        Generated for <strong>{companyData.url || "Your Business"}</strong>
+                    </p>
+                    {!isLoading && opportunities.length > 0 && (
+                        <span className="badge" style={{ background: 'hsla(var(--accent-primary)/0.1)', color: 'hsl(var(--accent-primary))', border: '1px solid hsla(var(--accent-primary)/0.2)', fontSize: '0.9rem', padding: '0.4rem 1rem' }}>
+                            {opportunities.length} High-Value Workflows Found
+                        </span>
+                    )}
                 </div>
             </header>
 
@@ -178,19 +185,7 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                         <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
                     </div>
 
-                    {/* Admin Only Stack */}
-                    {isAdmin && (
-                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
-                                <Server size={14} /> <strong>Admin Stack View</strong>
-                            </div>
-                            <div className="chips-grid" style={{ gap: '0.25rem' }}>
-                                {opp.admin_view.tech_stack.map(t => (
-                                    <span key={t} style={{ background: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+
                     {/* Admin Only Stack */}
                     {isAdmin && (
                         <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>

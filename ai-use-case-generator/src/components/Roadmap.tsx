@@ -73,9 +73,38 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
         // ... handled by App.tsx passed prop now
     };
 
-    const removeRecipe = (index: number) => {
-        alert("Removing items needs backend support (Implementation Pending). Blocking for now to prevent sync issues.");
-        // TODO: Implement DELETE /api/roadmap endpoint
+    const removeRecipe = async (index: number) => {
+        if (!confirm("Are you sure you want to remove this blueprint?")) return;
+
+        // 1. Optimistic UI Update
+        const updated = [...savedRecipes];
+        updated.splice(index, 1);
+        setSavedRecipes(updated);
+
+        // 2. Sync Local Storage (Critical for Library Checkmarks)
+        localStorage.setItem('dpg_roadmap', JSON.stringify(updated));
+        window.dispatchEvent(new Event('roadmap-updated'));
+
+        // 3. Sync Backend
+        if (user?.email) {
+            try {
+                const token = localStorage.getItem('dpg_auth_token');
+                await fetch(`${import.meta.env.PROD ? '/api' : 'http://localhost:3000/api'}/leads/sync`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        email: user.email,
+                        recipes: updated
+                    })
+                });
+            } catch (err) {
+                console.error("Failed to sync deletion to server", err);
+                // Ideally revert UI here if strict, but for MVP keep it deleted locally
+            }
+        }
     };
 
 

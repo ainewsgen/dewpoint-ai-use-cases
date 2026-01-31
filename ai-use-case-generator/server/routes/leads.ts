@@ -79,80 +79,118 @@ router.post('/leads', async (req, res) => {
         console.error('Save lead error:', error);
         res.status(500).json({ error: 'Failed to save lead' });
     }
-});
+    // Sync/Replace Roadmap (For Deletions/Reordering)
+    router.put('/leads/sync', async (req, res) => {
+        try {
+            const { email, recipes } = req.body;
 
-// Get User's Roadmap
-router.get('/roadmap/:email', async (req, res) => {
-    try {
-        const { email } = req.params;
-
-        // Get user
-        const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
-
-        if (user.length === 0) {
-            return res.json({ roadmap: [] });
-        }
-
-        // Get all leads for this user
-        const userLeads = await db.select().from(leads).where(eq(leads.userId, user[0].id));
-
-        res.json({ roadmap: userLeads });
-    } catch (error) {
-        console.error('Get roadmap error:', error);
-        res.status(500).json({ error: 'Failed to get roadmap' });
-    }
-});
-
-// Get All Leads (Admin)
-router.get('/admin/leads', async (req, res) => {
-    try {
-        const allLeads = await db.select({
-            lead: leads,
-            user: users,
-            company: companies,
-        })
-            .from(leads)
-            .leftJoin(users, eq(leads.userId, users.id))
-            .leftJoin(companies, eq(leads.companyId, companies.id));
-
-        res.json({ leads: allLeads });
-    } catch (error) {
-        console.error('Get all leads error:', error);
-        res.status(500).json({ error: 'Failed to get leads' });
-    }
-});
-
-// Get Public Library (All Generated Recipes)
-router.get('/library', async (req, res) => {
-    try {
-        const allLeads = await db.select({
-            recipes: leads.recipes
-        }).from(leads);
-
-        // Flatten and Dedupe
-        const allRecipes: any[] = [];
-        const seenTitles = new Set();
-
-        // Add some default system recipes if DB is empty?
-        // For now, let's just return what we have. Frontend can keep defaults as fallback.
-
-        allLeads.forEach(row => {
-            const recipeList = row.recipes as any[];
-            if (Array.isArray(recipeList)) {
-                recipeList.forEach(r => {
-                    if (!seenTitles.has(r.title)) {
-                        seenTitles.add(r.title);
-                        allRecipes.push(r);
-                    }
-                });
+            if (!email || !recipes) {
+                return res.status(400).json({ error: 'Missing required fields' });
             }
-        });
 
-        res.json({ recipes: allRecipes });
-    } catch (error) {
-        console.error('Get library error:', error);
-        res.status(500).json({ error: 'Failed to get library' });
-    }
-});
+            const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
+            if (user.length === 0) return res.status(404).json({ error: 'User not found' });
 
-export default router;
+            const userId = user[0].id;
+            const existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
+
+            if (existingLead.length > 0) {
+                // REPLACING the recipes array explicitly
+                const updated = await db.update(leads)
+                    .set({ recipes: recipes })
+                    .where(eq(leads.id, existingLead[0].id))
+                    .returning();
+                return res.json({ success: true, lead: updated[0] });
+            } else {
+                // If no lead exists yet, create one (same as POST but explicit list)
+                // Create dummy company if needed
+                const company = await db.insert(companies).values({ userId }).returning();
+                const lead = await db.insert(leads).values({
+                    userId,
+                    companyId: company[0].id,
+                    recipes: recipes
+                }).returning();
+                return res.json({ success: true, lead: lead[0] });
+            }
+
+        } catch (error) {
+            console.error('Sync roadmap error:', error);
+            res.status(500).json({ error: 'Failed to sync roadmap' });
+        }
+    });
+
+    // Get User's Roadmap
+    router.get('/roadmap/:email', async (req, res) => {
+        try {
+            const { email } = req.params;
+
+            // Get user
+            const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
+
+            if (user.length === 0) {
+                return res.json({ roadmap: [] });
+            }
+
+            // Get all leads for this user
+            const userLeads = await db.select().from(leads).where(eq(leads.userId, user[0].id));
+
+            res.json({ roadmap: userLeads });
+        } catch (error) {
+            console.error('Get roadmap error:', error);
+            res.status(500).json({ error: 'Failed to get roadmap' });
+        }
+    });
+
+    // Get All Leads (Admin)
+    router.get('/admin/leads', async (req, res) => {
+        try {
+            const allLeads = await db.select({
+                lead: leads,
+                user: users,
+                company: companies,
+            })
+                .from(leads)
+                .leftJoin(users, eq(leads.userId, users.id))
+                .leftJoin(companies, eq(leads.companyId, companies.id));
+
+            res.json({ leads: allLeads });
+        } catch (error) {
+            console.error('Get all leads error:', error);
+            res.status(500).json({ error: 'Failed to get leads' });
+        }
+    });
+
+    // Get Public Library (All Generated Recipes)
+    router.get('/library', async (req, res) => {
+        try {
+            const allLeads = await db.select({
+                recipes: leads.recipes
+            }).from(leads);
+
+            // Flatten and Dedupe
+            const allRecipes: any[] = [];
+            const seenTitles = new Set();
+
+            // Add some default system recipes if DB is empty?
+            // For now, let's just return what we have. Frontend can keep defaults as fallback.
+
+            allLeads.forEach(row => {
+                const recipeList = row.recipes as any[];
+                if (Array.isArray(recipeList)) {
+                    recipeList.forEach(r => {
+                        if (!seenTitles.has(r.title)) {
+                            seenTitles.add(r.title);
+                            allRecipes.push(r);
+                        }
+                    });
+                }
+            });
+
+            res.json({ recipes: allRecipes });
+        } catch (error) {
+            console.error('Get library error:', error);
+            res.status(500).json({ error: 'Failed to get library' });
+        }
+    });
+
+    export default router;

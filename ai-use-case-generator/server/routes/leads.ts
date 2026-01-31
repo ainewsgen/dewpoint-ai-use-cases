@@ -143,6 +143,32 @@ router.get('/roadmap/:email', async (req, res) => {
     }
 });
 
+// Delete a specific recipe from a user's roadmap (Admin)
+router.delete('/admin/leads/:userId/recipes', async (req, res) => {
+    try {
+        const userId = parseInt(req.params.userId);
+        const { title } = req.body; // Deleting by Title (assuming uniqueness in list)
+
+        if (!title) return res.status(400).json({ error: "Recipe title required" });
+
+        const userLeads = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
+        if (userLeads.length === 0) return res.status(404).json({ error: "No leads found for user" });
+
+        const currentRecipes = userLeads[0].recipes as any[];
+        const updatedRecipes = currentRecipes.filter(r => r.title !== title);
+
+        await db.update(leads)
+            .set({ recipes: updatedRecipes })
+            .where(eq(leads.id, userLeads[0].id));
+
+        res.json({ success: true, count: updatedRecipes.length });
+
+    } catch (error) {
+        console.error('Delete recipe error:', error);
+        res.status(500).json({ error: 'Failed to delete recipe' });
+    }
+});
+
 // Get All Leads (Admin)
 router.get('/admin/leads', async (req, res) => {
     try {

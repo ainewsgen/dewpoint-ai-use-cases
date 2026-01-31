@@ -1046,12 +1046,40 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     </h3>
                                     <div style={{ display: 'grid', gap: '1.5rem' }}>
                                         {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
-                                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px' }}>
+                                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                         <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{r.title}</h4>
                                                     </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                if (!confirm(`Are you sure you want to delete "${r.title}"?`)) return;
+                                                                try {
+                                                                    // New Endpoint for specific recipe deletion
+                                                                    const res = await fetch(`/api/admin/leads/${activeUser.id}/recipes`, {
+                                                                        method: 'DELETE',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ title: r.title })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        // Optimistic UI Update
+                                                                        const updatedRecipes = (activeUser.allRecipes || activeUser.recipes).filter((receipe: any) => receipe.title !== r.title);
+                                                                        setActiveUser({ ...activeUser, allRecipes: updatedRecipes, recipes: updatedRecipes });
+                                                                    } else {
+                                                                        alert("Failed to delete recipe");
+                                                                    }
+                                                                } catch (err) {
+                                                                    alert("Error deleting recipe: " + err);
+                                                                }
+                                                            }}
+                                                            className="btn-danger-icon"
+                                                            title="Delete Blueprint"
+                                                            style={{ padding: '0.25rem' }}
+                                                        >
+                                                            <Trash size={14} />
+                                                        </button>
                                                         <span className="badge" style={{ background: '#333' }}>{r.department}</span>
                                                         {r.industry && (
                                                             <span style={{
@@ -1068,7 +1096,8 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                         )}
                                                         <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
                                                             {r.generation_metadata?.source || 'System'}
-                                                        </span>                                    {r.generation_metadata?.fallback_reason && (
+                                                        </span>
+                                                        {r.generation_metadata?.fallback_reason && (
                                                             <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>
                                                                 ⚠️ {r.generation_metadata.fallback_reason}
                                                             </span>

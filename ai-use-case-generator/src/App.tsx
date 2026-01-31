@@ -11,6 +11,7 @@ import { Signup } from './components/auth/Signup';
 import { useAuth } from './context/AuthContext';
 import { Shield, LogOut, User } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Footer } from './components/Footer';
 
 
 type ViewState = 'DISCOVERY' | 'ANALYSIS' | 'MATRIX' | 'LIBRARY' | 'ROADMAP' | 'ADMIN';
@@ -237,6 +238,8 @@ function App() {
                         switchToLogin={() => setAuthModal('LOGIN')}
                     />
                 )}
+
+                <Footer />
             </div>
         </ErrorBoundary>
     );

@@ -461,14 +461,22 @@ User Profile:
 - Tech Stack: {{stack}}
 - Primary Pain Point: {{painPoint}}
 
-Generate 3 custom automation blueprints. Each blueprint must include:
-1. A catchy title.
-2. A technical breakdown of the workflow.
-3. A realistic ROI estimate (time or money).
-4. A step-by-step implementation plan.
-5. A detailed technical stack breakdown (Tool + Role).`}
+Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include the following fields:
+
+1.  **Title**: A catchy name for the automation.
+2.  **Department**: The target department (e.g., Sales, Finance, Ops).
+3.  **Problem**: A concise statement of the friction point.
+4.  **Solution Narrative**: A 1-sentence elevator pitch of the solution.
+5.  **Value Proposition**: Key benefit (e.g., "Eliminates context switching").
+6.  **ROI Estimate**: Specific time/money saved (e.g., "10 hrs/week").
+7.  **Deep Dive**: A detailed paragraph explaining the "How" and "Why".
+8.  **Example Scenario**: A real-world "Before & After" story.
+9.  **Walkthrough Steps**: A chronologically ordered list of 5-7 execution steps.
+10. **Tech Stack Details**: List of specific tools used + their role (e.g., "OpenAI: Reasoning").
+11. **Difficulty**: Implementation effort (Low, Med, High).
+12. **Upsell**: A potential service retainer or expansion opportunity.`}
                                 style={{
-                                    width: '100%', minHeight: '250px',
+                                    width: '100%', minHeight: '400px',
                                     background: '#111', color: '#eee',
                                     border: '1px solid #333', borderRadius: '6px',
                                     fontFamily: 'monospace', padding: '1rem', lineHeight: '1.5'

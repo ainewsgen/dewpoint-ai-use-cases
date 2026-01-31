@@ -127,4 +127,26 @@ router.post('/usage/readiness-check', requireAuth, requireAdmin, async (req, res
     }
 });
 
+// FIX SCHEMA: Create api_usage table if missing
+router.post('/usage/fix-schema', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS api_usage (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                model TEXT,
+                prompt_tokens INTEGER,
+                completion_tokens INTEGER,
+                total_cost DECIMAL(10, 6),
+                timestamp TIMESTAMP DEFAULT NOW()
+            );
+        `);
+        console.log("Fixed Schema: Created api_usage table.");
+        res.json({ success: true, message: "Created api_usage table" });
+    } catch (error: any) {
+        console.error("Fix Schema Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

@@ -13,6 +13,8 @@ import scanRoutes from './routes/scan';
 import generateRoutes from './routes/generate';
 import usageRoutes from './routes/usage';
 import { runMigrations } from './db/migrate';
+import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 dotenv.config();
 
@@ -60,9 +62,6 @@ const server = app.listen(PORT, () => {
     console.log(`📊 API available at http://localhost:${PORT}/api`);
 
     // Self-healing: Ensure Schema is correct (SQL Injection for migration reliability)
-    import { sql } from 'drizzle-orm';
-    import { db } from './db';
-
     // Run this async without blocking, or await if critical. We'll fire-and-forget but log errors.
     (async () => {
         try {

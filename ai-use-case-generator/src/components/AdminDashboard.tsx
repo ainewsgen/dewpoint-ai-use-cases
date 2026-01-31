@@ -36,7 +36,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
 
     // Usage Stats State
-    const [usageStats, setUsageStats] = useState<{ spend: number; requests: number; limit: number } | null>(null);
+    const [usageStats, setUsageStats] = useState<{ spend: number; requests: number; limit: number; integrationId?: number; debugMeta?: any } | null>(null);
     const [isUpdatingLimit, setIsUpdatingLimit] = useState(false);
 
     // CMS State

@@ -88,7 +88,10 @@ export class UsageService {
         return {
             spend: Number(result[0]?.totalSpend || 0),
             requests: Number(result[0]?.requestCount || 0),
-            limit
+            limit,
+            integrationId: openAIInt?.id,
+            debugMeta: openAIInt?.metadata
         };
     }
+}
 }

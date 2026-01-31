@@ -1,6 +1,6 @@
 import { db } from '../db';
 import { apiUsage, integrations } from '../db/schema';
-import { eq, sql, and, gte, lt } from 'drizzle-orm';
+import { eq, sql, and, gte, lt, desc } from 'drizzle-orm';
 
 export class UsageService {
     private static GPT4O_INPUT_COST = 5.00 / 1000000; // $5 per 1M tokens
@@ -71,10 +71,8 @@ export class UsageService {
             .from(apiUsage)
             .where(gte(apiUsage.timestamp, startOfDay));
 
-        // Fetch ALL integrations (enabled or not) to debug visibility
-        const allIntegrations = await db.query.integrations.findMany({
-            orderBy: (integrations, { desc }) => [desc(integrations.id)]
-        });
+        // Fetch ALL integrations (enabled or not) using db.select() for safety
+        const allIntegrations = await db.select().from(integrations).orderBy(desc(integrations.id));
 
         // 1. Try exact name match
         // 2. Try metadata provider match

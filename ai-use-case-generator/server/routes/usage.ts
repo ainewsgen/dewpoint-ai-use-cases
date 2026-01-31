@@ -28,11 +28,10 @@ router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Invalid limit value' });
         }
 
-        // 1. Fetch ALL enabled integrations
-        const allIntegrations = await db.query.integrations.findMany({
-            where: eq(integrations.enabled, true),
-            orderBy: (integrations, { desc }) => [desc(integrations.id)]
-        });
+        // 1. Fetch ALL enabled integrations using db.select
+        const allIntegrations = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true))
+            .orderBy(desc(integrations.id));
 
         // 2. Find best match
         const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')

@@ -40,3 +40,7 @@ CREATE TABLE IF NOT EXISTS integrations (
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Migration Fixes (Run on every start to ensure schema alignment)
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;
+ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL; -- Make nullable as we move to metadata.provider

@@ -129,22 +129,25 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.2rem' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
+
+                        {/* Separator Line */}
+                        <div style={{ width: '1px', height: '12px', background: 'var(--border-glass)' }}></div>
+
                         {opp.industry && (
                             <span style={{
-                                fontSize: '0.65rem',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em',
                                 color: 'var(--text-muted)',
-                                border: '1px solid var(--border-glass)',
-                                padding: '1px 4px',
-                                borderRadius: '3px'
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                fontWeight: 600
                             }}>
-                                Industry: {opp.industry}
+                                {opp.industry}
                             </span>
                         )}
-                        {isAdmin && (
+
+                        {isAdmin && (opp.generation_metadata?.source || '').length > 0 && (
                             <>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
+                                <div style={{ width: '1px', height: '12px', background: 'var(--border-glass)' }}></div>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px' }}>
                                     {opp.generation_metadata?.source || 'System'}
                                 </span>
                                 {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
@@ -154,7 +157,6 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                                 )}
                             </>
                         )}
-
                     </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
                 </div>

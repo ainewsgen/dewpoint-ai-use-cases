@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Lock, Unlock, Database, Eye, Megaphone, Save, Key, Edit, Plus, X, Trash, Globe, CheckCircle, AlertCircle, Shield } from 'lucide-react';
+import { Lock, Unlock, Database, Eye, Megaphone, Save, Key, Edit, Plus, X, Trash, Globe, CheckCircle, AlertCircle, Shield, Sparkles } from 'lucide-react';
 
 interface AdminDashboardProps {
     leads: Array<{
@@ -29,7 +29,7 @@ interface IntegrationModalProps {
 }
 
 export function AdminDashboard({ leads }: AdminDashboardProps) {
-    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users'>('leads');
+    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     // Local state for fetched leads (ignoring props now)
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
@@ -383,6 +383,19 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                         Announcements
                     </button>
                     <button
+                        onClick={() => setActiveTab('blueprints')}
+                        style={{
+                            background: activeTab === 'blueprints' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                            color: activeTab === 'blueprints' ? 'white' : 'var(--text-muted)',
+                            border: '1px solid var(--border-glass)',
+                            padding: '0.5rem 1.5rem', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600,
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        Blueprints & AI
+                    </button>
+                    <button
                         onClick={() => setActiveTab('integrations')}
                         style={{
                             background: activeTab === 'integrations' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
@@ -397,6 +410,61 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                     </button>
                 </div>
             </header>
+
+            {/* Blueprints & AI Tab */}
+            {activeTab === 'blueprints' && (
+                <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                    <div style={{ marginBottom: '3rem' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'hsl(var(--accent-gold))' }}>
+                            <Sparkles size={20} /> AI Generation Config
+                        </h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                            Manage the precanned prompt used by the engine to generate specific recipe details.
+                        </p>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>System Prompt Template</label>
+                            <textarea
+                                defaultValue={`You are an expert Solutions Architect. Given the user's Tech Stack: {{stack}} and Pain Point: {{pain}}, generate 3 high-impact automation blueprints.
+Each blueprint must include:
+1. A catchy title.
+2. A technical breakdown of the workflow.
+3. A realistic ROI estimate (time or money).
+4. A step-by-step implementation plan.`}
+                                style={{
+                                    width: '100%', minHeight: '150px',
+                                    background: '#111', color: '#eee',
+                                    border: '1px solid #333', borderRadius: '6px',
+                                    fontFamily: 'monospace', padding: '1rem', lineHeight: '1.5'
+                                }}
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                <button className="btn-primary" onClick={() => alert("System Prompt Updated (Configuration Saved)")}>
+                                    <Save size={16} /> Save Configuration
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                        <Database size={20} /> Managed Blueprints
+                    </h3>
+
+                    {/* Mock List of Core Blueprints */}
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        {['The Silent Assistant', 'The Invoice Watchdog', 'The Omni-Channel Nurture', 'The Project Pulse'].map((name, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                                <span style={{ fontWeight: 600 }}>{name}</span>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <span className="badge" style={{ background: i % 2 === 0 ? '#222' : '#333' }}>{i % 2 === 0 ? 'Core' : 'Advanced'}</span>
+                                    <button className="btn-secondary" style={{ padding: '0.25rem 0.5rem' }} title="Edit Template">
+                                        <Edit size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Integrations Tab */}
             {activeTab === 'integrations' && (
@@ -693,11 +761,22 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
                                                     <div>
                                                         <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
-                                                        <div className="chips-grid" style={{ gap: '0.25rem' }}>
-                                                            {r.admin_view.tech_stack.map((t: string) => (
-                                                                <span key={t} style={{ background: '#222', padding: '2px 8px', borderRadius: '4px', border: '1px solid #444', fontSize: '0.75rem' }}>{t}</span>
-                                                            ))}
-                                                        </div>
+                                                        {r.admin_view.stack_details ? (
+                                                            <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                                                {r.admin_view.stack_details.map((detail: any, i: number) => (
+                                                                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', background: '#222', padding: '4px 8px', borderRadius: '4px', border: '1px solid #444' }}>
+                                                                        <span style={{ fontWeight: 600, color: 'white' }}>{detail.tool}</span>
+                                                                        <span style={{ color: '#888', fontSize: '0.75rem', fontStyle: 'italic' }}>{detail.role}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="chips-grid" style={{ gap: '0.25rem' }}>
+                                                                {r.admin_view.tech_stack.map((t: string) => (
+                                                                    <span key={t} style={{ background: '#222', padding: '2px 8px', borderRadius: '4px', border: '1px solid #444', fontSize: '0.75rem' }}>{t}</span>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Upsell Opp</label>

@@ -223,6 +223,18 @@ function RoadmapCard({ opp, onRemove, isAdmin }: { opp: Opportunity, onRemove: (
                         </div>
                     )}
 
+                    {/* Step-by-Step Walkthrough */}
+                    {opp.public_view.walkthrough_steps && (
+                        <div style={{ marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '6px' }}>
+                            <p style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>Implementation Flow:</p>
+                            <ol style={{ paddingLeft: '1.2rem', color: 'var(--text-muted)', margin: 0 }}>
+                                {opp.public_view.walkthrough_steps.map((step, i) => (
+                                    <li key={i} style={{ marginBottom: '0.4rem' }}>{step}</li>
+                                ))}
+                            </ol>
+                        </div>
+                    )}
+
                     {/* Admin Only Stack */}
                     {isAdmin && (
                         <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '0.5rem' }}>

@@ -30,7 +30,9 @@ CREATE TABLE IF NOT EXISTS leads (
 -- 3. Integrations Table
 CREATE TABLE IF NOT EXISTS integrations (
     id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
+    name TEXT,
     provider TEXT NOT NULL,
     api_key TEXT,
     api_secret TEXT,

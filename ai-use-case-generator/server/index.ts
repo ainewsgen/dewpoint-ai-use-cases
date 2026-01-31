@@ -68,6 +68,10 @@ const server = app.listen(PORT, () => {
             console.log("🛠️ Checking Database Schema...");
             // Force add 'metadata' column if missing
             await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+
+            // Force add 'provider' column matching schema (was missing in prod DB likely)
+            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
+
             // Make 'provider' nullable (backward compat)
             await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
             console.log("✅ Database Schema Verified/Patched.");

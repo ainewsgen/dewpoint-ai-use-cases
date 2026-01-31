@@ -66,4 +66,65 @@ router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
     }
 });
 
+import { decrypt } from '../utils/encryption';
+import { OpenAIService } from '../services/openai';
+
+// ... existing code ...
+
+// System Readiness Check (Deep Diagnostic)
+router.post('/usage/readiness-check', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const report = {
+            integration: { status: 'pending', details: '' },
+            budget: { status: 'pending', details: '' },
+            api_connection: { status: 'pending', details: '' },
+            overall: false
+        };
+
+        // 1. Check Integration (Global Scope)
+        const allIntegrations = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true));
+
+        const activeInt = allIntegrations.find(i => i.enabled && (i.apiKey || i.apiSecret));
+
+        if (!activeInt) {
+            report.integration = { status: 'failed', details: 'No enabled integration with API Request keys found.' };
+            return res.json(report);
+        }
+        report.integration = { status: 'ok', details: `Found active provider: ${activeInt.name}` };
+
+        // 2. Check Budget
+        const stats = await UsageService.getDailyStats();
+        if (stats.spend >= stats.limit) {
+            report.budget = { status: 'failed', details: `Budget exceeded ($${stats.spend.toFixed(2)} / $${stats.limit.toFixed(2)})` };
+            // We return here because budget block prevents API call
+            return res.json(report);
+        }
+        report.budget = { status: 'ok', details: `Budget healthy ($${stats.spend.toFixed(2)} / $${stats.limit.toFixed(2)})` };
+
+        // 3. Live API Test
+        try {
+            const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
+            if (!apiKey) throw new Error("API Key empty after decryption");
+
+            await OpenAIService.generateJSON({
+                apiKey,
+                systemPrompt: "Ping",
+                userContext: "Pong",
+                model: "gpt-3.5-turbo"
+            });
+            report.api_connection = { status: 'ok', details: 'Live API connection successful' };
+            report.overall = true;
+        } catch (apiErr: any) {
+            report.api_connection = { status: 'failed', details: `API Handshake failed: ${apiErr.message}` };
+        }
+
+        res.json(report);
+
+    } catch (error: any) {
+        console.error('Readiness Check Error:', error);
+        res.status(500).json({ error: 'System Check Failed', details: error.message });
+    }
+});
+
 export default router;

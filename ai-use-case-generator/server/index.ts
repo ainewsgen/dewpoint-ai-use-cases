@@ -67,6 +67,8 @@ app.post('/api/debug/fix-schema', async (req, res) => {
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
         await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
+        // Fix for is_active vs enabled mismatch
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;`);
         res.json({ status: 'Schema patched successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

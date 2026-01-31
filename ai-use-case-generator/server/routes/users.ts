@@ -107,6 +107,9 @@ router.put('/users/:id', async (req, res) => {
         if (name !== undefined) updateData.name = name;
         if (role !== undefined) updateData.role = role;
         if (isActive !== undefined) updateData.isActive = isActive;
+        if (req.body.password) {
+            updateData.passwordHash = await bcrypt.hash(req.body.password, SALT_ROUNDS);
+        }
 
         const [updatedUser] = await db.update(users)
             .set(updateData)

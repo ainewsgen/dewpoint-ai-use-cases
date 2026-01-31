@@ -56,6 +56,8 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [isEditingRealUser, setIsEditingRealUser] = useState(false);
     const [currentRealUser, setCurrentRealUser] = useState<any>(null);
     const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
+    const [isDiagnosing, setIsDiagnosing] = useState(false);
+
 
     // Blueprint Edit State
     const [editingBlueprint, setEditingBlueprint] = useState<Opportunity | null>(null);
@@ -636,7 +638,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                 try {
                                     const res = await fetch('/api/admin/usage/readiness-check', { method: 'POST' });
                                     const report = await res.json();
-                                    
+
                                     let msg = `Diagnostic Report:\n`;
                                     msg += `------------------\n`;
                                     msg += `Integration: ${report.integration?.status === 'ok' ? '✅' : '❌'} (${report.integration?.details})\n`;
@@ -644,7 +646,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                     msg += `API Check: ${report.api_connection?.status === 'ok' ? '✅' : '❌'} (${report.api_connection?.details})\n`;
                                     msg += `------------------\n`;
                                     msg += `Overall Result: ${report.overall ? 'PASSED ✅' : 'FAILED ❌'}`;
-                                    
+
                                     alert(msg);
                                 } catch (err) {
                                     alert("Diagnostic Failed: " + err);
@@ -671,7 +673,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.5' }}>
                                             {reason}
                                         </p>
-                                        <button 
+                                        <button
                                             onClick={runDiagnostics}
                                             disabled={isDiagnosing}
                                             className="btn-secondary"

@@ -75,6 +75,16 @@ app.get('/api/debug/schema-check', async (req, res) => {
     }
 });
 
+// NEW: Factory Reset Integrations (Nuclear Option)
+app.post('/api/debug/reset-integrations', async (req, res) => {
+    try {
+        await db.execute(sql`DELETE FROM integrations`);
+        res.json({ status: 'ok', message: 'All integrations have been wiped. Please re-add them via the UI.' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Deep DB Diagnostic (Priority)
 app.get('/api/debug/db-check', async (req, res) => {
     try {

@@ -10,6 +10,7 @@ import { Login } from './components/auth/Login';
 import { Signup } from './components/auth/Signup';
 import { useAuth } from './context/AuthContext';
 import { Shield, LogOut, User } from 'lucide-react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 
 type ViewState = 'DISCOVERY' | 'ANALYSIS' | 'MATRIX' | 'LIBRARY' | 'ROADMAP' | 'ADMIN';
@@ -111,129 +112,133 @@ function App() {
     };
 
     return (
-        <div className="app-shell">
-            <nav style={{ position: 'fixed', top: 0, right: 0, left: 0, padding: '1rem', zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}>
-                {/* Brand - visible on larger screens */}
-                <div style={{ pointerEvents: 'auto', paddingLeft: '1rem' }}>
-                    <div className="logo-pill" style={{ padding: '0.25rem 0.5rem' }}>
-                        <img src="/logo-icon.png" alt="DPG" style={{ height: '32px' }} />
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>
-
-                    {/* User Login - Global HIDDEN per requirements. Only show if user is logged in (Profile) */}
-
-                    {user && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.5rem' }}>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                <User size={14} style={{ marginRight: '4px' }} />
-                                {user.name || user.email.split('@')[0]}
-                            </div>
-                            <button
-                                onClick={() => logout()}
-                                title="Logout"
-                                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
-                            >
-                                <LogOut size={16} />
-                            </button>
+        <ErrorBoundary>
+            <div className="app-shell">
+                <nav style={{ position: 'fixed', top: 0, right: 0, left: 0, padding: '1rem', zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}>
+                    {/* ... (rest of nav remains the same, assuming valid) */}
+                    {/* To avoid huge replace block, I'm wrapping the whole div. The content inside is unchanged. */}
+                    {/* Brand - visible on larger screens */}
+                    <div style={{ pointerEvents: 'auto', paddingLeft: '1rem' }}>
+                        <div className="logo-pill" style={{ padding: '0.25rem 0.5rem' }}>
+                            <img src="/logo-icon.png" alt="DPG" style={{ height: '32px' }} />
                         </div>
-                    )}
+                    </div>
 
-                    {view !== 'DISCOVERY' && view !== 'ADMIN' && (
-                        <button onClick={() => setView('DISCOVERY')} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>New Search</button>
-                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>
 
-                    {/* Global Navigation - Always Visible */}
-                    <button
-                        onClick={() => setView(view === 'LIBRARY' ? 'DISCOVERY' : 'LIBRARY')}
-                        style={{
-                            background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
-                            border: '1px solid var(--border-glass)',
-                            color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
-                            padding: '0.4rem 1rem',
-                            borderRadius: '50px',
-                            cursor: 'pointer',
-                            backdropFilter: 'blur(10px)',
-                            fontSize: '0.85rem',
-                            fontWeight: 500
-                        }}
-                    >
-                        Library
-                    </button>
-                    {/* My Roadmap Button - Conditional Style based on view */}
-                    <button
-                        onClick={() => {
-                            if (view === 'ROADMAP') {
-                                setView('DISCOVERY');
-                                return;
-                            }
-                            // Gating Logic
-                            if (!user) {
-                                setAuthModal('LOGIN');
-                            } else {
-                                setView('ROADMAP');
-                            }
-                        }}
-                        style={{
-                            background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',
-                            border: '1px solid var(--border-glass)',
-                            color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
-                            fontWeight: 'bold',
-                            padding: '0.4rem 1rem',
-                            borderRadius: '50px',
-                            cursor: 'pointer',
-                            backdropFilter: 'blur(10px)',
-                            fontSize: '0.85rem'
-                        }}
-                    >
-                        My Roadmap
-                    </button>
+                        {/* User Login - Global HIDDEN per requirements. Only show if user is logged in (Profile) */}
 
-                    {/* Admin Toggle Removed */}
-                </div>
-            </nav>
+                        {user && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.5rem' }}>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                    <User size={14} style={{ marginRight: '4px' }} />
+                                    {user.name || user.email.split('@')[0]}
+                                </div>
+                                <button
+                                    onClick={() => logout()}
+                                    title="Logout"
+                                    style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
+                                >
+                                    <LogOut size={16} />
+                                </button>
+                            </div>
+                        )}
 
-            {view === 'DISCOVERY' && <Onboarding onComplete={handleOnboardingComplete} />}
-            {view === 'ANALYSIS' && <Analysis onComplete={handleAnalysisComplete} />}
-            {/* ... other views ... */}
-            {view === 'MATRIX' && (
-                <Matrix
-                    companyData={data}
-                    onUnlock={handleCaptureLead}
-                    isAdmin={isAdminMode}
-                    onSaveRequest={handleRequestSave}
-                    user={user}
-                />
-            )}
-            {view === 'LIBRARY' && (
-                <Library
-                    isAdmin={isAdminMode}
-                    onSaveRequest={handleRequestSave}
-                    user={user}
-                />
-            )}
-            {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
-            {/* Note: Passing user and leads to Roadmap to handle Admin integration */}
+                        {view !== 'DISCOVERY' && view !== 'ADMIN' && (
+                            <button onClick={() => setView('DISCOVERY')} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>New Search</button>
+                        )}
 
-            {/* view === 'ADMIN' block removed as it's merged into Roadmap */}
+                        {/* Global Navigation - Always Visible */}
+                        <button
+                            onClick={() => setView(view === 'LIBRARY' ? 'DISCOVERY' : 'LIBRARY')}
+                            style={{
+                                background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                                border: '1px solid var(--border-glass)',
+                                color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
+                                padding: '0.4rem 1rem',
+                                borderRadius: '50px',
+                                cursor: 'pointer',
+                                backdropFilter: 'blur(10px)',
+                                fontSize: '0.85rem',
+                                fontWeight: 500
+                            }}
+                        >
+                            Library
+                        </button>
+                        {/* My Roadmap Button - Conditional Style based on view */}
+                        <button
+                            onClick={() => {
+                                if (view === 'ROADMAP') {
+                                    setView('DISCOVERY');
+                                    return;
+                                }
+                                // Gating Logic
+                                if (!user) {
+                                    setAuthModal('LOGIN');
+                                } else {
+                                    setView('ROADMAP');
+                                }
+                            }}
+                            style={{
+                                background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',
+                                border: '1px solid var(--border-glass)',
+                                color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
+                                fontWeight: 'bold',
+                                padding: '0.4rem 1rem',
+                                borderRadius: '50px',
+                                cursor: 'pointer',
+                                backdropFilter: 'blur(10px)',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            My Roadmap
+                        </button>
 
-            {authModal === 'LOGIN' && (
-                <Login
-                    onClose={() => setAuthModal(null)}
-                    onSuccess={handleLoginSuccess}
-                    switchToSignup={() => setAuthModal('SIGNUP')}
-                />
-            )}
+                        {/* Admin Toggle Removed */}
+                    </div>
+                </nav>
 
-            {authModal === 'SIGNUP' && (
-                <Signup
-                    onClose={() => setAuthModal(null)}
-                    onSuccess={handleLoginSuccess}
-                    switchToLogin={() => setAuthModal('LOGIN')}
-                />
-            )}
-        </div>
+                {view === 'DISCOVERY' && <Onboarding onComplete={handleOnboardingComplete} />}
+                {view === 'ANALYSIS' && <Analysis onComplete={handleAnalysisComplete} />}
+                {/* ... other views ... */}
+                {view === 'MATRIX' && (
+                    <Matrix
+                        companyData={data}
+                        onUnlock={handleCaptureLead}
+                        isAdmin={isAdminMode}
+                        onSaveRequest={handleRequestSave}
+                        user={user}
+                    />
+                )}
+                {view === 'LIBRARY' && (
+                    <Library
+                        isAdmin={isAdminMode}
+                        onSaveRequest={handleRequestSave}
+                        user={user}
+                    />
+                )}
+                {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
+                {/* Note: Passing user and leads to Roadmap to handle Admin integration */}
+
+                {/* view === 'ADMIN' block removed as it's merged into Roadmap */}
+
+                {authModal === 'LOGIN' && (
+                    <Login
+                        onClose={() => setAuthModal(null)}
+                        onSuccess={handleLoginSuccess}
+                        switchToSignup={() => setAuthModal('SIGNUP')}
+                    />
+                )}
+
+                {authModal === 'SIGNUP' && (
+                    <Signup
+                        onClose={() => setAuthModal(null)}
+                        onSuccess={handleLoginSuccess}
+                        switchToLogin={() => setAuthModal('LOGIN')}
+                    />
+                )}
+            </div>
+        </ErrorBoundary>
     );
 }
 

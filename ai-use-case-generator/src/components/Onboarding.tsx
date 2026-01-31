@@ -365,24 +365,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Tech Stack</label>
 
-                        {/* Custom Tech Input */}
-                        <div className="input-group" style={{ marginBottom: '1rem' }}>
-                            <input
-                                type="text"
-                                placeholder="Add custom tech (Press Enter)..."
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        const val = e.currentTarget.value.trim();
-                                        if (val && !stack.includes(val)) {
-                                            setStack(prev => [...prev, val]);
-                                            e.currentTarget.value = '';
-                                        }
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem' }}>
                             {Object.entries(techCategories).map(([category, tools]) => (
                                 <div key={category}>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'hsl(var(--accent-primary))', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -401,6 +384,23 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Custom Tech Input moved to bottom */}
+                        <div className="input-group" style={{ marginBottom: '1rem' }}>
+                            <input
+                                type="text"
+                                placeholder="Add custom tech (Press Enter)..."
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        const val = e.currentTarget.value.trim();
+                                        if (val && !stack.includes(val)) {
+                                            setStack(prev => [...prev, val]);
+                                            e.currentTarget.value = '';
+                                        }
+                                    }
+                                }}
+                            />
                         </div>
                         {/* Render Custom Chips */}
                         {stack.filter(s => !allTechOptions.includes(s)).length > 0 && (

@@ -236,9 +236,12 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 fetchIntegrations();
                 setIsEditingIntegration(false);
                 setCurrentIntegration(null);
+            } else {
+                alert('Failed to save integration. See console.');
             }
         } catch (error) {
             console.error('Save integration failed', error);
+            alert('Save failed: ' + error);
         }
     };
 
@@ -426,7 +429,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             backdropFilter: 'blur(10px)'
                         }}
                     >
-                        Customer Interests
+                        Customer Interests / Leads
                     </button>
                     <button
                         onClick={() => setActiveTab('users')}
@@ -439,7 +442,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             backdropFilter: 'blur(10px)'
                         }}
                     >
-                        Platform Users
+                        Users
                     </button>
                     <button
                         onClick={() => setActiveTab('cms')}
@@ -1287,113 +1290,127 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     );
 }
 
-function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProps) {
-    const [name, setName] = useState(integration?.name || '');
-    const [authType, setAuthType] = useState(integration?.authType || 'api_key');
-    const [baseUrl, setBaseUrl] = useState(integration?.baseUrl || '');
-    const [apiKey, setApiKey] = useState('');
-    const [status, setStatus] = useState(integration?.enabled ?? true);
+const [isTesting, setIsTesting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await onSave({
-            name,
-            authType,
-            baseUrl,
-            apiKey: apiKey || undefined, // Only send if changed/set
-            enabled: status
-        });
-    };
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSave({
+        name,
+        authType,
+        baseUrl,
+        apiKey: apiKey || undefined, // Only send if changed/set
+        enabled: status
+    });
+};
 
-    return (
-        <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Database size={20} className="text-accent" />
-                        {integration ? 'Edit Connection' : 'New Connection'}
-                    </h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                        <X size={24} />
-                    </button>
+const handleTest = async () => {
+    if (!integration?.id) return;
+    setIsTesting(true);
+    try {
+        const res = await fetch(`/api/integrations/${integration.id}/test`, { method: 'POST' });
+        if (res.ok) alert('Connection Successful! ✅');
+        else alert('Connection Failed ❌');
+    } catch (e) {
+        alert('Connection Error');
+    } finally {
+        setIsTesting(false);
+    }
+};
+
+return (
+    <div className="modal-overlay">
+        <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Database size={20} className="text-accent" />
+                    {integration ? 'Edit Connection' : 'New Connection'}
+                </h3>
+                <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={24} />
+                </button>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
+                <div>
+                    <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Integration Name</label>
+                    <input
+                        type="text"
+                        required
+                        placeholder="e.g. OpenAI, Pinecone..."
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
+                    />
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div>
-                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Integration Name</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="e.g. OpenAI, Pinecone..."
-                            value={name}
-                            onChange={e => setName(e.target.value)}
+                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Auth Type</label>
+                        <select
+                            value={authType}
+                            onChange={e => setAuthType(e.target.value as any)}
                             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                        />
+                        >
+                            <option value="api_key">API Key</option>
+                            <option value="oauth">OAuth 2.0</option>
+                        </select>
                     </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Auth Type</label>
-                            <select
-                                value={authType}
-                                onChange={e => setAuthType(e.target.value as any)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                            >
-                                <option value="api_key">API Key</option>
-                                <option value="oauth">OAuth 2.0</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Status</label>
-                            <div
-                                onClick={() => setStatus(!status)}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)',
-                                    cursor: 'pointer', background: status ? 'hsla(140, 70%, 50%, 0.1)' : 'var(--bg-card)'
-                                }}
-                            >
-                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: status ? 'hsl(140, 70%, 50%)' : '#666' }} />
-                                <span style={{ color: 'var(--text-main)' }}>{status ? 'Active' : 'Disabled'}</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <div>
-                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Base URL (Optional)</label>
+                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Status</label>
+                        <div
+                            onClick={() => setStatus(!status)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)',
+                                cursor: 'pointer', background: status ? 'hsla(140, 70%, 50%, 0.1)' : 'var(--bg-card)'
+                            }}
+                        >
+                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: status ? 'hsl(140, 70%, 50%)' : '#666' }} />
+                            <span style={{ color: 'var(--text-main)' }}>{status ? 'Active' : 'Disabled'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Base URL (Optional)</label>
+                    <input
+                        type="text"
+                        placeholder="https://api.example.com/v1"
+                        value={baseUrl}
+                        onChange={e => setBaseUrl(e.target.value)}
+                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
+                    />
+                </div>
+
+                <div>
+                    <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
+                        {integration ? 'Update API Key (Leave blank to keep)' : 'API Key / Token'}
+                    </label>
+                    <div style={{ position: 'relative' }}>
                         <input
-                            type="text"
-                            placeholder="https://api.example.com/v1"
-                            value={baseUrl}
-                            onChange={e => setBaseUrl(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
+                            type="password"
+                            placeholder="sk-..."
+                            value={apiKey}
+                            onChange={e => setApiKey(e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
                         />
+                        <Lock size={16} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
                     </div>
+                </div>
 
-                    <div>
-                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
-                            {integration ? 'Update API Key (Leave blank to keep)' : 'API Key / Token'}
-                        </label>
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type="password"
-                                placeholder="sk-..."
-                                value={apiKey}
-                                onChange={e => setApiKey(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                            />
-                            <Lock size={16} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                        <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
-                        <button type="submit" className="btn-primary">
-                            <Save size={18} /> Save Connection
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                    {integration?.id && (
+                        <button type="button" onClick={handleTest} disabled={isTesting} className="btn-secondary" style={{ marginRight: 'auto' }}>
+                            {isTesting ? 'Testing...' : 'Test Connection'}
                         </button>
-                    </div>
-                </form>
-            </div>
+                    )}
+                    <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+                    <button type="submit" className="btn-primary">
+                        <Save size={18} /> Save Connection
+                    </button>
+                </div>
+            </form>
         </div>
-    );
+    </div>
+);
 }

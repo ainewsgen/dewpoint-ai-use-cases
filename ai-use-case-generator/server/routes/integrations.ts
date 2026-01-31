@@ -98,12 +98,13 @@ router.put('/integrations/:id', requireAuth, async (req: AuthRequest, res) => {
         const integrationId = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
         const { name, authType, baseUrl, apiKey, apiSecret, metadata, enabled } = req.body;
 
-        // Ensure user owns this integration
-        const [existing] = await db.select().from(integrations)
-            .where(and(
-                eq(integrations.id, integrationId),
-                eq(integrations.userId, userId)
-            ));
+        // Ensure user owns this integration OR is admin
+        const isAdmin = req.user!.role === 'admin';
+        const query = isAdmin
+            ? eq(integrations.id, integrationId)
+            : and(eq(integrations.id, integrationId), eq(integrations.userId, userId));
+
+        const [existing] = await db.select().from(integrations).where(query);
 
         if (!existing) {
             return res.status(404).json({ error: 'Integration not found' });
@@ -172,11 +173,13 @@ router.post('/integrations/:id/test', requireAuth, async (req: AuthRequest, res)
         const userId = req.user!.id;
         const integrationId = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
 
-        const [integration] = await db.select().from(integrations)
-            .where(and(
-                eq(integrations.id, integrationId),
-                eq(integrations.userId, userId)
-            ));
+        // Ensure user owns this integration OR is admin
+        const isAdmin = req.user!.role === 'admin';
+        const query = isAdmin
+            ? eq(integrations.id, integrationId)
+            : and(eq(integrations.id, integrationId), eq(integrations.userId, userId));
+
+        const [integration] = await db.select().from(integrations).where(query);
 
         if (!integration) {
             return res.status(404).json({ error: 'Integration not found' });

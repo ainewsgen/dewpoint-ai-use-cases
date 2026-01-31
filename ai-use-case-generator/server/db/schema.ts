@@ -49,6 +49,7 @@ export const integrations = pgTable('integrations', {
     id: serial('id').primaryKey(),
     userId: serial('user_id').references(() => users.id), // who configured it
     name: text('name').notNull(),
+    provider: text('provider'), // Added to match DB schema
     authType: text('auth_type').default('api_key'), // 'api_key' | 'oauth' | 'basic'
     baseUrl: text('base_url'),
     apiKey: text('api_key'), // encrypted

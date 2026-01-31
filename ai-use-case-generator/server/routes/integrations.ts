@@ -68,6 +68,8 @@ router.post('/integrations', requireAuth, async (req: AuthRequest, res) => {
             baseUrl: baseUrl || null,
             metadata: metadata || null,
             enabled: true,
+            // Explicitly set provider for backward compatibility with schema
+            provider: metadata?.provider || (name.toLowerCase().includes('gemini') ? 'gemini' : 'openai'),
         };
 
         if (apiKey) encryptedData.apiKey = encrypt(apiKey);

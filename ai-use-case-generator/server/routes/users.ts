@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, companies, leads } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 
@@ -11,7 +11,7 @@ const SALT_ROUNDS = 10;
 // All routes require admin
 router.use(requireAuth, requireAdmin);
 
-// List all users
+// List all users with full profile data
 router.get('/users', async (req, res) => {
     try {
         const allUsers = await db.select({
@@ -24,7 +24,34 @@ router.get('/users', async (req, res) => {
             createdAt: users.createdAt,
         }).from(users);
 
-        res.json({ users: allUsers });
+        // Fetch related data
+        // Optimization: In a real large app, use JOINs. Here, separate queries are fine.
+        const allCompanies = await db.select().from(companies); // Need to import companies
+        const allLeads = await db.select().from(leads); // Need to import leads
+
+        const enrichedUsers = allUsers.map(u => {
+            const comp = allCompanies.find(c => c.userId === u.id);
+            const lead = allLeads.find(l => l.userId === u.id);
+
+            return {
+                ...u,
+                company: {
+                    // UI expects these nested for the Detail View
+                    name: u.name,
+                    email: u.email,
+                    url: comp?.url || '',
+                    industry: comp?.industry || '',
+                    role: comp?.role || '', // Job Title
+                    size: comp?.size || '',
+                    painPoint: comp?.painPoint || '',
+                    stack: comp?.stack || [],
+                },
+                recipes: lead?.recipes || [],
+                allRecipes: lead?.recipes || []
+            };
+        });
+
+        res.json({ users: enrichedUsers });
     } catch (error) {
         console.error('List users error:', error);
         res.status(500).json({ error: 'Failed to fetch users' });

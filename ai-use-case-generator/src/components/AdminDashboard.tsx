@@ -31,8 +31,7 @@ interface IntegrationModalProps {
 export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
-    const [passcode, setPasscode] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // Legacy mock auth removed - relying on App.tsx real auth
 
 
     // CMS State
@@ -70,7 +69,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     const fetchUsers = async () => {
         try {
-            const res = await fetch('https://dewpoint-ai-use-cases.onrender.com/api/admin/users');
+            const res = await fetch('/api/admin/users');
             if (res.ok) {
                 const data = await res.json();
                 setUsers(data.users);
@@ -95,7 +94,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     const fetchIntegrations = async () => {
         try {
-            const res = await fetch('https://dewpoint-ai-use-cases.onrender.com/api/admin/integrations', {
+            const res = await fetch('/api/admin/integrations', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } // Assuming token storage
             });
             if (res.ok) {
@@ -143,8 +142,8 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const handleSaveIntegration = async (data: any) => {
         try {
             const url = currentIntegration
-                ? `https://dewpoint-ai-use-cases.onrender.com/api/integrations/${currentIntegration.id}`
-                : 'https://dewpoint-ai-use-cases.onrender.com/api/integrations';
+                ? `/api/integrations/${currentIntegration.id}`
+                : '/api/integrations';
 
             const method = currentIntegration ? 'PUT' : 'POST';
 
@@ -170,7 +169,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const handleDeleteIntegration = async (id: number) => {
         if (confirm('Are you sure you want to delete this integration?')) {
             try {
-                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/integrations/${id}`, { method: 'DELETE' });
+                await fetch(`/api/integrations/${id}`, { method: 'DELETE' });
                 fetchIntegrations();
             } catch (error) {
                 console.error('Delete integration failed', error);
@@ -181,7 +180,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const handleTestConnection = async (id: number) => {
         setTestingId(id);
         try {
-            const res = await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/integrations/${id}/test`, { method: 'POST' });
+            const res = await fetch(`/api/integrations/${id}/test`, { method: 'POST' });
             if (res.ok) {
                 alert('Connection Successful! ✅');
             } else {
@@ -226,7 +225,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         try {
             if (currentRealUser) {
                 // Update
-                const res = await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/admin/users/${currentRealUser.id}`, {
+                const res = await fetch(`/api/admin/users/${currentRealUser.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...userEditForm, password: userEditForm.password || undefined })
@@ -238,7 +237,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 }
             } else {
                 // Create
-                const res = await fetch('https://dewpoint-ai-use-cases.onrender.com/api/admin/users', {
+                const res = await fetch('/api/admin/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userEditForm)
@@ -257,7 +256,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const handleDeleteUserReal = async (id: number) => {
         if (confirm('Are you sure you want to deactivate this user?')) {
             try {
-                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/admin/users/${id}`, { method: 'DELETE' });
+                await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
                 fetchUsers();
             } catch (error) {
                 console.error('Delete user failed', error);
@@ -300,39 +299,6 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         setEditingUser(null);
     };
 
-    // Simple mock auth
-    const handleLogin = () => {
-        if (passcode === 'dewpoint') {
-            setIsAuthenticated(true);
-        } else {
-            alert('Access Denied');
-        }
-    };
-
-    if (!isAuthenticated) {
-        return (
-            <div className="center-stage animate-fade-in">
-                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', maxWidth: '400px' }}>
-                    <Lock size={48} className="text-accent" style={{ marginBottom: '1rem' }} />
-                    <h2 style={{ marginBottom: '1rem' }}>DewPoint Admin</h2>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Restricted Access</p>
-                    <div className="input-group" style={{ marginBottom: '1rem' }}>
-                        <input
-                            type="password"
-                            placeholder="Enter Passcode..."
-                            value={passcode}
-                            onChange={(e) => setPasscode(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                        />
-                    </div>
-                    <button onClick={handleLogin} className="btn-primary" style={{ width: '100%' }}>
-                        <Unlock size={18} /> Authenticate
-                    </button>
-                    <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>Hint: dewpoint</p>
-                </div>
-            </div>
-        );
-    }
 
 
 

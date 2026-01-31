@@ -200,7 +200,14 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
 
                             {/* Generation Source Indicator */}
                             <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem', borderTop: '1px dashed var(--border-glass)', paddingTop: '0.5rem' }}>
-                                <span>Source: <strong>{opp.generation_metadata?.source || 'System'}</strong></span>
+                                <span>
+                                    Source: <strong>{opp.generation_metadata?.source || 'System'}</strong>
+                                    {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                                        <span style={{ display: 'block', fontSize: '0.65rem', color: 'salmon', marginTop: '2px' }}>
+                                            ⚠️ {opp.generation_metadata.fallback_reason}
+                                        </span>
+                                    )}
+                                </span>
                                 {opp.generation_metadata?.model && (
                                     <span>Model: <strong>{opp.generation_metadata.model}</strong></span>
                                 )}

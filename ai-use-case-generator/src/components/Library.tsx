@@ -280,7 +280,12 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
 
                             {/* Generation Source Indicator */}
                             <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem', borderTop: '1px dashed var(--border-glass)', paddingTop: '0.5rem' }}>
-                                <span>Source: <strong>{opp.generation_metadata?.source || 'System'}</strong></span>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span>Source: <strong>{opp.generation_metadata?.source || 'System'}</strong></span>
+                                    {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                                        <span style={{ color: 'salmon', fontSize: '0.7rem' }}>⚠️ {opp.generation_metadata.fallback_reason}</span>
+                                    )}
+                                </div>
                                 {opp.generation_metadata?.model && (
                                     <span>Model: <strong>{opp.generation_metadata.model}</strong></span>
                                 )}

@@ -126,6 +126,8 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     useEffect(() => {
         if (activeTab === 'integrations') {
             fetchIntegrations();
+        } else if (activeTab === 'observability') {
+            fetchUsageStats();
         }
     }, [activeTab]);
 

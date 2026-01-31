@@ -29,12 +29,12 @@ app.use(cors({
         : 'http://localhost:5173',
     credentials: true, // Allow cookies
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 
 // Health Check (before other API routes for priority)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: 'v3.21', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', version: 'v3.22', timestamp: new Date().toISOString() });
 });
 
 

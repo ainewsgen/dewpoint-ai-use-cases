@@ -64,12 +64,21 @@ export class UsageService {
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
-        const result = await db.select({
-            totalSpend: sql<number>`COALESCE(SUM(${apiUsage.totalCost}), 0)`,
-            requestCount: sql<number>`COUNT(*)`
-        })
-            .from(apiUsage)
-            .where(gte(apiUsage.timestamp, startOfDay));
+        // 1. Fetch Spending & Requests (Debug wrapped)
+        let result: { totalSpend: number, requestCount: number }[] = [];
+        try {
+            // @ts-ignore
+            result = await db.select({
+                totalSpend: sql<number>`sum(${apiUsage.totalCost})`,
+                requestCount: sql<number>`count(*)`
+            })
+                .from(apiUsage)
+                .where(gte(apiUsage.timestamp, startOfDay));
+        } catch (e: any) {
+            console.error("UsageService: Failed to fetch apiUsage", e);
+            // Don't crash, just return 0s so debugging can continue
+            result = [{ totalSpend: 0, requestCount: 0 }];
+        }
 
         // Fetch ALL integrations (enabled or not) using db.select() for safety
         const allIntegrations = await db.select().from(integrations).orderBy(desc(integrations.id));

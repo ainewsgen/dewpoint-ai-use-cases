@@ -12,9 +12,14 @@ router.get('/usage/stats', requireAuth, requireAdmin, async (req, res) => {
     try {
         const stats = await UsageService.getDailyStats();
         res.json(stats);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Usage Stats Error:', error);
-        res.status(500).json({ error: 'Failed to fetch usage stats' });
+        res.status(500).json({
+            error: 'Failed to fetch usage stats',
+            details: error.message,
+            stack: error.stack,
+            at: 'server/routes/usage.ts'
+        });
     }
 });
 

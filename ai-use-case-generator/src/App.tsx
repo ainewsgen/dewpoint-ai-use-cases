@@ -187,15 +187,16 @@ function App() {
                                 background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
                                 border: '1px solid var(--border-glass)',
                                 color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
-                                padding: '0.4rem 1rem',
+                                padding: '0.4rem 0.8rem', /* Slightly reduced padding */
                                 borderRadius: '50px',
                                 cursor: 'pointer',
                                 backdropFilter: 'blur(10px)',
                                 fontSize: '0.85rem',
-                                fontWeight: 500
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
                             }}
                         >
-                            Library
+                            Free Library of Use Cases
                         </button>
                         {/* My Roadmap Button - Conditional Style based on view */}
                         <button
@@ -216,14 +217,15 @@ function App() {
                                 border: '1px solid var(--border-glass)',
                                 color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
                                 fontWeight: 'bold',
-                                padding: '0.4rem 1rem',
+                                padding: '0.4rem 0.8rem',
                                 borderRadius: '50px',
                                 cursor: 'pointer',
                                 backdropFilter: 'blur(10px)',
-                                fontSize: '0.85rem'
+                                fontSize: '0.85rem',
+                                whiteSpace: 'nowrap'
                             }}
                         >
-                            My Roadmap
+                            Roadmap
                         </button>
 
                         {/* Admin Console - Only for Admins */}

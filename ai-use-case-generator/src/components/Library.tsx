@@ -161,7 +161,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
                 <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
                     <BookOpen size={48} className="text-accent" />
                 </div>
-                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Use Case Library</h2>
+                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Free Library of Use Cases</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Browse our archive of proven automation recipes.</p>
             </header>
 

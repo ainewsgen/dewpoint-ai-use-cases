@@ -19,11 +19,11 @@ router.post('/generate', requireAuth, async (req, res) => {
         // In a multi-user app, we might check req.user.id, but here it's a platform key.
 
         const authReq = req as AuthRequest;
-        const userId = authReq.user!.id; // Authenticated user via requireAuth
+        // const userId = authReq.user!.id; // User tracked for auth, but keys are global pool
 
-        // Check for ANY active AI integration
+        // Check for ANY active AI integration (Global Scope)
         const integrationsList = await db.select().from(integrations)
-            .where(eq(integrations.userId, userId));
+            .where(eq(integrations.enabled, true));
 
         // Find Enabled Integration with keys
         // Priority: Metadata 'provider' set -> First found

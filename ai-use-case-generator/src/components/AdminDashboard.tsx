@@ -973,8 +973,25 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
                                             <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                    <h4 style={{ fontSize: '1.1rem' }}>{r.title}</h4>
-                                                    <span className="badge" style={{ background: '#333' }}>{r.department}</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{r.title}</h4>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span className="badge" style={{ background: '#333' }}>{r.department}</span>
+                                                        {r.industry && (
+                                                            <span className="badge" style={{ background: 'transparent', border: '1px solid #444', color: 'var(--text-muted)' }}>
+                                                                {r.industry}
+                                                            </span>
+                                                        )}
+                                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                                                            {r.generation_metadata?.source || 'System'}
+                                                            {r.generation_metadata?.fallback_reason && (
+                                                                <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>
+                                                                    ⚠️ {r.generation_metadata.fallback_reason}
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 {/* ... recipes details ... */}
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>

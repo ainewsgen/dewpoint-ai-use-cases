@@ -202,7 +202,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
 }
 
 function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, isAdmin: boolean, isSaved: boolean, onToggle: () => void }) {
-    const [showSpecs, setShowSpecs] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
 
     return (
         <div className="glass-panel recipe-card">
@@ -247,9 +247,11 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                 </p>
             </div>
 
-            {showSpecs && (
-                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.03)', padding: '1.25rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem' }}>
+            {/* Deep Dive Content (Public + Admin) */}
+            {showDetails && (
+                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.02)', padding: '1.25rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem', border: '1px solid var(--border-glass)' }}>
 
+                    {/* Publicly visible "Technical Workflow" (simplified) */}
                     <div style={{ marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
                             <strong>⚙️ How it works</strong>
@@ -257,22 +259,24 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                         <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.admin_view.workflow_steps}</p>
                     </div>
 
-                    {opp.public_view.detailed_explanation && (
-                        <div style={{ marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
-                                <strong>📝 Deep Dive</strong>
-                            </div>
-                            <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                            <strong>📝 Deep Dive</strong>
                         </div>
-                    )}
+                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
+                    </div>
 
                     {/* Admin Only Stack */}
                     {isAdmin && (
-                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '0.5rem' }}>
-                            <div style={{ width: '100%', color: 'salmon', fontSize: '0.75rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Server size={12} /> Admin Stack View</div>
-                            {opp.admin_view.tech_stack.map(t => (
-                                <span key={t} className="chip active" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>{t}</span>
-                            ))}
+                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
+                                <Server size={14} /> <strong>Admin Stack View</strong>
+                            </div>
+                            <div className="chips-grid" style={{ gap: '0.25rem' }}>
+                                {opp.admin_view.tech_stack.map(t => (
+                                    <span key={t} style={{ background: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -281,7 +285,10 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
             <div style={{ marginTop: 'auto' }}>
                 <button
                     type="button"
-                    onClick={() => setShowSpecs(!showSpecs)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDetails(!showDetails);
+                    }}
                     className="btn-primary"
                     style={{
                         width: '100%',
@@ -290,7 +297,7 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                     }}
                 >
-                    {showSpecs ? 'Hide Blueprint' : 'View Blueprint'} {showSpecs ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    {showDetails ? 'Hide Blueprint' : 'View Blueprint'} {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
             </div>
         </div>

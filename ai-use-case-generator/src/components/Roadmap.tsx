@@ -1,7 +1,7 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server, Lock, ArrowDownUp } from 'lucide-react';
+import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server, Lock, ArrowDownUp, Map, Shield } from 'lucide-react';
 
 
 import { AdminDashboard } from './AdminDashboard'; // Ensure import
@@ -128,19 +128,20 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
             {activeTab === 'ROADMAP' ? (
                 <div className="roadmap-grid">
                     {savedRecipes.length === 0 ? (
-                        <p>Go back to the <strong>Generator</strong> or <strong>Library</strong> to find recipes to save.</p>
+                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', border: '2px dashed var(--border-glass)', borderRadius: '12px' }}>
+                            <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Your roadmap is empty.</p>
+                            <p>Explore the library to find automations for your business.</p>
                         </div>
-            ) : (
-                <div className="matrix-grid">
-                    {sortedRecipes.map((opp, idx) => (
-                        <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
-                    ))}
+                    ) : (
+                        sortedRecipes.map((opp, idx) => (
+                            <RoadmapCard key={idx} opp={opp} onRemove={() => removeRecipe(idx)} isAdmin={isAdmin} />
+                        ))
+                    )}
                 </div>
+            ) : (
+                <AdminDashboard leads={leads} />
             )}
-        </>
-    )
-}
-        </div >
+        </div>
     );
 }
 

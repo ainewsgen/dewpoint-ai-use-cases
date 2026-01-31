@@ -67,41 +67,48 @@ function App() {
         try {
             const currentUser = userContext || user;
 
-            // 1. Local Storage Sync (Immediate UI consistency for Library & specific persistence)
-            // fetch current local
+            // 1. Local Storage Management (Primary Toggle Source)
             const localSaved = localStorage.getItem('dpg_roadmap');
             let currentLocal: Opportunity[] = localSaved ? JSON.parse(localSaved) : [];
+            let action: 'ADDED' | 'REMOVED' = 'ADDED';
 
-            // Check if exists to determine add/remove or just append? 
-            // The Library "Toggle" assumes add if we are here usually, but let's handle idempotency.
-            // Actually Library toggles locally. Ideally we replicate that logic here or just Append safely.
-            // For now, let's assume this is an ADD operation from the library.
-            if (!currentLocal.find(r => r.title === recipe.title)) {
+            if (currentLocal.find(r => r.title === recipe.title)) {
+                // Exists -> Remove it
+                currentLocal = currentLocal.filter(r => r.title !== recipe.title);
+                action = 'REMOVED';
+            } else {
+                // New -> Add it
                 currentLocal.push(recipe);
-                localStorage.setItem('dpg_roadmap', JSON.stringify(currentLocal));
-                window.dispatchEvent(new Event('roadmap-updated')); // Notify Library.tsx
+                action = 'ADDED';
             }
 
-            if (!currentUser?.email) return;
+            // Sync Local
+            localStorage.setItem('dpg_roadmap', JSON.stringify(currentLocal));
+            window.dispatchEvent(new Event('roadmap-updated')); // Notify Library, Roadmap
+
+            // Return action early if no user to sync with, so UI can still feedback
+            if (!currentUser?.email) return action;
 
             const token = localStorage.getItem('dpg_auth_token');
-            const response = await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads`, {
-                method: 'POST',
+            // USE PUT /leads/sync to ensure exact state match (replacing list, not merging)
+            const response = await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads/sync`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     email: currentUser.email,
-                    name: currentUser.name,
-                    recipes: currentLocal // SYNC THE WHOLE LOCAL LIST to ensure backend matches frontend state
+                    recipes: currentLocal // Full Sync matches local state exactly
                 })
             });
 
             if (!response.ok) throw new Error('Failed to sync save');
+            return action;
 
         } catch (err) {
             console.error("Failed to sync save to backend", err);
+            return 'ERROR';
         }
     };
 

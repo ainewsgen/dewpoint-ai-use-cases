@@ -208,7 +208,22 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
         <div className="glass-panel recipe-card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
                 <div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>{opp.department}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.2rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
+                        {opp.industry && (
+                            <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px' }}>
+                                {opp.industry}
+                            </span>
+                        )}
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
+                            {opp.generation_metadata?.source || 'System'}
+                        </span>
+                        {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                            <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
+                                ⚠️ {opp.generation_metadata.fallback_reason}
+                            </span>
+                        )}
+                    </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
                 </div>
                 {/* Save Icon Button */}
@@ -270,23 +285,7 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                     {isAdmin && (
                         <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                                <span className={`dept-badge ${opp.department.toLowerCase().replace(' ', '-')}`}>
-                                    {opp.department}
-                                </span>
-                                {opp.industry && (
-                                    <span style={{
-                                        fontSize: '0.7rem',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.05em',
-                                        color: 'var(--text-muted)',
-                                        border: '1px solid var(--border-glass)',
-                                        padding: '2px 6px',
-                                        borderRadius: '4px'
-                                    }}>
-                                        {opp.industry}
-                                    </span>
-                                )}
-                                <Server size={14} style={{ marginLeft: 'auto', color: 'salmon' }} /> <strong style={{ color: 'salmon' }}>Admin Stack View</strong>
+                                <Server size={14} style={{ color: 'salmon' }} /> <strong style={{ color: 'salmon' }}>Admin Stack View</strong>
                             </div>
                             <div className="chips-grid" style={{ gap: '0.25rem' }}>
                                 {opp.admin_view.tech_stack.map(t => (

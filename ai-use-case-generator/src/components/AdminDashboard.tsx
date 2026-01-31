@@ -151,10 +151,15 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     const fetchUsageStats = async () => {
         try {
-            const res = await fetch('/api/admin/usage/stats');
+            const res = await fetch('/api/admin/usage/stats', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
             if (res.ok) {
                 const data = await res.json();
+                console.log('Usage Stats Loaded:', data);
                 setUsageStats(data);
+            } else {
+                console.error('Usage Stats Failed:', await res.text());
             }
         } catch (error) {
             console.error('Failed to fetch usage stats', error);

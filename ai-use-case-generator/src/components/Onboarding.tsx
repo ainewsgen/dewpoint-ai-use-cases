@@ -308,23 +308,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your Role</label>
+                            <label className="input-label">Your Role</label>
                             <div className="input-group">
                                 <select
                                     value={role}
                                     onChange={e => setRole(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.9rem',
-                                        borderRadius: '6px',
-                                        border: '1px solid var(--border-glass)',
-                                        background: 'var(--bg-card)', // Use card background instead of white
-                                        color: 'hsl(var(--text-main))',
-                                        fontSize: '1rem',
-                                        // Ensure dropdown arrow is visible (browser default usually fine, but custom bg might need generic appearance)
-                                    }}
                                 >
                                     <option value="" disabled>Select Role...</option>
                                     <option value="Founder">Founder / CEO</option>
@@ -338,20 +328,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company Size</label>
+                            <label className="input-label">Company Size</label>
                             <div className="input-group">
                                 <select
                                     value={size}
                                     onChange={e => setSize(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.9rem',
-                                        borderRadius: '6px',
-                                        border: '1px solid var(--border-glass)',
-                                        background: 'var(--bg-card)',
-                                        color: 'hsl(var(--text-main))',
-                                        fontSize: '1rem'
-                                    }}
                                 >
                                     <option value="Solopreneur">Solopreneur (1)</option>
                                     <option value="1-10">Micro (1-10)</option>
@@ -363,12 +344,23 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Tech Stack</label>
+                        <label className="input-label" style={{ marginBottom: '1rem' }}>Tech Stack</label>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '2rem' }}>
                             {Object.entries(techCategories).map(([category, tools]) => (
                                 <div key={category}>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'hsl(var(--accent-primary))', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 800,
+                                        color: 'hsl(var(--accent-primary))',
+                                        marginBottom: '0.75rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.1em',
+                                        borderBottom: '1px solid var(--border-glass)',
+                                        paddingBottom: '0.25rem',
+                                        width: 'fit-content'
+                                    }}>
                                         {category}
                                     </label>
                                     <div className="chips-grid">
@@ -377,6 +369,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                                 key={t}
                                                 className={`chip ${stack.includes(t) ? 'active' : ''}`}
                                                 onClick={() => toggleTech(t)}
+                                                style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}
                                             >
                                                 {t}
                                             </button>
@@ -391,6 +384,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             <input
                                 type="text"
                                 placeholder="Add custom tech (Press Enter)..."
+                                style={{ paddingLeft: '1rem' }} // Override the default padding-left 3rem if using icon, but here we aren't
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         const val = e.currentTarget.value.trim();

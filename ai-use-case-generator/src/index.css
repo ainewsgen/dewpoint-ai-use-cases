@@ -180,24 +180,52 @@ h5 {
 
 /* ... btn styles ... */
 
-.input-group input {
-    width: 100%;
-    padding: 1rem 1rem 1rem 3rem;
-    background: white;
-    border: 1px solid hsl(213, 20%, 90%);
-    /* Light border */
-    border-radius: var(--radius-md);
-    color: hsl(var(--text-main));
-    /* Dark text */
-    font-size: 1rem;
-    transition: all 0.2s;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+/* Input Group & Select Styles */
+.input-group {
+    position: relative;
 }
 
-.input-group input:focus {
+.input-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: hsl(var(--text-muted));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 1rem;
+    background: #f8fafc;
+    /* Slight off-white for contrast */
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    color: hsl(var(--text-main));
+    font-size: 1rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    appearance: none;
+    /* Remove default browser arrow to style custom if needed, but we keep simple for now */
+}
+
+.input-group select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+.input-group input:focus,
+.input-group select:focus {
     outline: none;
+    background: white;
     border-color: hsl(var(--accent-primary));
-    box-shadow: 0 0 0 3px hsla(var(--accent-primary)/0.1);
+    box-shadow: 0 0 0 4px hsla(var(--accent-primary)/0.1);
+    transform: translateY(-1px);
 }
 
 /* Matrix Styles */
@@ -224,11 +252,18 @@ h5 {
     /* Gold highlight on hover */
 }
 
+/* Chips Grid - Compact Layout */
+.chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
 /* Badges */
 .badge {
     padding: 0.35rem 0.75rem;
-    border-radius: 50px;
-    /* Full pill shape */
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;

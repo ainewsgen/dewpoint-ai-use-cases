@@ -212,16 +212,20 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
                         {opp.industry && (
                             <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px' }}>
-                                {opp.industry}
+                                Industry: {opp.industry}
                             </span>
                         )}
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
-                            {opp.generation_metadata?.source || 'System'}
-                        </span>
-                        {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
-                            <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
-                                ⚠️ {opp.generation_metadata.fallback_reason}
-                            </span>
+                        {isAdmin && (
+                            <>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
+                                    {opp.generation_metadata?.source || 'System'}
+                                </span>
+                                {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                                    <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
+                                        ⚠️ {opp.generation_metadata.fallback_reason}
+                                    </span>
+                                )}
+                            </>
                         )}
                     </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>

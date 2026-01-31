@@ -139,16 +139,20 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                                 padding: '1px 4px',
                                 borderRadius: '3px'
                             }}>
-                                {opp.industry}
+                                Industry: {opp.industry}
                             </span>
                         )}
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
-                            {opp.generation_metadata?.source || 'System'}
-                        </span>
-                        {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
-                            <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
-                                ⚠️ {opp.generation_metadata.fallback_reason}
-                            </span>
+                        {isAdmin && (
+                            <>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
+                                    {opp.generation_metadata?.source || 'System'}
+                                </span>
+                                {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                                    <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
+                                        ⚠️ {opp.generation_metadata.fallback_reason}
+                                    </span>
+                                )}
+                            </>
                         )}
 
                     </div>

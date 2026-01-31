@@ -7,4 +7,13 @@ export default defineConfig({
     build: {
         emptyOutDir: false, // Don't delete dist/server from TypeScript build
     },
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:3000',
+                changeOrigin: true,
+                secure: false,
+            }
+        }
+    }
 })

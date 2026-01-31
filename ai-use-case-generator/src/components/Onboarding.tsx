@@ -75,8 +75,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         setError(false);
 
         try {
-            // Attempt server-side "AI" scan which reads the actual page content
-            const response = await fetch(`${import.meta.env.PROD ? '/api' : 'http://localhost:3000/api'}/scan-url`, {
+            // Attempt server-side "AI" scan via Proxy
+            const response = await fetch('/api/scan-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: cleanUrl })
@@ -90,21 +90,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 if (data.context) setScrapedContext(data.context);
 
                 if (data.stack && data.stack.length > 0) {
-                    // Merge distinct
                     setStack(prev => {
-                        const next = new Set([...prev, ...data.stack, 'Gmail/GSuite']); // Always assume GSuite
+                        const next = new Set([...prev, ...data.stack, 'Gmail/GSuite']);
                         return Array.from(next);
                     });
                 } else {
                     setStack(prev => prev.includes('Gmail/GSuite') ? prev : [...prev, 'Gmail/GSuite']);
                 }
             } else {
-                // Fallback to client-side heuristics if server fails (e.g. timeout/block)
+                console.warn("Scan failed, falling back to heuristics");
                 runClientHeuristics(cleanUrl);
             }
 
         } catch (err) {
-            console.warn("Server scan failed, using fallback.", err);
+            console.warn("Server scan network error, using fallback.", err);
             runClientHeuristics(cleanUrl);
         } finally {
             setIsScanning(false);

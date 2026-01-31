@@ -269,8 +269,24 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                     {/* Admin Only Stack */}
                     {isAdmin && (
                         <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
-                                <Server size={14} /> <strong>Admin Stack View</strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                                <span className={`dept-badge ${opp.department.toLowerCase().replace(' ', '-')}`}>
+                                    {opp.department}
+                                </span>
+                                {opp.industry && (
+                                    <span style={{
+                                        fontSize: '0.7rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em',
+                                        color: 'var(--text-muted)',
+                                        border: '1px solid var(--border-glass)',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px'
+                                    }}>
+                                        {opp.industry}
+                                    </span>
+                                )}
+                                <Server size={14} style={{ marginLeft: 'auto', color: 'salmon' }} /> <strong style={{ color: 'salmon' }}>Admin Stack View</strong>
                             </div>
                             <div className="chips-grid" style={{ gap: '0.25rem' }}>
                                 {opp.admin_view.tech_stack.map(t => (

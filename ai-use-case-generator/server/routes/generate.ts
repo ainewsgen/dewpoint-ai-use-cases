@@ -55,7 +55,7 @@ User Profile:
 - Website Summary: {{description}}
 - Deep Site Analysis: {{pageContext}}
 
-Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title, Department, Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.
+Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title, Department, Industry (specific to the use case or general), Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.
 
 CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "dormant data" opportunities or "competitor gaps" (e.g. if they lack online booking, suggest an AI scheduler).`;
 
@@ -119,6 +119,7 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
 
             const enrichedBlueprints = finalBlueprints.map((b: any) => ({
                 ...b,
+                industry: b.industry || companyData.industry || 'General',
                 generation_metadata: {
                     source: 'AI',
                     model: modelId,

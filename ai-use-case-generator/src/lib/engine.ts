@@ -25,6 +25,7 @@ export interface CompanyData {
 export interface Opportunity {
     title: string;
     department: string;
+    industry?: string;
     public_view: {
         problem: string;
         solution_narrative: string;
@@ -91,6 +92,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
     opportunities.push({
         title: "The Silent Assistant",
         department: getDepartmentFromPain(painPoint),
+        industry: industry || "General",
         public_view: {
             problem: `You identified "${painPoint}" as a major daily friction point.`,
             solution_narrative: `An intelligent digital assistant that intercepts "${painPoint}" tasks, understands the context regardless of format, and handles the execution instantly without you lifting a finger.`,
@@ -131,6 +133,7 @@ if (financeTool) {
     opportunities.push({
         title: "The Invoice Watchdog",
         department: "Finance",
+        industry: "Finance",
         public_view: {
             problem: "Duplicate invoices and creeping vendor costs often go unnoticed until it's too late.",
             solution_narrative: "A 24/7 auditor that reads every incoming PDF invoice, compares it against your contract terms, and alerts you only when it finds a mistake.",
@@ -167,6 +170,7 @@ if (financeTool) {
     opportunities.push({
         title: "Receipt Auto-Router",
         department: "Finance",
+        industry: "Finance",
         public_view: {
             problem: "Chasing employees for receipts is a low-value distraction.",
             solution_narrative: "Automatically matches email receipts to credit card transactions and categorizes them instantly.",
@@ -206,6 +210,7 @@ if (dataTool) {
     opportunities.push({
         title: "The Omni-Channel Nurture",
         department: "Sales",
+        industry: "Sales",
         public_view: {
             problem: "Leads go cold because manual follow-up is too slow or generic.",
             solution_narrative: "When a high-value prospect visits your pricing page, this agent instantly researches them and drafts a hyper-personalized video script and email for your rep to approve.",
@@ -242,6 +247,7 @@ if (dataTool) {
     opportunities.push({
         title: "The Lead Qualifier",
         department: "Sales",
+        industry: "Sales",
         public_view: {
             problem: "Wasting time talking to unqualified leads.",
             solution_narrative: "Intelligently researches every new inquiry, scores them based on your criteria, and drafts the perfect reply.",
@@ -279,6 +285,7 @@ if (dataTool) {
 opportunities.push({
     title: "The Project Pulse",
     department: "Operations",
+    industry: "Operations",
     public_view: {
         problem: "Project updates require constantly nagging the team for status.",
         solution_narrative: "An observer that silently reads all project activity and automatically updates your client dashboard so they never have to ask 'where are we at?'.",
@@ -327,6 +334,7 @@ if (isProfessionalServices) {
     opportunities.push({
         title: "The Case Miner",
         department: "Knowledge",
+        industry: "Legal",
         public_view: {
             problem: "Your firm sits on decades of PDF case files that are effectively invisible to your current team.",
             solution_narrative: "An internal search engine that indexes every past case/project, allowing staff to ask 'Have we solved a problem like this before?' and get instant cited answers.",
@@ -365,6 +373,7 @@ if (!stack.includes("LinkedIn")) {
     opportunities.push({
         title: "The Competitor Watchtower",
         department: "Strategy",
+        industry: "Strategy",
         public_view: {
             problem: "Competitors are launching moves you don't see until it's too late.",
             solution_narrative: "A silent scout that monitors your top 5 competitors' websites, hiring boards, and press releases daily, summarizing their strategy in a weekly briefing.",

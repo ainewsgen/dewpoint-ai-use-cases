@@ -32,7 +32,7 @@ app.use(cookieParser());
 
 // Health Check (before other API routes for priority)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: 'v3.16', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', version: 'v3.17', timestamp: new Date().toISOString() });
 });
 
 // API Routes

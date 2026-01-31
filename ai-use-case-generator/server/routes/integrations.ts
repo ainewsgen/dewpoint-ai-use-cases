@@ -87,9 +87,9 @@ router.post('/integrations', requireAuth, async (req: AuthRequest, res) => {
                 apiSecret: apiSecret || null,
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Create integration error:', error);
-        res.status(500).json({ error: 'Failed to create integration' });
+        res.status(500).json({ error: `Failed to create integration: ${error.message}` });
     }
 });
 
@@ -140,9 +140,9 @@ router.put('/integrations/:id', requireAuth, async (req: AuthRequest, res) => {
                 apiSecret: updated.apiSecret ? decrypt(updated.apiSecret) : null,
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Update integration error:', error);
-        res.status(500).json({ error: 'Failed to update integration' });
+        res.status(500).json({ error: `Failed to update integration: ${error.message}` });
     }
 });
 

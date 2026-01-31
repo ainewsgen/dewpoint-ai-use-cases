@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-import { requireAuth, requireAdmin } from './middleware/auth'; // Import Auth Middleware
+import { requireAuth, requireAdmin, AuthRequest } from './middleware/auth'; // Import Auth Middleware
 import authRoutes from './routes/auth';
 import authEnhancedRoutes from './routes/auth-enhanced';
 import leadsRoutes from './routes/leads';
@@ -87,6 +87,10 @@ import { OpenAIService } from './services/openai';
 import { GeminiService } from './services/gemini';
 import { UsageService } from './services/usage';
 
+import { requireAuth, requireAdmin, AuthRequest } from './middleware/auth'; // Import Auth Middleware
+
+// ...
+
 app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
     const trace: string[] = [];
     const log = (msg: string) => {
@@ -96,7 +100,8 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
 
     try {
         log("Starting Dry Run...");
-        const userId = req.user?.id || 1;
+        const authReq = req as AuthRequest;
+        const userId = authReq.user?.id || 1;
         log(`User Context: ID ${userId}`);
 
         // 1. Dummy Data

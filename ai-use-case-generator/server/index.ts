@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://dewpoint-ai-use-cases.onrender.com'
+        ? (process.env.CLIENT_URL || 'https://dewpoint-ai-use-cases.onrender.com')
         : 'http://localhost:5173',
     credentials: true, // Allow cookies
 }));

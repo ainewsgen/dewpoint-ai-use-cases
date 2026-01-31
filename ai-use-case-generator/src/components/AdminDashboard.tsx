@@ -499,7 +499,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             <textarea
                                 value={announcement}
                                 onChange={(e) => setAnnouncement(e.target.value)}
-                                placeholder="e.g., 'Maintenance scheduled for Saturday' or 'Welcome to our generic Beta!'"
+                                placeholder="e.g., 'System Maintenance: Saturday 2am' or 'Welcome to the Beta!'"
                                 style={{
                                     width: '100%', minHeight: '150px', padding: '1rem',
                                     background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)',

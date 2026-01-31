@@ -69,7 +69,7 @@ function App() {
             if (!currentUser?.email) return;
 
             const token = localStorage.getItem('dpg_auth_token');
-            const response = await fetch(`${import.meta.env.PROD ? 'https://dewpoint-ai-use-cases.onrender.com' : 'http://localhost:3000'}/api/leads`, {
+            const response = await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

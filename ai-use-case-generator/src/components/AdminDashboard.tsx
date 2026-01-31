@@ -723,67 +723,64 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         </button>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.0rem' }}>
                         {integrations.map(int => (
-                            <div key={int.id} className="animate-fade-in" style={{
-                                padding: '1.5rem',
+                            <div key={int.id} className="animate-fade-in glass-panel" style={{
+                                padding: '1.25rem',
                                 background: 'rgba(255,255,255,0.03)',
                                 borderRadius: '12px',
-                                border: '1px solid var(--border-glass)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '1rem',
-                                transition: 'all 0.2s',
-                                position: 'relative',
-                                overflow: 'hidden'
+                                position: 'relative'
                             }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        {/* Status Dot */}
                                         <div style={{
-                                            width: '40px', height: '40px',
-                                            background: 'hsla(var(--accent-primary)/0.1)',
-                                            borderRadius: '8px',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            color: 'hsl(var(--accent-primary))'
-                                        }}>
-                                            <Database size={20} />
-                                        </div>
-                                        <div>
-                                            <h4 style={{ fontWeight: 600, fontSize: '1rem' }}>{int.name}</h4>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{int.authType}</span>
-                                        </div>
+                                            width: '8px', height: '8px', borderRadius: '50%',
+                                            background: int.enabled ? 'hsl(140, 70%, 50%)' : 'hsl(0, 0%, 40%)',
+                                            boxShadow: int.enabled ? '0 0 8px hsl(140, 70%, 50%)' : 'none'
+                                        }} title={int.enabled ? 'Active' : 'Disabled'} />
+
+                                        <h4 style={{ fontWeight: 600, fontSize: '1rem', margin: 0 }}>{int.name}</h4>
                                     </div>
-                                    <div style={{
-                                        width: '8px', height: '8px', borderRadius: '50%',
-                                        background: int.enabled ? 'hsl(140, 70%, 50%)' : 'hsl(0, 0%, 40%)',
-                                        boxShadow: int.enabled ? '0 0 8px hsl(140, 70%, 50%)' : 'none'
-                                    }} />
+
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            onClick={() => openEditIntegration(int)}
+                                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                            title="Edit"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteIntegration(int.id)}
+                                            style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}
+                                            title="Delete"
+                                        >
+                                            <Trash size={16} />
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
-                                    <button
-                                        onClick={() => handleTestConnection(int.id)}
-                                        disabled={testingId === int.id}
-                                        className="btn-secondary"
-                                        style={{ flex: 1, fontSize: '0.8rem', justifyContent: 'center' }}
-                                    >
-                                        {testingId === int.id ? 'Testing...' : 'Test Connection'}
-                                    </button>
-                                    <button
-                                        onClick={() => openEditIntegration(int)}
-                                        className="btn-secondary"
-                                        style={{ padding: '0.5rem', color: 'var(--text-muted)' }}
-                                    >
-                                        <Edit size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteIntegration(int.id)}
-                                        className="btn-secondary"
-                                        style={{ padding: '0.5rem', color: 'salmon', borderColor: 'salmon' }}
-                                    >
-                                        <Trash size={16} />
-                                    </button>
-                                </div>
+                                {/* Minimal info: Provider Label if exists */}
+                                {/* We hide 'api_key' because it complicates things. */}
+                                {(int.metadata as any)?.provider && (
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                        {(int.metadata as any).provider}
+                                    </div>
+                                )}
+
+                                {/* Quick Test Action - kept but subtle */}
+                                <button
+                                    onClick={() => handleTestConnection(int.id)}
+                                    disabled={testingId === int.id}
+                                    className="btn-secondary"
+                                    style={{ width: '100%', fontSize: '0.8rem', justifyContent: 'center', padding: '0.4rem', marginTop: '0.25rem' }}
+                                >
+                                    {testingId === int.id ? 'Testing...' : 'Test Connection'}
+                                </button>
                             </div>
                         ))}
                     </div>

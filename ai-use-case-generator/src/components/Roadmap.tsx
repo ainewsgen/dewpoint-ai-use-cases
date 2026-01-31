@@ -106,7 +106,7 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
 
             {/* Admin Toggle: Absolute Positioned Top-Right */}
             {isAdmin && (
-                <div style={{ position: 'absolute', top: '2rem', right: '1rem', zIndex: 20 }}>
+                <div style={{ position: 'absolute', top: '6rem', right: '1rem', zIndex: 20 }}>
                     <button
                         onClick={() => setActiveTab(activeTab === 'ADMIN' ? 'ROADMAP' : 'ADMIN')}
                         className="btn-secondary"

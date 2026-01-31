@@ -19,7 +19,7 @@ router.post('/generate', requireAuth, async (req, res) => {
         // In a multi-user app, we might check req.user.id, but here it's a platform key.
 
         const authReq = req as AuthRequest;
-        const userId = authReq.user!.id; // User tracked for auth, but keys are global pool
+        const userId = authReq.user?.id || 1; // Default to admin (1) if user context missing, to prevent crash
 
         // Check for ANY active AI integration (Global Scope)
         const integrationsList = await db.select().from(integrations)

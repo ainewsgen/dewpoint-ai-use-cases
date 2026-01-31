@@ -4,6 +4,7 @@ import { integrations } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import { encrypt, decrypt } from '../utils/encryption';
+import { OpenAIService } from '../services/openai';
 
 const router = Router();
 
@@ -205,7 +206,7 @@ router.post('/integrations/:id/test', requireAuth, async (req: AuthRequest, res)
             }
 
             const decryptedKey = decrypt(integration.apiKey);
-            
+
             // minimal test call
             try {
                 await OpenAIService.generateJSON({
@@ -221,17 +222,17 @@ router.post('/integrations/:id/test', requireAuth, async (req: AuthRequest, res)
                 });
             } catch (apiError: any) {
                 console.error("OpenAI Test Error:", apiError);
-                return res.status(400).json({ 
-                    error: 'OpenAI Connection Failed', 
-                    details: apiError.message 
+                return res.status(400).json({
+                    error: 'OpenAI Connection Failed',
+                    details: apiError.message
                 });
             }
         }
-        
+
         // Fallback for other providers (not implemented yet)
         res.json({
-             success: true,
-             message: 'Connection configuration saved (Test skipped for this provider type)',
+            success: true,
+            message: 'Connection configuration saved (Test skipped for this provider type)',
         });
     } catch (error) {
         console.error('Test integration error:', error);

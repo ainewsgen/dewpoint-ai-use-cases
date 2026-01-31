@@ -518,6 +518,8 @@ User Profile:
 - Role: {{role}}
 - Tech Stack: {{stack}}
 - Primary Pain Point: {{painPoint}}
+- Website Summary: {{description}}
+- Deep Site Analysis: {{pageContext}}
 
 Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include the following fields:
 

@@ -28,12 +28,15 @@ router.post('/signup', async (req, res) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
+        // Check if user should be admin
+        const isAdminConfigured = email === 'admin@dewpoint.ai' || email.startsWith('admin+');
+
         // Create user
         const [newUser] = await db.insert(users).values({
             email,
             name,
             passwordHash,
-            role: 'user',
+            role: isAdminConfigured ? 'admin' : 'user',
             isActive: true,
         }).returning();
 

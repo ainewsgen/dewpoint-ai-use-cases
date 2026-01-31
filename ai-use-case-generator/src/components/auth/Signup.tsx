@@ -42,7 +42,10 @@ export const Signup: React.FC<SignupProps> = ({ onClose, onSuccess, switchToLogi
                     <X size={20} />
                 </button>
 
-                <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Create Account</h2>
+                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Save Your Roadmap</h2>
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.4' }}>
+                    Create a free account to save your generated use cases and unlock the full strategy matrix.
+                </p>
 
                 {error && (
                     <div style={{ background: 'rgba(255, 59, 48, 0.1)', color: '#ff3b30', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem' }}>

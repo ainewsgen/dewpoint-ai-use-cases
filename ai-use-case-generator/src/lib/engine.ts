@@ -42,10 +42,12 @@ export interface Opportunity {
         workflow_steps: string;
         upsell_opportunity: string;
     };
-    source: 'AI' | 'System';
-    model?: string;
-    timestamp?: string;
-    fallback_reason?: string;
+    generation_metadata?: {
+        source: 'AI' | 'System';
+        model?: string;
+        timestamp?: string;
+        fallback_reason?: string;
+    };
 }
 
 export async function generateOpportunities(companyData: CompanyData, promptDetails?: any): Promise<Opportunity[]> {

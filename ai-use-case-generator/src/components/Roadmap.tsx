@@ -102,27 +102,38 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
 
     // Admin View Wrapper
     return (
-        <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>
-            {/* Header Area */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Map size={32} className="text-accent" />
-                    <h2 className="text-accent" style={{ margin: 0 }}>
-                        {activeTab === 'ADMIN' ? 'Admin Console' : 'My Blueprints'}
-                    </h2>
-                </div>
+        <div className="container animate-fade-in" style={{ paddingTop: '2rem', position: 'relative' }}>
 
-                {isAdmin && (
+            {/* Admin Toggle: Absolute Positioned Top-Right */}
+            {isAdmin && (
+                <div style={{ position: 'absolute', top: '2rem', right: '1rem', zIndex: 20 }}>
                     <button
                         onClick={() => setActiveTab(activeTab === 'ADMIN' ? 'ROADMAP' : 'ADMIN')}
                         className="btn-secondary"
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}
                     >
                         {activeTab === 'ADMIN' ? <Map size={16} /> : <Shield size={16} />}
                         {activeTab === 'ADMIN' ? 'Return to Roadmap' : 'Admin Dashboard'}
                     </button>
-                )}
-            </div>
+                </div>
+            )}
+
+            {/* Centered Header */}
+            <header style={{ textAlign: 'center', marginBottom: '3rem', marginTop: '1rem' }}>
+                <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-gold)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
+                    {activeTab === 'ADMIN' ? (
+                        <Shield size={48} className="text-gold" />
+                    ) : (
+                        <Map size={48} className="text-gold" />
+                    )}
+                </div>
+                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+                    {activeTab === 'ADMIN' ? 'Admin Console' : 'My Blueprints'}
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>
+                    {activeTab === 'ADMIN' ? 'Manage leads, integrations, and users.' : 'Your curated list of high-impact AI strategies.'}
+                </p>
+            </header>
 
             {/* Content Switch */}
             {activeTab === 'ROADMAP' ? (

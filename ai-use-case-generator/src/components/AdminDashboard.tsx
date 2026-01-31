@@ -422,7 +422,20 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                     <Shield size={48} className="text-secondary" />
                 </div>
                 <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Admin Console</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>System Management & Overview</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', margin: 0 }}>System Management & Overview</p>
+                    <button
+                        onClick={() => {
+                            fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+                                window.location.href = '/login';
+                            });
+                        }}
+                        className="btn-secondary"
+                        style={{ padding: '0.2rem 0.6rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                        <MonitorStop size={14} /> Log Out
+                    </button>
+                </div>
 
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem', flexWrap: 'wrap' }}>
                     <button

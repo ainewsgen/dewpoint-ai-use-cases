@@ -36,6 +36,24 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', version: 'v3.17', timestamp: new Date().toISOString() });
 });
 
+// NEW: Robust Schema Inspection Endpoint
+app.get('/api/debug/schema-check', async (req, res) => {
+    try {
+        const schemaResult = await db.execute(sql`
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'integrations';
+        `);
+        res.json({
+            status: 'ok',
+            columns: schemaResult.rows,
+            db_url_exists: !!process.env.DATABASE_URL
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Deep DB Diagnostic (Priority)
 app.get('/api/debug/db-check', async (req, res) => {
     try {

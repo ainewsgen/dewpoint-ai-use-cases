@@ -5,6 +5,9 @@ import { eq } from 'drizzle-orm';
 import { decrypt } from '../utils/encryption';
 import { OpenAIService } from '../services/openai';
 import { UsageService } from '../services/usage';
+import { GeminiService } from '../services/gemini'; // Static import
+import { AuthRequest } from '../middleware/auth';
+
 
 const router = express.Router();
 
@@ -15,9 +18,12 @@ router.post('/generate', async (req, res) => {
         // We assume there's a system-wide or admin-owned integration named 'OpenAI'
         // In a multi-user app, we might check req.user.id, but here it's a platform key.
 
+        const authReq = req as AuthRequest;
+        const userId = authReq.user?.id || 1; // Default to admin for now
+
         // Check for ANY active AI integration
         const integrationsList = await db.select().from(integrations)
-            .where(eq(integrations.userId, req.user?.id || 1)); // Default to admin for now
+            .where(eq(integrations.userId, userId));
 
         // Find Enabled Integration with keys
         // Priority: Metadata 'provider' set -> First found
@@ -91,7 +97,6 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
 
             let result;
             if (provider === 'gemini') {
-                const { GeminiService } = await import('../services/gemini'); // Dynamic import to avoid load issues if file missing
                 result = await GeminiService.generateJSON(aiParams);
             } else {
                 result = await OpenAIService.generateJSON(aiParams);

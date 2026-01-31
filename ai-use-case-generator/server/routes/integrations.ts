@@ -198,16 +198,40 @@ router.post('/integrations/:id/test', requireAuth, async (req: AuthRequest, res)
             return res.status(404).json({ error: 'Integration not found' });
         }
 
-        // TODO: Implement actual API testing based on integration type
-        // For now, just validate that credentials exist
-        if (!integration.apiKey && !integration.apiSecret) {
-            return res.status(400).json({ error: 'No credentials configured' });
-        }
+        // Real API Test
+        if (integration.provider === 'openai' || integration.name.toLowerCase().includes('openai')) {
+            if (!integration.apiKey) {
+                return res.status(400).json({ error: 'No API Key configured' });
+            }
 
+            const decryptedKey = decrypt(integration.apiKey);
+            
+            // minimal test call
+            try {
+                await OpenAIService.generateJSON({
+                    apiKey: decryptedKey,
+                    systemPrompt: "You are a connection tester.",
+                    userContext: "Return { \"status\": \"ok\" } JSON.",
+                    model: "gpt-3.5-turbo" // Cheap model for testing
+                });
+
+                return res.json({
+                    success: true,
+                    message: 'Successfully connected to OpenAI!',
+                });
+            } catch (apiError: any) {
+                console.error("OpenAI Test Error:", apiError);
+                return res.status(400).json({ 
+                    error: 'OpenAI Connection Failed', 
+                    details: apiError.message 
+                });
+            }
+        }
+        
+        // Fallback for other providers (not implemented yet)
         res.json({
-            success: true,
-            message: 'Integration test successful',
-            // Would include actual test results here
+             success: true,
+             message: 'Connection configuration saved (Test skipped for this provider type)',
         });
     } catch (error) {
         console.error('Test integration error:', error);

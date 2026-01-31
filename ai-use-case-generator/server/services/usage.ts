@@ -71,21 +71,20 @@ export class UsageService {
             .from(apiUsage)
             .where(gte(apiUsage.timestamp, startOfDay));
 
-        // Fetch ALL enabled integrations to find the active one robustly
+        // Fetch ALL integrations (enabled or not) to debug visibility
         const allIntegrations = await db.query.integrations.findMany({
-            where: eq(integrations.enabled, true),
             orderBy: (integrations, { desc }) => [desc(integrations.id)]
         });
 
         // 1. Try exact name match
         // 2. Try metadata provider match
-        // 3. Fallback to the most recent enabled integration
+        // 3. Fallback to the most recent integration
         const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')
             || allIntegrations.find(i => (i.metadata as any)?.provider === 'openai')
             || allIntegrations[0];
 
+        console.log(`[UsageStats] Total Integrations: ${allIntegrations.length}`);
         console.log(`[UsageStats] Selected Integration ID: ${openAIInt?.id}, Name: ${openAIInt?.name}`);
-        console.log(`[UsageStats] Metadata RAW:`, openAIInt?.metadata);
 
         // Ensure default of 5.00 if strictly undefined or null, but allow 0 if explicitly set (and not null)
         const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
@@ -96,7 +95,8 @@ export class UsageService {
             requests: Number(result[0]?.requestCount || 0),
             limit,
             integrationId: openAIInt?.id,
-            debugMeta: openAIInt?.metadata
+            debugMeta: openAIInt?.metadata,
+            integrationCount: allIntegrations.length
         };
     }
 }

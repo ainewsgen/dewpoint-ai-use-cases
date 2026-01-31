@@ -612,6 +612,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                     <div style={{ marginTop: '2rem', padding: '1rem', border: '1px dashed #444', borderRadius: '8px', opacity: 0.7 }}>
                         <h5 style={{ color: '#888', marginBottom: '0.5rem', fontSize: '0.8rem' }}>🛠️ Debug: Integration Persistence</h5>
                         <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#aaa' }}>
+                            <p>DB Count: <span style={{ color: 'white' }}>{(usageStats as any)?.integrationCount ?? '?'}</span></p>
                             <p>Integration ID: <span style={{ color: 'white' }}>{usageStats?.integrationId || 'Values not found'}</span></p>
                             <p>Raw Metadata: <span style={{ color: 'white' }}>{JSON.stringify(usageStats?.debugMeta || {})}</span></p>
                         </div>

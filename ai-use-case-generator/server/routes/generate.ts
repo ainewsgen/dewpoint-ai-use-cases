@@ -123,15 +123,48 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
                 ? (result.blueprints || result.opportunities)
                 : (Array.isArray(result) ? result : []);
 
-            const enrichedBlueprints = finalBlueprints.map((b: any) => ({
-                ...b,
-                industry: b.industry || companyData.industry || 'General',
-                generation_metadata: {
-                    source: 'AI',
-                    model: modelId,
-                    timestamp: new Date().toISOString()
+            const enrichedBlueprints = finalBlueprints.map((b: any) => {
+                // Heuristic: If AI returns flat keys, map them to our Schema
+                // Check if it already has the structure
+                if (b.public_view && b.admin_view) {
+                    return {
+                        ...b,
+                        industry: b.industry || companyData.industry || 'General',
+                        generation_metadata: {
+                            source: 'AI',
+                            model: modelId,
+                            timestamp: new Date().toISOString()
+                        }
+                    };
                 }
-            }));
+
+                // Map Flat Keys to Nested Schema
+                return {
+                    title: b.Title || b.title || "Untitled Blueprint",
+                    department: b.Department || b.department || "General",
+                    industry: b.Industry || b.industry || companyData.industry || "General",
+                    public_view: {
+                        problem: b.Problem || b.problem || "No problem defined.",
+                        solution_narrative: b['Solution Narrative'] || b.solution_narrative || b.Solution || "No solution defined.",
+                        value_proposition: b['Value Proposition'] || b.value_proposition || "No value prop defined.",
+                        roi_estimate: b['ROI Estimate'] || b.roi_estimate || b.ROI || "N/A",
+                        detailed_explanation: b['Deep Dive'] || b.deep_dive || b.DeepDive || "",
+                        example_scenario: b['Example Scenario'] || b.example_scenario || "",
+                        walkthrough_steps: b['Walkthrough Steps'] || b.walkthrough_steps || []
+                    },
+                    admin_view: {
+                        tech_stack: b['Tech Stack Details'] || b.tech_stack || [],
+                        implementation_difficulty: (b.Difficulty || b.difficulty || "Med") as "High" | "Med" | "Low",
+                        workflow_steps: typeof b.Walkthrough === 'string' ? b.Walkthrough : (b['Workflow Steps'] || ""),
+                        upsell_opportunity: b.Upsell || b['Upsell Opportunity'] || b.upsell_opportunity || "Consultation"
+                    },
+                    generation_metadata: {
+                        source: 'AI',
+                        model: modelId,
+                        timestamp: new Date().toISOString()
+                    }
+                };
+            });
 
             res.json({ blueprints: enrichedBlueprints });
         } catch (err: any) {

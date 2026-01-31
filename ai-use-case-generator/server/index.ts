@@ -15,6 +15,7 @@ import usageRoutes from './routes/usage';
 import { runMigrations } from './db/migrate';
 import { sql } from 'drizzle-orm';
 import { db } from './db';
+import * as schema from './db/schema';
 
 dotenv.config();
 
@@ -86,6 +87,28 @@ app.post('/api/debug/fix-schema', async (req, res) => {
         res.json({ status: 'Schema patched successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Deep DB Diagnostic
+app.get('/api/debug/db-check', async (req, res) => {
+    try {
+        // Raw SQL check
+        const rawResult = await db.execute(sql`SELECT id, name, enabled, metadata FROM integrations ORDER BY id DESC`);
+
+        // Drizzle Select check
+        // @ts-ignore
+        const selectResult = await db.select().from(schema.integrations).limit(5);
+
+        res.json({
+            status: 'ok',
+            raw_count: rawResult.rows.length,
+            raw_rows: rawResult.rows,
+            drizzle_rows: selectResult,
+            db_url_set: !!process.env.DATABASE_URL
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message, stack: error.stack });
     }
 });
 

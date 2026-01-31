@@ -673,10 +673,30 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                             }}
                                             disabled={isDiagnosing}
                                             className="btn-secondary"
-                                            style={{ marginTop: '0.75rem', fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                            style={{ marginTop: '0.75rem', fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.5rem', float: 'left' }}
                                         >
                                             {isDiagnosing ? <RefreshCw className="spin" size={12} /> : <Zap size={12} />}
                                             {isDiagnosing ? 'Running Checks...' : 'Test AI Readiness'}
+                                        </button>
+
+                                        <button
+                                            onClick={async () => {
+                                                if (!confirm("This will attempt to safely create missing database tables. Continue?")) return;
+                                                try {
+                                                    const res = await fetch('/api/admin/usage/fix-schema', { method: 'POST' });
+                                                    const data = await res.json();
+                                                    if (res.ok) alert("Schema Fix Success: " + data.message);
+                                                    else alert("Schema Fix Failed: " + data.error);
+                                                } catch (e) {
+                                                    alert("Error fixing schema: " + e);
+                                                }
+                                            }}
+                                            className="btn-secondary"
+                                            style={{ marginTop: '0.75rem', fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', float: 'left', marginLeft: '0.5rem', borderColor: 'rgba(255,255,255,0.1)' }}
+                                            title="Use this if you see 'api_usage' table errors"
+                                        >
+                                            <Database size={12} />
+                                            Fix DB Schema
                                         </button>
                                     </div>
                                 </div>

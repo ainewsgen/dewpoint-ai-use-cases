@@ -11,13 +11,17 @@ export class UsageService {
      * Throws an error if limit exceeded.
      */
     static async checkBudgetExceeded(): Promise<void> {
-        // 1. Get Daily Limit
-        const openAIInt = await db.query.integrations.findFirst({
-            where: eq(integrations.name, 'OpenAI')
+        // 1. Get Daily Limit (Find LATEST created integration to match Admin logic)
+        const openAIIntegrations = await db.query.integrations.findMany({
+            where: eq(integrations.name, 'OpenAI'),
+            orderBy: (integrations, { desc }) => [desc(integrations.id)],
+            limit: 1
         });
+        const openAIInt = openAIIntegrations[0];
 
-        // Default to $5.00 if not set
-        const dailyLimit = (openAIInt?.metadata as any)?.daily_limit_usd || 5.00;
+        // Default to $5.00 if not set, but respect 0 if explicitly set
+        const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
+        const dailyLimit = metaLimit !== undefined ? Number(metaLimit) : 5.00;
 
         // 2. Calculate Today's Spend
         const startOfDay = new Date();

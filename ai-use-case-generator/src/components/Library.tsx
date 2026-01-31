@@ -162,7 +162,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
                     <BookOpen size={48} className="text-accent" />
                 </div>
                 <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Use Case Library</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Browse our archive of {LIBRARY_RECIPES.length}+ proved automation recipes.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Browse our archive of proven automation recipes.</p>
             </header>
 
             <div className="filter-bar" style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>

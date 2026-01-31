@@ -31,6 +31,8 @@ interface IntegrationModalProps {
 export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
+    // Local state for fetched leads (ignoring props now)
+    const [adminLeads, setAdminLeads] = useState<any[]>([]);
     // Legacy mock auth removed - relying on App.tsx real auth
 
 
@@ -64,8 +66,27 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     useEffect(() => {
         if (activeTab === 'users') {
             fetchUsers();
+        } else if (activeTab === 'leads') {
+            fetchLeads();
         }
     }, [activeTab]);
+
+    const fetchLeads = async () => {
+        try {
+            const res = await fetch('/api/admin/leads');
+            if (res.ok) {
+                const data = await res.json();
+                // Admin API returns { leads: [] }
+                // We need to shape it for the dashboard if structure differs, 
+                // but our API structure seems to match what we need (mostly).
+                // Let's store it in a local state for leads, ignoring the prop.
+                setAdminLeads(data.leads || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch admin leads', error);
+        }
+    };
+
 
     const fetchUsers = async () => {
         try {
@@ -536,8 +557,8 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             {/* Logic for Grouping Leads */}
             {activeTab === 'leads' && (() => {
                 // Group duplicates by Email (or URL if no email)
-                const uniqueUsers = leads.reduce((acc, lead) => {
-                    const key = lead.company.email || lead.company.url;
+                const uniqueUsers = adminLeads.reduce((acc, lead) => {
+                    const key = lead.company?.email || lead.company?.url || 'unknown';
                     if (!acc[key]) {
                         acc[key] = {
                             ...lead,

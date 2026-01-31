@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
+import { runMigrations } from '../db/migrate';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { AuthRequest } from '../middleware/auth';
@@ -236,6 +237,11 @@ router.post('/reset-password', async (req, res) => {
 // Emergency Reset Endpoint (Remove after use)
 router.get('/nuke-reset-db-secure-8857', async (req, res) => {
     try {
+        // Ensure tables exist before trying to wipe them
+        console.log('Running migrations...');
+        await runMigrations();
+
+        console.log('Wiping users...');
         await db.delete(users);
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash('admin123', saltRounds);

@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import { requireAuth, requireAdmin } from './middleware/auth'; // Import Auth Middleware
 import authRoutes from './routes/auth';
 import authEnhancedRoutes from './routes/auth-enhanced';
 import leadsRoutes from './routes/leads';
@@ -33,7 +34,7 @@ app.use(cookieParser());
 
 // Health Check (before other API routes for priority)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: 'v3.19', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', version: 'v3.20', timestamp: new Date().toISOString() });
 });
 
 
@@ -54,6 +55,29 @@ app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 
 
 
+
+// EMERGENCY REPAIR ROUTE (Bypassing Router complexities)
+app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        console.log("Attempting to repair schema (Emergency Route)...");
+        await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS api_usage (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                model TEXT,
+                prompt_tokens INTEGER,
+                completion_tokens INTEGER,
+                total_cost DECIMAL(10, 6),
+                timestamp TIMESTAMP DEFAULT NOW()
+            );
+        `);
+        console.log("Fixed Schema: Created api_usage table.");
+        res.json({ success: true, message: "Created api_usage table (Emergency Fix)" });
+    } catch (error: any) {
+        console.error("Fix Schema Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Deep DB Diagnostic
 app.get('/api/debug/db-check', async (req, res) => {

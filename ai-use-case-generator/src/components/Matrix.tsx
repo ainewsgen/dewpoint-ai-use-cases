@@ -191,6 +191,27 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                             </div>
                         </div>
                     )}
+                    {/* Admin Only Stack */}
+                    {isAdmin && (
+                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
+                                <Server size={14} /> <strong>Admin Stack View</strong>
+                            </div>
+                            <div className="chips-grid" style={{ gap: '0.25rem' }}>
+                                {opp.admin_view.tech_stack.map(t => (
+                                    <span key={t} style={{ background: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
+                                ))}
+                            </div>
+
+                            {/* Generation Source Indicator */}
+                            <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem', borderTop: '1px dashed var(--border-glass)', paddingTop: '0.5rem' }}>
+                                <span>Source: <strong>{opp.generation_metadata?.source || 'System'}</strong></span>
+                                {opp.generation_metadata?.model && (
+                                    <span>Model: <strong>{opp.generation_metadata.model}</strong></span>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

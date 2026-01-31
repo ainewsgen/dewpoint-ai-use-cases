@@ -278,28 +278,38 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                                 ))}
                             </div>
                         </div>
-                    )}
+                            
+                            {/* Generation Source Indicator */}
+                    <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem', borderTop: '1px dashed var(--border-glass)', paddingTop: '0.5rem' }}>
+                        <span>Source: <strong>{opp.generation_metadata?.source || 'System'}</strong></span>
+                        {opp.generation_metadata?.model && (
+                            <span>Model: <strong>{opp.generation_metadata.model}</strong></span>
+                        )}
+                    </div>
                 </div>
             )}
-
-            <div style={{ marginTop: 'auto' }}>
-                <button
-                    type="button"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDetails(!showDetails);
-                    }}
-                    className="btn-primary"
-                    style={{
-                        width: '100%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                        padding: '0.75rem', fontSize: '1rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                    }}
-                >
-                    {showDetails ? 'Hide Blueprint' : 'View Blueprint'} {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-            </div>
         </div>
+    )
+}
+
+<div style={{ marginTop: 'auto' }}>
+    <button
+        type="button"
+        onClick={(e) => {
+            e.stopPropagation();
+            setShowDetails(!showDetails);
+        }}
+        className="btn-primary"
+        style={{
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            padding: '0.75rem', fontSize: '1rem',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        }}
+    >
+        {showDetails ? 'Hide Blueprint' : 'View Blueprint'} {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+    </button>
+</div>
+        </div >
     );
 }

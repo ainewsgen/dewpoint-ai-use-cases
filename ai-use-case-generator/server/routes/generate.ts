@@ -112,8 +112,21 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
 
             UsageService.logUsage(promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
 
-            // 3. Return Blueprints
-            res.json(result);
+            // 3. Return Blueprints with Metadata
+            const finalBlueprints = Array.isArray(result.blueprints || result.opportunities)
+                ? (result.blueprints || result.opportunities)
+                : (Array.isArray(result) ? result : []);
+
+            const enrichedBlueprints = finalBlueprints.map((b: any) => ({
+                ...b,
+                generation_metadata: {
+                    source: 'AI',
+                    model: modelId,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+
+            res.json({ blueprints: enrichedBlueprints });
         } catch (err: any) {
             if (err.message && err.message.includes('budget exceeded')) {
                 console.warn("Budget Limit Hit:", err.message);

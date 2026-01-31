@@ -41,6 +41,11 @@ export interface Opportunity {
         workflow_steps: string;
         upsell_opportunity: string;
     };
+    generation_metadata?: {
+        source: 'AI' | 'System';
+        model?: string;
+        timestamp?: string;
+    };
 }
 
 export async function generateOpportunities(companyData: CompanyData, promptDetails?: any): Promise<Opportunity[]> {
@@ -105,6 +110,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
             implementation_difficulty: "Med",
             workflow_steps: "1. Ingest webhook/email 2. Parse intent via LLM 3. Extract structured JSON 4. Execute API call 5. Notify user.",
             upsell_opportunity: "Monthly maintenance & prompt tuning retainer."
+        },
+        generation_metadata: {
+            source: 'System',
+            model: 'Static Template'
         }
     });
 
@@ -140,6 +149,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
                 implementation_difficulty: "High",
                 workflow_steps: "1. Watch Gmail attachment 2. OCR PDF 3. Match PO # in NetSuite/Xero 4. Verify line item variance > 5% 5. Slack Alert.",
                 upsell_opportunity: "Gain share of recovered revenue."
+            },
+            generation_metadata: {
+                source: 'System',
+                model: 'Static Template'
             }
         });
     } else {
@@ -171,6 +184,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
                 implementation_difficulty: "Low",
                 workflow_steps: "1. Monitor inbox for 'receipt' 2. Extract Merchant/Date/Amount 3. Match roughly with bank feed CSV.",
                 upsell_opportunity: "Implementation fee only."
+            },
+            generation_metadata: {
+                source: 'System',
+                model: 'Static Template'
             }
         });
     }
@@ -207,6 +224,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
                 implementation_difficulty: "High",
                 workflow_steps: "1. Identify IP via Clearbit 2. Scrape LinkedIn profile 3. Generate personalization via LLM 4. Create Draft in System.",
                 upsell_opportunity: "High-value retainer for sales ops optimization."
+            },
+            generation_metadata: {
+                source: 'System',
+                model: 'Static Template'
             }
         });
     } else {
@@ -238,6 +259,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
                 implementation_difficulty: "Med",
                 workflow_steps: "1. Webhook from Contact Form 2. Search Company Name 3. Scrape 'About Us' 4. Classify 'Good/Bad Fit' 5. Tag in Database.",
                 upsell_opportunity: "Monthly scraping credit markup."
+            },
+            generation_metadata: {
+                source: 'System',
+                model: 'Static Template'
             }
         });
     }
@@ -271,6 +296,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
             implementation_difficulty: "Med",
             workflow_steps: "1. Ingest daily commits/tickets 2. Summarize progress via LLM 3. Post to Notion/Portal 4. Slack Audit Log.",
             upsell_opportunity: "Portal build-out services."
+        },
+        generation_metadata: {
+            source: 'System',
+            model: 'Static Template'
         }
     });
 
@@ -315,6 +344,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
                 implementation_difficulty: "High",
                 workflow_steps: "1. Ingest PDF archive 2. Chunk & Embed 3. Semantic Search UI.",
                 upsell_opportunity: "Enterprise Knowledge Base Retainer."
+            },
+            generation_metadata: {
+                source: 'System',
+                model: 'Static Template'
             }
         });
     }
@@ -349,6 +382,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
                 implementation_difficulty: "Med",
                 workflow_steps: "1. Daily scrape of target URLs 2. Diff check for changes 3. LLM summarizes strategic intent.",
                 upsell_opportunity: "Market Intelligence Dashboard."
+            },
+            generation_metadata: {
+                source: 'System',
+                model: 'Static Template'
             }
         });
     }

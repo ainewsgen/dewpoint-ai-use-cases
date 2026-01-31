@@ -3,7 +3,7 @@ import { requireAuth, requireAdmin } from '../middleware/auth';
 import { UsageService } from '../services/usage';
 import { db } from '../db';
 import { integrations } from '../db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, desc } from 'drizzle-orm';
 
 const router = Router();
 

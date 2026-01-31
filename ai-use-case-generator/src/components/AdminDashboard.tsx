@@ -1201,6 +1201,20 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         </span>
                                     </td>
                                     <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                        <button
+                                            onClick={() => handleTestConnection(i.id)}
+                                            disabled={testingId === i.id}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: 'var(--text-muted)',
+                                                cursor: 'pointer',
+                                                marginRight: '1rem'
+                                            }}
+                                            title="Test Connection"
+                                        >
+                                            <RefreshCw size={16} className={testingId === i.id ? "spin" : ""} />
+                                        </button>
                                         <button onClick={() => openEditIntegration(i)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
                                             <Edit size={16} />
                                         </button>

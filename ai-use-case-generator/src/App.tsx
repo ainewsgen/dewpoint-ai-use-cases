@@ -39,7 +39,7 @@ function App() {
 
     // ... (keep useEffect) ...
     useEffect(() => {
-        console.log("DewPoint App v2.1 Loaded - Auth Tabs Removed");
+        console.log("DewPoint App v3.15 Loaded - API Check Pending");
     }, []);
 
     // Handlers

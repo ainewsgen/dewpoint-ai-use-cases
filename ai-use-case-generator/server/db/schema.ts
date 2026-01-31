@@ -55,7 +55,7 @@ export const integrations = pgTable('integrations', {
     apiKey: text('api_key'), // encrypted
     apiSecret: text('api_secret'), // encrypted  
     metadata: jsonb('metadata'), // additional config
-    enabled: boolean('is_active').default(true),
+    enabled: boolean('is_active').default(true), // Mapped to is_active checking
     createdAt: timestamp('created_at').defaultNow(),
 });
 

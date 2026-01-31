@@ -133,6 +133,23 @@ h5 {
     background: hsla(var(--accent-primary) / 0.05);
 }
 
+.btn-danger-icon {
+    background: transparent;
+    border: 1px solid transparent;
+    color: hsl(0, 70%, 60%);
+    cursor: pointer;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-danger-icon:hover {
+    background: hsla(0, 70%, 60%, 0.1);
+    color: hsl(0, 80%, 50%);
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;

@@ -15,24 +15,23 @@ router.post('/generate', async (req, res) => {
         // We assume there's a system-wide or admin-owned integration named 'OpenAI'
         // In a multi-user app, we might check req.user.id, but here it's a platform key.
 
-        // Find the "OpenAI" integration
+        // Check for ANY active AI integration
         const integrationsList = await db.select().from(integrations)
-            .where(eq(integrations.name, 'OpenAI')); // Case-sensitive match for now
+            .where(eq(integrations.userId, req.user?.id || 1)); // Default to admin for now
 
-        const openAIInt = integrationsList.find(i => i.enabled && (i.apiKey || i.apiSecret));
+        // Find Enabled Integration with keys
+        // Priority: Metadata 'provider' set -> First found
+        const activeInt = integrationsList.find(i => i.enabled && (i.apiKey || i.apiSecret));
 
-        if (!openAIInt || !openAIInt.apiKey) {
-            console.warn("No OpenAI Integration found or enabled.");
-            // Fallback: If no key is in DB, maybe they set it in ENV? (Legacy)
-            if (!process.env.OPENAI_API_KEY) {
-                return res.status(503).json({
-                    error: 'OpenAI Integration not configured. please go to Admin > Integrations and add your OpenAI Key.'
-                });
-            }
+        if (!activeInt || (!activeInt.apiKey && !activeInt.apiSecret)) {
+            console.warn("No Active AI Integration found.");
+            return res.status(503).json({
+                error: 'No active AI Provider found. Configure OpenAI or Gemini in Admin > Integrations.'
+            });
         }
 
-        const apiKey = openAIInt?.apiKey
-            ? decrypt(openAIInt.apiKey)
+        const apiKey = activeInt?.apiKey
+            ? decrypt(activeInt.apiKey)
             : process.env.OPENAI_API_KEY!;
 
         if (!companyData || !companyData.role || !companyData.painPoint) {
@@ -78,12 +77,25 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
             // Check Daily Budget
             await UsageService.checkBudgetExceeded();
 
-            const result = await OpenAIService.generateJSON({
+            // Determine Provider & Model
+            const metadata = activeInt.metadata as any || {};
+            const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
+            const modelId = metadata.model; // e.g. 'gemini-1.5-pro' or 'gpt-4-turbo'
+
+            const aiParams = {
                 systemPrompt,
                 userContext: JSON.stringify(companyData),
-                model: 'gpt-4o',
-                apiKey: apiKey // Pass the retrieved key
-            });
+                model: modelId, // OpenAIService defaults to gpt-4o if undefined, GeminiService defaults to 1.5-pro
+                apiKey
+            };
+
+            let result;
+            if (provider === 'gemini') {
+                const { GeminiService } = await import('../services/gemini'); // Dynamic import to avoid load issues if file missing
+                result = await GeminiService.generateJSON(aiParams);
+            } else {
+                result = await OpenAIService.generateJSON(aiParams);
+            }
 
             // Log Usage (Async, non-blocking)
             // Note: OpenAI API doesn't always return token counts in the streamlined 'json_object' mode unless requested.

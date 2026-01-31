@@ -19,6 +19,7 @@ interface Integration {
     apiKey?: string; // Only present if we handle it carefully, mostly for checking existence
     enabled: boolean;
     status?: 'active' | 'error' | 'testing' | 'success';
+    metadata?: Record<string, any>;
 }
 
 // Add Integration Modal Props

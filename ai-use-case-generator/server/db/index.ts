@@ -10,6 +10,7 @@ if (!connectionString) {
 
 const pool = new Pool({
     connectionString,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 });
 
 export const db = drizzle(pool, { schema });

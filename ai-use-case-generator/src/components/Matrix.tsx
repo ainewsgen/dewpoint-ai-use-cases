@@ -142,10 +142,14 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                                 {opp.industry}
                             </span>
                         )}
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                            {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
-                                <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>⚠️ {opp.generation_metadata.fallback_reason}</span>
-                            )}
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
+                            {opp.generation_metadata?.source || 'System'}
+                        </span>
+                        {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                            <span style={{ fontSize: '0.65rem', color: 'salmon', marginLeft: '0.25rem' }}>
+                                ⚠️ {opp.generation_metadata.fallback_reason}
+                            </span>
+                        )}
                         </span>
                     </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
@@ -186,75 +190,77 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                 </p>
             </div>
 
-            {/* Deep Dive Content (Public + Admin) */}
-            {showDetails && (
-                <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.02)', padding: '1.25rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem', border: '1px solid var(--border-glass)' }}>
+            {/* Deep Dive Content (Public + Admin) */ }
+    {
+        showDetails && (
+            <div className="animate-fade-in" style={{ background: 'rgba(0,0,0,0.02)', padding: '1.25rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem', border: '1px solid var(--border-glass)' }}>
 
-                    {/* Publicly visible "Technical Workflow" (simplified) */}
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
-                            <strong>⚙️ How it works</strong>
-                        </div>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.admin_view.workflow_steps}</p>
+                {/* Publicly visible "Technical Workflow" (simplified) */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                        <strong>⚙️ How it works</strong>
                     </div>
-
-                    <div style={{ marginBottom: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
-                            <strong>📝 Deep Dive</strong>
-                        </div>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
-                    </div>
-
-
-                    {/* Admin Only Stack */}
-                    {isAdmin && (
-                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
-                                <Server size={14} /> <strong>Admin Stack View</strong>
-                            </div>
-                            <div className="chips-grid" style={{ gap: '0.25rem' }}>
-                                {opp.admin_view.tech_stack.map(t => (
-                                    <span key={t} style={{ background: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
-                                ))}
-                            </div>
-
-                            {/* Generation Source Indicator */}
-                            <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem', borderTop: '1px dashed var(--border-glass)', paddingTop: '0.5rem' }}>
-                                <span>
-                                    Source: <strong>{opp.generation_metadata?.source || 'System'}</strong>
-                                    {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
-                                        <span style={{ display: 'block', fontSize: '0.65rem', color: 'salmon', marginTop: '2px' }}>
-                                            ⚠️ {opp.generation_metadata.fallback_reason}
-                                        </span>
-                                    )}
-                                </span>
-                                {opp.generation_metadata?.model && (
-                                    <span>Model: <strong>{opp.generation_metadata.model}</strong></span>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                    <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.admin_view.workflow_steps}</p>
                 </div>
-            )}
 
-            <div style={{ marginTop: 'auto' }}>
-                <button
-                    type="button"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDetails(!showDetails);
-                    }}
-                    className="btn-primary"
-                    style={{
-                        width: '100%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                        padding: '0.75rem', fontSize: '1rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                    }}
-                >
-                    {showDetails ? 'Hide Blueprint' : 'View Blueprint'} {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
+                <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                        <strong>📝 Deep Dive</strong>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>{opp.public_view.detailed_explanation}</p>
+                </div>
+
+
+                {/* Admin Only Stack */}
+                {isAdmin && (
+                    <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'salmon' }}>
+                            <Server size={14} /> <strong>Admin Stack View</strong>
+                        </div>
+                        <div className="chips-grid" style={{ gap: '0.25rem' }}>
+                            {opp.admin_view.tech_stack.map(t => (
+                                <span key={t} style={{ background: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
+                            ))}
+                        </div>
+
+                        {/* Generation Source Indicator */}
+                        <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem', borderTop: '1px dashed var(--border-glass)', paddingTop: '0.5rem' }}>
+                            <span>
+                                Source: <strong>{opp.generation_metadata?.source || 'System'}</strong>
+                                {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                                    <span style={{ display: 'block', fontSize: '0.65rem', color: 'salmon', marginTop: '2px' }}>
+                                        ⚠️ {opp.generation_metadata.fallback_reason}
+                                    </span>
+                                )}
+                            </span>
+                            {opp.generation_metadata?.model && (
+                                <span>Model: <strong>{opp.generation_metadata.model}</strong></span>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
-        </div>
+        )
+    }
+
+    <div style={{ marginTop: 'auto' }}>
+        <button
+            type="button"
+            onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(!showDetails);
+            }}
+            className="btn-primary"
+            style={{
+                width: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                padding: '0.75rem', fontSize: '1rem',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}
+        >
+            {showDetails ? 'Hide Blueprint' : 'View Blueprint'} {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+    </div>
+        </div >
     );
 }

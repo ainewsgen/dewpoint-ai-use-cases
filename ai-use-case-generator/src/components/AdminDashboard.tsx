@@ -436,7 +436,9 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-secondary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
                     <Shield size={48} className="text-secondary" />
                 </div>
-                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Admin Console</h2>
+                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+                    Admin Console <span style={{ fontSize: '1rem', opacity: 0.6, border: '1px solid currentColor', padding: '2px 6px', borderRadius: '4px', verticalAlign: 'middle' }}>v3.18</span>
+                </h2>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', margin: 0 }}>System Management & Overview</p>
                     <button

@@ -238,7 +238,10 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 setIsEditingIntegration(false);
                 setCurrentIntegration(null);
             } else {
-                alert('Failed to save integration. See console.');
+                const errData = await res.json().catch(() => ({}));
+                const errMsg = errData.error || 'Unknown server error';
+                console.error('Save error details:', errData);
+                alert(`Failed to save integration: ${errMsg}`);
             }
         } catch (error) {
             console.error('Save integration failed', error);

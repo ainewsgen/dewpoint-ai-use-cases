@@ -109,8 +109,8 @@ router.post('/usage/readiness-check', requireAuth, requireAdmin, async (req, res
 
             await OpenAIService.generateJSON({
                 apiKey,
-                systemPrompt: "Ping",
-                userContext: "Pong",
+                systemPrompt: "You are a connectivity test. Return valid JSON.",
+                userContext: "Return a JSON object: { \"status\": \"ok\" }",
                 model: "gpt-3.5-turbo"
             });
             report.api_connection = { status: 'ok', details: 'Live API connection successful' };

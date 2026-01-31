@@ -171,7 +171,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         opportunities.push({
             title: "Receipt Auto-Router",
             department: "Finance",
-            industry: "Finance",
+            industry: industry || "Finance",
             public_view: {
                 problem: "Chasing employees for receipts is a low-value distraction.",
                 solution_narrative: "Automatically matches email receipts to credit card transactions and categorizes them instantly.",
@@ -211,7 +211,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         opportunities.push({
             title: "The Omni-Channel Nurture",
             department: "Sales",
-            industry: "Sales",
+            industry: industry || "Sales",
             public_view: {
                 problem: "Leads go cold because manual follow-up is too slow or generic.",
                 solution_narrative: "When a high-value prospect visits your pricing page, this agent instantly researches them and drafts a hyper-personalized video script and email for your rep to approve.",
@@ -248,7 +248,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         opportunities.push({
             title: "The Lead Qualifier",
             department: "Sales",
-            industry: "Sales",
+            industry: industry || "Sales",
             public_view: {
                 problem: "Wasting time talking to unqualified leads.",
                 solution_narrative: "Intelligently researches every new inquiry, scores them based on your criteria, and drafts the perfect reply.",
@@ -286,7 +286,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
     opportunities.push({
         title: "The Project Pulse",
         department: "Operations",
-        industry: "Operations",
+        industry: industry || "Operations",
         public_view: {
             problem: "Project updates require constantly nagging the team for status.",
             solution_narrative: "An observer that silently reads all project activity and automatically updates your client dashboard so they never have to ask 'where are we at?'.",

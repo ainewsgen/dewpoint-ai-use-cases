@@ -22,7 +22,7 @@ router.get('/users', async (req, res) => {
             isActive: users.isActive,
             lastLogin: users.lastLogin,
             createdAt: users.createdAt,
-        }).from(users);
+        }).from(users).where(eq(users.isActive, true));
 
         // Fetch related data
         // Optimization: In a real large app, use JOINs. Here, separate queries are fine.

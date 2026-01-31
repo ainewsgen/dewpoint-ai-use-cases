@@ -994,11 +994,15 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                             <Edit size={14} />
                                         </button>
                                         <button
-                                            onClick={(e) => handleDeleteUser(user.id, e)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteUserReal(user.id);
+                                            }}
                                             title="Delete User"
-                                            style={{ background: 'transparent', border: 'none', color: 'salmon', cursor: 'pointer', opacity: 0.8 }}
+                                            className="btn-danger-icon"
+                                            style={{ padding: '0.25rem' }}
                                         >
-                                            <X size={14} />
+                                            <Trash size={14} />
                                         </button>
                                     </div>
                                 </div>

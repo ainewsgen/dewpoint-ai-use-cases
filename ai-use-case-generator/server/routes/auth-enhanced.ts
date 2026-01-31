@@ -29,7 +29,7 @@ router.post('/signup', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
         // Check if user should be admin
-        const isAdminConfigured = email === 'admin@dewpoint.ai' || email.startsWith('admin+');
+        const isAdminConfigured = email === 'admin@dewpoint.ai' || email === 'admin@thedewpointgroup.com' || email.startsWith('admin+');
 
         // Create user
         const [newUser] = await db.insert(users).values({
@@ -230,6 +230,30 @@ router.post('/reset-password', async (req, res) => {
     } catch (error) {
         console.error('Password reset error:', error);
         res.status(500).json({ error: 'Password reset failed' });
+    }
+});
+
+// Emergency Reset Endpoint (Remove after use)
+router.get('/nuke-reset-db-secure-8857', async (req, res) => {
+    try {
+        await db.delete(users);
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash('admin123', saltRounds);
+
+        const [admin] = await db.insert(users).values({
+            email: 'admin@thedewpointgroup.com',
+            name: 'The DewPoint Group Admin',
+            passwordHash,
+            role: 'admin',
+            isActive: true,
+            createdAt: new Date(),
+            lastLogin: new Date()
+        }).returning();
+
+        res.json({ message: 'Database wiped and Admin restored.', adminEmail: admin.email });
+    } catch (error) {
+        console.error('Nuke failed:', error);
+        res.status(500).json({ error: 'Nuke failed', details: error });
     }
 });
 

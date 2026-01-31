@@ -127,7 +127,27 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
         <div className="glass-panel recipe-card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
                 <div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>{opp.department}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.2rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
+                        {opp.industry && (
+                            <span style={{
+                                fontSize: '0.65rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                color: 'var(--text-muted)',
+                                border: '1px solid var(--border-glass)',
+                                padding: '1px 4px',
+                                borderRadius: '3px'
+                            }}>
+                                {opp.industry}
+                            </span>
+                        )}
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                            {opp.generation_metadata?.source === 'System' && opp.generation_metadata?.fallback_reason && (
+                                <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>⚠️ {opp.generation_metadata.fallback_reason}</span>
+                            )}
+                        </span>
+                    </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
                 </div>
                 {/* Save Icon Button */}

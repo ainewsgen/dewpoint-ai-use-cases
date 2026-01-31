@@ -122,6 +122,11 @@ router.put('/integrations/:id', requireAuth, async (req: AuthRequest, res) => {
         if (apiKey !== undefined) updateData.apiKey = apiKey ? encrypt(apiKey) : null;
         if (apiSecret !== undefined) updateData.apiSecret = apiSecret ? encrypt(apiSecret) : null;
 
+        // Ensure provider matches metadata (for Hybrid Schema compatibility)
+        if (metadata) {
+            updateData.provider = metadata.provider || (updateData.name?.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
+        }
+
         const [updated] = await db.update(integrations)
             .set(updateData)
             .where(eq(integrations.id, integrationId))

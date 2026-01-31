@@ -57,8 +57,25 @@ if (process.env.NODE_ENV === 'production') {
 
 // Start server immediately
 const server = app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 API available at http://localhost:${PORT}/api`);
+
+    // Self-healing: Ensure Schema is correct (SQL Injection for migration reliability)
+    import { sql } from 'drizzle-orm';
+    import { db } from './db';
+
+    // Run this async without blocking, or await if critical. We'll fire-and-forget but log errors.
+    (async () => {
+        try {
+            console.log("🛠️ Checking Database Schema...");
+            // Force add 'metadata' column if missing
+            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+            // Make 'provider' nullable (backward compat)
+            await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
+            console.log("✅ Database Schema Verified/Patched.");
+        } catch (err) {
+            console.error("⚠️ Schema Patch Warning:", err);
+        }
+    })();
 });
 
 // Run migrations in background

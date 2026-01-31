@@ -128,9 +128,10 @@ function App() {
     const handleLoginSuccess = (loggedInUser: any) => {
         setAuthModal(null);
         if (pendingSave) {
-            saveToBackend(pendingSave, loggedInUser).then(() => {
+            saveToBackend(pendingSave, loggedInUser).then((action) => {
                 setPendingSave(null);
-                alert("Saved to Roadmap!");
+                if (action === 'ADDED') alert("Added to Roadmap!");
+                if (action === 'REMOVED') alert("Removed from Roadmap!");
             });
         }
     };

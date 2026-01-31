@@ -979,18 +979,25 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                         <span className="badge" style={{ background: '#333' }}>{r.department}</span>
                                                         {r.industry && (
-                                                            <span className="badge" style={{ background: 'transparent', border: '1px solid #444', color: 'var(--text-muted)' }}>
+                                                            <span style={{
+                                                                fontSize: '0.65rem',
+                                                                textTransform: 'uppercase',
+                                                                letterSpacing: '0.05em',
+                                                                color: 'var(--text-muted)',
+                                                                border: '1px solid var(--border-glass)',
+                                                                padding: '1px 4px',
+                                                                borderRadius: '3px'
+                                                            }}>
                                                                 {r.industry}
                                                             </span>
                                                         )}
-                                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
                                                             {r.generation_metadata?.source || 'System'}
-                                                            {r.generation_metadata?.fallback_reason && (
-                                                                <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>
-                                                                    ⚠️ {r.generation_metadata.fallback_reason}
-                                                                </span>
-                                                            )}
-                                                        </span>
+                                                        </span>                                    {r.generation_metadata?.fallback_reason && (
+                                                            <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>
+                                                                ⚠️ {r.generation_metadata.fallback_reason}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 {/* ... recipes details ... */}

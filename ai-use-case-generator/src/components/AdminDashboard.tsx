@@ -229,6 +229,33 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         setIsEditingIntegration(true);
     };
 
+    // Blueprint Mock Logic
+    const handleEditBlueprint = async (name: string) => {
+        // Dynamic import to retrieve generator if not available in scope, 
+        // or assumes 'generateOpportunities' is exported from '../lib/engine' (it is).
+        const { generateOpportunities } = await import('../lib/engine');
+
+        const dummyData: CompanyData = {
+            url: 'example.com', role: 'CTO', size: 'Enterprise',
+            stack: ['Salesforce', 'Slack', 'Jira', 'QuickBooks'],
+            painPoint: 'Manual Data Entry'
+        };
+        const sampleOpps = generateOpportunities(dummyData);
+
+        // Find best match or default to first if name mismatch (since names are dynamic sometimes)
+        // Actually names are relatively static in the generator.
+        const match = sampleOpps.find(o => o.title === name) || sampleOpps[0];
+
+        // Deep copy to allow editing state
+        setEditingBlueprint(JSON.parse(JSON.stringify(match)));
+    };
+
+    const handleSaveBlueprint = () => {
+        // Here we would sync to backend or file system
+        alert("Template updated locally! (In a real app, this would update the 'engine.ts' logic or database template).");
+        setEditingBlueprint(null);
+    };
+
     // ... User Management handlers ... 
     // (Note: Skipping re-implementation of user mgmt handlers as they are outside the chunk, 
     // wait, I need to make sure I don't delete them. The chunk end line is 272, which is before user mgmt.
@@ -354,7 +381,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             backdropFilter: 'blur(10px)'
                         }}
                     >
-                        User Management
+                        Customer Interests
                     </button>
                     <button
                         onClick={() => setActiveTab('users')}
@@ -466,7 +493,7 @@ Generate 3 custom automation blueprints. Each blueprint must include:
                                 <span style={{ fontWeight: 600 }}>{name}</span>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <span className="badge" style={{ background: i % 2 === 0 ? '#222' : '#333' }}>{i % 2 === 0 ? 'Core' : 'Advanced'}</span>
-                                    <button className="btn-secondary" style={{ padding: '0.25rem 0.5rem' }} title="Edit Template">
+                                    <button className="btn-secondary" style={{ padding: '0.25rem 0.5rem' }} title="Edit Template" onClick={() => handleEditBlueprint(name)}>
                                         <Edit size={14} />
                                     </button>
                                 </div>
@@ -807,6 +834,84 @@ Generate 3 custom automation blueprints. Each blueprint must include:
                     </div>
                 );
             })()}
+
+            {/* Blueprint Editor Modal */}
+            {editingBlueprint && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1100
+                }}>
+                    <div className="glass-panel animate-fade-in" style={{ padding: '2rem', width: '95%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.5rem' }}>Editing Blueprint Template</h3>
+                                <p style={{ color: 'hsl(var(--accent-gold))', fontSize: '1rem' }}>{editingBlueprint.title}</p>
+                            </div>
+                            <button onClick={() => setEditingBlueprint(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '1.5rem' }}>
+                            {/* Narrative Section */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Problem Statement Template</label>
+                                    <textarea
+                                        value={editingBlueprint.public_view.problem}
+                                        onChange={e => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, problem: e.target.value } })}
+                                        style={{ width: '100%', minHeight: '100px', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: '#eee' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Solution Narrative</label>
+                                    <textarea
+                                        value={editingBlueprint.public_view.solution_narrative}
+                                        onChange={e => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, solution_narrative: e.target.value } })}
+                                        style={{ width: '100%', minHeight: '100px', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: '#eee' }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Implementation Steps */}
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Implementation Steps (One per line)</label>
+                                <textarea
+                                    value={editingBlueprint.public_view.walkthrough_steps?.join('\n') || ''}
+                                    onChange={e => {
+                                        const steps = e.target.value.split('\n');
+                                        setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, walkthrough_steps: steps } })
+                                    }}
+                                    style={{ width: '100%', minHeight: '150px', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: '#eee', fontFamily: 'monospace' }}
+                                />
+                            </div>
+
+                            {/* Stack Details */}
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Tech Stack Logic</label>
+                                <div style={{ padding: '1rem', background: '#222', borderRadius: '6px' }}>
+                                    {editingBlueprint.admin_view.stack_details?.map((detail, idx) => (
+                                        <div key={idx} style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+                                            <input value={detail.tool} readOnly style={{ background: '#333', border: 'none', padding: '0.5rem', color: '#aaa', flex: 1, borderRadius: '4px' }} />
+                                            <input value={detail.role} onChange={(e) => {
+                                                const newDetails = [...(editingBlueprint.admin_view.stack_details || [])];
+                                                newDetails[idx].role = e.target.value;
+                                                setEditingBlueprint({ ...editingBlueprint, admin_view: { ...editingBlueprint.admin_view, stack_details: newDetails } });
+                                            }} style={{ background: '#111', border: '1px solid #444', padding: '0.5rem', color: 'white', flex: 2, borderRadius: '4px' }} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
+                            <button onClick={() => setEditingBlueprint(null)} className="btn-secondary">Cancel</button>
+                            <button onClick={handleSaveBlueprint} className="btn-primary">
+                                <Save size={16} /> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Edit User Modal */}
             {editingUser && (

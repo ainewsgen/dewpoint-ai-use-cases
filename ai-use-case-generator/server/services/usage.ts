@@ -78,6 +78,9 @@ export class UsageService {
         });
         const openAIInt = openAIIntegrations[0];
 
+        console.log(`[UsageStats] Found Integration: ${openAIInt?.id}, Name: ${openAIInt?.name}`);
+        console.log(`[UsageStats] Metadata RAW:`, openAIInt?.metadata);
+
         // Ensure default of 5.00 if strictly undefined, but respect 0 if set
         const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
         const limit = metaLimit !== undefined ? Number(metaLimit) : 5.00;

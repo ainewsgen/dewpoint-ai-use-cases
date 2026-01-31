@@ -218,11 +218,14 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     const handleSaveIntegration = async (data: any) => {
         try {
-            const url = currentIntegration
-                ? `/api/integrations/${currentIntegration.id}`
-                : '/api/integrations';
+            // Fix for "Shimmed" Integrations (ID 0) -> Treat as NEW
+            const isNew = !currentIntegration || currentIntegration.id === 0;
 
-            const method = currentIntegration ? 'PUT' : 'POST';
+            const url = isNew
+                ? '/api/integrations'
+                : `/api/integrations/${currentIntegration.id}`;
+
+            const method = isNew ? 'POST' : 'PUT';
 
             const res = await fetch(url, {
                 method,

@@ -67,8 +67,17 @@ app.post('/api/debug/fix-schema', async (req, res) => {
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
         await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
-        // Fix for is_active vs enabled mismatch
+        // Fully Comprehensive Schema Repair
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
+        await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;`);
+
+        // Ensure core columns exist (in case of partial migration)
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS api_secret TEXT;`);
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS base_url TEXT;`);
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS auth_type TEXT DEFAULT 'api_key';`);
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS user_id INTEGER;`); // Critical for ownership
         res.json({ status: 'Schema patched successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

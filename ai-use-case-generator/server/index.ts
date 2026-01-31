@@ -34,7 +34,7 @@ app.use(cookieParser());
 
 // Health Check (before other API routes for priority)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: 'v3.20', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', version: 'v3.21', timestamp: new Date().toISOString() });
 });
 
 
@@ -76,6 +76,95 @@ app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res)
     } catch (error: any) {
         console.error("Fix Schema Error:", error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// DRY RUN DIAGNOSTIC (Full Pipeline Test)
+import { integrations } from './db/schema';
+import { eq } from 'drizzle-orm';
+import { decrypt } from './utils/encryption';
+import { OpenAIService } from './services/openai';
+import { GeminiService } from './services/gemini';
+import { UsageService } from './services/usage';
+
+app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
+    const trace: string[] = [];
+    const log = (msg: string) => {
+        console.log(`[DryRun] ${msg}`);
+        trace.push(msg);
+    };
+
+    try {
+        log("Starting Dry Run...");
+        const userId = req.user?.id || 1;
+        log(`User Context: ID ${userId}`);
+
+        // 1. Dummy Data
+        const companyData = {
+            role: "CTO",
+            industry: "Technology",
+            painPoint: "Inefficient Deployment Pipelines",
+            stack: ["AWS", "GitHub Actions"],
+            url: "https://example.com"
+        };
+        log("Step 1: Dummy Data Prepared");
+
+        // 2. Integration Check
+        const integrationsList = await db.select().from(integrations).where(eq(integrations.enabled, true));
+        const activeInt = integrationsList.find(i => i.enabled && (i.apiKey || i.apiSecret));
+
+        if (!activeInt) throw new Error("No active integration found");
+        log(`Step 2: Integration Found (${activeInt.name})`);
+
+        const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
+        if (!apiKey) throw new Error("API Key missing or invalid");
+
+        // 3. System Prompt
+        const systemPrompt = "You are a test. Return valid JSON containing a 'blueprints' array with one item: { title: 'Test', public_view: {}, admin_view: {} }.";
+        log("Step 3: System Prompt Prepared");
+
+        // 4. AI Call
+        log("Step 4: Calling AI Provider (This may take 10-20s)...");
+        const metadata = activeInt.metadata as any || {};
+        const modelId = metadata.model || 'gpt-4o';
+        const aiParams = {
+            systemPrompt,
+            userContext: JSON.stringify(companyData),
+            model: modelId,
+            apiKey
+        };
+
+        let result;
+        if (activeInt.name.toLowerCase().includes('gemini')) {
+            result = await GeminiService.generateJSON(aiParams);
+        } else {
+            result = await OpenAIService.generateJSON(aiParams);
+        }
+        log("Step 4: AI Response Received ✅");
+
+        // 5. Usage Logging
+        log("Step 5: Logging Usage to DB...");
+        try {
+            await UsageService.logUsage(userId, 50, 50, modelId);
+            log("Step 5: DB Write Successful ✅");
+        } catch (dbErr: any) {
+            log(`Step 5 FAILED: DB Write Error - ${dbErr.message}`);
+            // Don't throw, we want to return the trace
+        }
+
+        // 6. verification
+        log("Step 6: Verifying Response Structure...");
+        if (result.blueprints || Array.isArray(result)) {
+            log("Step 6: Structure Looks Valid ✅");
+        } else {
+            log("Step 6 Warning: Unexpected JSON structure");
+        }
+
+        res.json({ success: true, trace });
+
+    } catch (error: any) {
+        log(`FATAL ERROR: ${error.message}`);
+        res.status(500).json({ success: false, trace, error: error.message });
     }
 });
 

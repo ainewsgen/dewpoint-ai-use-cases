@@ -439,7 +439,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                     <Shield size={48} className="text-secondary" />
                 </div>
                 <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-                    Admin Console <span style={{ fontSize: '1rem', opacity: 0.6, border: '1px solid currentColor', padding: '2px 6px', borderRadius: '4px', verticalAlign: 'middle' }}>v3.20</span>
+                    Admin Console <span style={{ fontSize: '1rem', opacity: 0.6, border: '1px solid currentColor', padding: '2px 6px', borderRadius: '4px', verticalAlign: 'middle' }}>v3.21</span>
                 </h2>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', margin: 0 }}>System Management & Overview</p>
@@ -698,6 +698,30 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                             >
                                                 <Database size={12} />
                                                 Fix DB Schema
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!confirm("This will simulate a full generation (costing ~10 cents). Continue?")) return;
+                                                    setIsDiagnosing(true); // Reuse loading state
+                                                    try {
+                                                        const res = await fetch('/api/admin/dry-run', { method: 'POST' });
+                                                        const data = await res.json();
+
+                                                        const log = data.trace ? data.trace.join('\n') : "No trace available";
+                                                        alert(data.success ? `SUCCESS!\n\n${log}` : `FAILED!\n\n${log}`);
+
+                                                    } catch (e) {
+                                                        alert("Dry Run Network Error: " + e);
+                                                    } finally {
+                                                        setIsDiagnosing(false);
+                                                    }
+                                                }}
+                                                className="btn-secondary"
+                                                style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'hsla(var(--accent-primary)/0.3)', color: 'hsl(var(--accent-primary))' }}
+                                                title="Run a full pipeline test with dummy data"
+                                            >
+                                                <Sparkles size={12} />
+                                                Run Full Simulation
                                             </button>
                                         </div>
                                     </div>

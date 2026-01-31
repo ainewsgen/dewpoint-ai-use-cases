@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.PROD
-    ? 'https://dewpoint-ai-use-cases.onrender.com/api'
+    ? '/api' // Relative path works automatically for same-domain deployment
     : 'http://localhost:3000/api';
 
 interface User {

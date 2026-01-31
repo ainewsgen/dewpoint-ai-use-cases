@@ -511,8 +511,8 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                 placeholder="e.g., 'System Maintenance: Saturday 2am' or 'Welcome to the Beta!'"
                                 style={{
                                     width: '100%', minHeight: '150px', padding: '1rem',
-                                    background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)',
-                                    color: 'white', borderRadius: '8px', marginBottom: '1rem',
+                                    background: 'var(--bg-card)', border: '1px solid var(--border-glass)',
+                                    color: 'var(--text-main)', borderRadius: '8px', marginBottom: '1rem',
                                     fontSize: '1rem', fontFamily: 'inherit'
                                 }}
                             />
@@ -932,7 +932,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             placeholder="e.g. OpenAI, Pinecone..."
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
                         />
                     </div>
 
@@ -942,7 +942,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             <select
                                 value={authType}
                                 onChange={e => setAuthType(e.target.value as any)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: '#222', color: 'white' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
                             >
                                 <option value="api_key">API Key</option>
                                 <option value="oauth">OAuth 2.0</option>
@@ -955,11 +955,11 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
                                     padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)',
-                                    cursor: 'pointer', background: status ? 'hsla(140, 70%, 50%, 0.1)' : 'rgba(0,0,0,0.2)'
+                                    cursor: 'pointer', background: status ? 'hsla(140, 70%, 50%, 0.1)' : 'var(--bg-card)'
                                 }}
                             >
                                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: status ? 'hsl(140, 70%, 50%)' : '#666' }} />
-                                {status ? 'Active' : 'Disabled'}
+                                <span style={{ color: 'var(--text-main)' }}>{status ? 'Active' : 'Disabled'}</span>
                             </div>
                         </div>
                     </div>
@@ -971,7 +971,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             placeholder="https://api.example.com/v1"
                             value={baseUrl}
                             onChange={e => setBaseUrl(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
                         />
                     </div>
 
@@ -985,7 +985,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                                 placeholder="sk-..."
                                 value={apiKey}
                                 onChange={e => setApiKey(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
+                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
                             />
                             <Lock size={16} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
                         </div>

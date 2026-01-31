@@ -13,7 +13,31 @@ interface MatrixProps {
 }
 
 export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user }: MatrixProps) {
-    const opportunities = generateOpportunities(companyData);
+    // Fix: generateOpportunities is async, so we must handle it with state
+    const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+
+        async function fetchOpportunities() {
+            try {
+                const opps = await generateOpportunities(companyData);
+                if (mounted) {
+                    setOpportunities(opps);
+                    setIsLoading(false);
+                }
+            } catch (err) {
+                console.error("Failed to generate opportunities", err);
+                if (mounted) setIsLoading(false);
+            }
+        }
+
+        fetchOpportunities();
+
+        return () => { mounted = false; };
+    }, [companyData]);
+
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
 
     // Sync from LocalStorage on mount (for visual "checked" state)
@@ -60,21 +84,29 @@ export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user }: 
                     <p style={{ color: 'var(--text-muted)' }}>Generated for <strong>{companyData.url || "Your Business"}</strong></p>
                 </div>
                 <div className="glass-panel" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', color: 'hsl(var(--accent-primary))', fontWeight: 500 }}>
-                    <span>{opportunities.length} High-Value Workflows Found</span>
+                    <span>{isLoading ? 'Synthesizing...' : `${opportunities.length} High-Value Workflows Found`}</span>
                 </div>
             </header>
 
-            <div className="matrix-grid">
-                {opportunities.map((opp, idx) => (
-                    <RecipeCard
-                        key={idx}
-                        opp={opp}
-                        isAdmin={isAdmin}
-                        isSaved={!!savedRecipes.find(r => r.title === opp.title)}
-                        onToggleSave={() => handleToggleSave(opp)}
-                    />
-                ))}
-            </div>
+            {isLoading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="loader" style={{ width: '40px', height: '40px', border: '3px solid var(--border-glass)', borderTopColor: 'hsl(var(--accent-primary))', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                    <p style={{ color: 'var(--text-muted)' }}>Finalizing Blueprints...</p>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                </div>
+            ) : (
+                <div className="matrix-grid">
+                    {opportunities.map((opp, idx) => (
+                        <RecipeCard
+                            key={idx}
+                            opp={opp}
+                            isAdmin={isAdmin}
+                            isSaved={!!savedRecipes.find(r => r.title === opp.title)}
+                            onToggleSave={() => handleToggleSave(opp)}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Modal Logic Removed */}
         </div>

@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-venv/
-node_modules/
-dist/
-.env
-.DS_Store
-postgres_data/
-mongo_data/

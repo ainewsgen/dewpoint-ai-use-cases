@@ -195,7 +195,26 @@ function App() {
                             My Roadmap
                         </button>
 
-                        {/* Admin Toggle Removed */}
+                        {/* Admin Console - Only for Admins */}
+                        {user?.role === 'admin' && (
+                            <button
+                                onClick={() => setView('ADMIN')}
+                                style={{
+                                    background: view === 'ADMIN' ? 'hsl(var(--accent-secondary))' : 'hsla(var(--bg-card)/0.6)',
+                                    border: '1px solid var(--border-glass)',
+                                    color: view === 'ADMIN' ? 'white' : 'hsl(var(--text-main))',
+                                    fontWeight: 'bold',
+                                    padding: '0.4rem 1rem',
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                    backdropFilter: 'blur(10px)',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                <Shield size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                                Admin
+                            </button>
+                        )}
                     </div>
                 </nav>
 
@@ -219,9 +238,9 @@ function App() {
                     />
                 )}
                 {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
-                {/* Note: Passing user and leads to Roadmap to handle Admin integration */}
 
-                {/* view === 'ADMIN' block removed as it's merged into Roadmap */}
+                {/* Admin Dashboard restored as top-level view */}
+                {view === 'ADMIN' && <AdminDashboard leads={leads} />}
 
                 {authModal === 'LOGIN' && (
                     <Login

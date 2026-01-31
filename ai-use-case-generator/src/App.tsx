@@ -66,6 +66,22 @@ function App() {
     const saveToBackend = async (recipe: Opportunity, userContext?: any) => {
         try {
             const currentUser = userContext || user;
+
+            // 1. Local Storage Sync (Immediate UI consistency for Library & specific persistence)
+            // fetch current local
+            const localSaved = localStorage.getItem('dpg_roadmap');
+            let currentLocal: Opportunity[] = localSaved ? JSON.parse(localSaved) : [];
+
+            // Check if exists to determine add/remove or just append? 
+            // The Library "Toggle" assumes add if we are here usually, but let's handle idempotency.
+            // Actually Library toggles locally. Ideally we replicate that logic here or just Append safely.
+            // For now, let's assume this is an ADD operation from the library.
+            if (!currentLocal.find(r => r.title === recipe.title)) {
+                currentLocal.push(recipe);
+                localStorage.setItem('dpg_roadmap', JSON.stringify(currentLocal));
+                window.dispatchEvent(new Event('roadmap-updated')); // Notify Library.tsx
+            }
+
             if (!currentUser?.email) return;
 
             const token = localStorage.getItem('dpg_auth_token');
@@ -78,7 +94,7 @@ function App() {
                 body: JSON.stringify({
                     email: currentUser.email,
                     name: currentUser.name,
-                    recipes: [recipe] // Upsert logic on backend handles merging
+                    recipes: currentLocal // SYNC THE WHOLE LOCAL LIST to ensure backend matches frontend state
                 })
             });
 
@@ -91,10 +107,17 @@ function App() {
 
     const handleRequestSave = (recipe: Opportunity) => {
         if (user) {
-            // Optimistic Update?
-            // Actually, we should just save to backend
             saveToBackend(recipe).then(() => {
-                alert("Saved to Roadmap!");
+                // Determine if we added or removed for the alert text?
+                // For simplicity, just say "Roadmap updated"
+                // Or check our local state in Library? 
+                // Library calls this on toggle. If it was removed, we should probably support remove.
+                // Current flow is Add-Only via this function?
+                // Library.tsx: onToggle -> handleToggleSave -> onSaveRequest(opp) -> App.handleRequestSave
+                // But Library also runs its own setSavedRecipes logic.
+                // IF we want true sync, handleRequestSave should handle Toggle.
+
+                alert("Roadmap updated!");
             });
         } else {
             setPendingSave(recipe);

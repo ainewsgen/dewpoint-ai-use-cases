@@ -6,12 +6,12 @@ import { decrypt } from '../utils/encryption';
 import { OpenAIService } from '../services/openai';
 import { UsageService } from '../services/usage';
 import { GeminiService } from '../services/gemini'; // Static import
-import { AuthRequest } from '../middleware/auth';
+import { AuthRequest, requireAuth } from '../middleware/auth';
 
 
 const router = express.Router();
 
-router.post('/generate', async (req, res) => {
+router.post('/generate', requireAuth, async (req, res) => {
     try {
         const { companyData, promptDetails } = req.body;
         // Check for Admin Key in DB (Integrations table)
@@ -19,7 +19,7 @@ router.post('/generate', async (req, res) => {
         // In a multi-user app, we might check req.user.id, but here it's a platform key.
 
         const authReq = req as AuthRequest;
-        const userId = authReq.user?.id || 1; // Default to admin for now
+        const userId = authReq.user!.id; // Authenticated user via requireAuth
 
         // Check for ANY active AI integration
         const integrationsList = await db.select().from(integrations)

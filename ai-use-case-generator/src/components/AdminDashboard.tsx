@@ -600,6 +600,59 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                         </div>
                     </div>
 
+                    {/* System Forecast / Diagnostic */}
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '1.5rem' }}>
+                        <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+                            <Activity size={18} /> System Forecast
+                        </h4>
+
+                        {(() => {
+                            const hasActiveIntegration = integrations.some(i => i.enabled);
+                            const budgetExceeded = (usageStats?.spend || 0) >= (usageStats?.limit || 100);
+
+                            // Determine State
+                            let status = 'System (Fallback)';
+                            let color = 'salmon';
+                            let reason = 'Unknown Error';
+
+                            if (!hasActiveIntegration) {
+                                status = 'System (Fallback)';
+                                color = 'orange';
+                                reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
+                            } else if (budgetExceeded) {
+                                status = 'System (Fallback)';
+                                color = 'salmon';
+                                reason = `Daily budget limit ($${usageStats?.limit}) has been reached relative to current spend ($${usageStats?.spend}).`;
+                            } else {
+                                status = 'AI (Live Generation)';
+                                color = 'hsl(140, 70%, 50%)';
+                                reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
+                            }
+
+                            return (
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                                    <div style={{
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '6px',
+                                        background: color === 'salmon' ? 'rgba(250, 128, 114, 0.2)' : (color === 'orange' ? 'rgba(255, 165, 0, 0.2)' : 'rgba(0, 255, 127, 0.1)'),
+                                        border: `1px solid ${color}`,
+                                        color: color,
+                                        fontWeight: 700,
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        {status}
+                                    </div>
+                                    <div>
+                                        <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'white' }}>Current Operational Mode</strong>
+                                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                            {reason}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
+
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
                         <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Shield size={16} /> Budget Enforcement

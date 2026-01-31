@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity, Eye } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity, Eye, Sparkles } from 'lucide-react';
 
 interface AdminDashboardProps {
     leads: Array<{
@@ -496,6 +496,89 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 </div>
             </header>
 
+            {/* Observability Tab */}
+            {activeTab === 'observability' && (
+                <div className="glass-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'hsl(var(--accent-gold))' }}>
+                            <Activity size={20} /> AI Usage & Budget
+                        </h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button
+                                onClick={fetchUsageStats}
+                                className="btn-secondary"
+                                style={{ padding: '0.5rem' }}
+                                title="Refresh"
+                            >
+                                <RefreshCw size={16} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                        {/* Budget Card */}
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                            <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'block', marginBottom: '0.5rem' }}>Daily Budget Limit</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '1.5rem', fontWeight: 600 }}>${usageStats?.limit?.toFixed(2) || '0.00'}</span>
+                                {isUpdatingLimit ? (
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Updating...</span>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            const newLimit = prompt("Set new daily limit in USD (e.g., 5.00):", usageStats?.limit?.toString());
+                                            if (newLimit && !isNaN(parseFloat(newLimit))) {
+                                                handleUpdateLimit(parseFloat(newLimit));
+                                            }
+                                        }}
+                                        className="btn-secondary"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                    >
+                                        <Edit size={12} /> Edit
+                                    </button>
+                                )}
+                            </div>
+                            <div style={{ marginTop: '1rem', height: '6px', background: '#333', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{
+                                    height: '100%',
+                                    width: `${Math.min(((usageStats?.spend || 0) / (usageStats?.limit || 1)) * 100, 100)}%`,
+                                    background: (usageStats?.spend || 0) > (usageStats?.limit || 0) ? 'salmon' : 'hsl(var(--accent-primary))',
+                                    transition: 'width 0.5s ease'
+                                }} />
+                            </div>
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: (usageStats?.spend || 0) > (usageStats?.limit || 0) ? 'salmon' : 'var(--text-muted)' }}>
+                                ${usageStats?.spend?.toFixed(4)} used today
+                            </p>
+                        </div>
+
+                        {/* Request Count Card */}
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                            <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'block', marginBottom: '0.5rem' }}>Total Requests Today</label>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'white' }}>
+                                {usageStats?.requests || 0}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                        <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Shield size={16} /> Budget Enforcement
+                        </h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                            When the daily limit is reached, all AI Generation requests will automatically fall back to static templates to prevent overage charges.
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <CheckCircle size={16} color="hsl(var(--accent-primary))" /> Hard Limit Active
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <CheckCircle size={16} color="hsl(var(--accent-primary))" /> Admin Notifications (Coming Soon)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Blueprints & AI Tab */}
             {activeTab === 'blueprints' && (
                 <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
@@ -627,7 +710,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         className="btn-secondary"
                                         style={{ flex: 1, fontSize: '0.8rem', justifyContent: 'center' }}
                                     >
-                                        {testingId === int.id ? 'Testing...' : 'Test'}
+                                        {testingId === int.id ? 'Testing...' : 'Test Connection'}
                                     </button>
                                     <button
                                         onClick={() => openEditIntegration(int)}

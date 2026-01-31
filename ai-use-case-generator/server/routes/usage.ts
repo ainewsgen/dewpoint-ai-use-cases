@@ -28,17 +28,20 @@ router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Invalid limit value' });
         }
 
-        // Find OpenAI Integration (Get latest created if multiple)
-        const openAIIntegrations = await db.query.integrations.findMany({
-            where: eq(integrations.name, 'OpenAI'),
-            orderBy: (integrations, { desc }) => [desc(integrations.id)],
-            limit: 1
+        // 1. Fetch ALL enabled integrations
+        const allIntegrations = await db.query.integrations.findMany({
+            where: eq(integrations.enabled, true),
+            orderBy: (integrations, { desc }) => [desc(integrations.id)]
         });
-        const openAIInt = openAIIntegrations[0];
+
+        // 2. Find best match
+        const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')
+            || allIntegrations.find(i => (i.metadata as any)?.provider === 'openai')
+            || allIntegrations[0];
 
         if (!openAIInt) {
-            console.warn("Update Limit: OpenAI integration not found");
-            return res.status(404).json({ error: 'OpenAI integration not found. Please connect it first.' });
+            console.warn("Update Limit: No active integration found");
+            return res.status(404).json({ error: 'No active integration found. Please connect an AI provider.' });
         }
 
         // Update Metadata

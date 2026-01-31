@@ -71,14 +71,20 @@ export class UsageService {
             .from(apiUsage)
             .where(gte(apiUsage.timestamp, startOfDay));
 
-        const openAIIntegrations = await db.query.integrations.findMany({
-            where: eq(integrations.name, 'OpenAI'),
-            orderBy: (integrations, { desc }) => [desc(integrations.id)],
-            limit: 1
+        // Fetch ALL enabled integrations to find the active one robustly
+        const allIntegrations = await db.query.integrations.findMany({
+            where: eq(integrations.enabled, true),
+            orderBy: (integrations, { desc }) => [desc(integrations.id)]
         });
-        const openAIInt = openAIIntegrations[0];
 
-        console.log(`[UsageStats] Found Integration: ${openAIInt?.id}, Name: ${openAIInt?.name}`);
+        // 1. Try exact name match
+        // 2. Try metadata provider match
+        // 3. Fallback to the most recent enabled integration
+        const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')
+            || allIntegrations.find(i => (i.metadata as any)?.provider === 'openai')
+            || allIntegrations[0];
+
+        console.log(`[UsageStats] Selected Integration ID: ${openAIInt?.id}, Name: ${openAIInt?.name}`);
         console.log(`[UsageStats] Metadata RAW:`, openAIInt?.metadata);
 
         // Ensure default of 5.00 if strictly undefined or null, but allow 0 if explicitly set (and not null)

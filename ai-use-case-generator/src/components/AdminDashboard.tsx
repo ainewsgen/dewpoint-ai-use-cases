@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity, Eye } from 'lucide-react';
 
 interface AdminDashboardProps {
     leads: Array<{

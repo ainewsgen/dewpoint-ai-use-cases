@@ -133,7 +133,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         opportunities.push({
             title: "The Invoice Watchdog",
             department: "Finance",
-            industry: "Finance",
+            industry: industry || "Finance",
             public_view: {
                 problem: "Duplicate invoices and creeping vendor costs often go unnoticed until it's too late.",
                 solution_narrative: "A 24/7 auditor that reads every incoming PDF invoice, compares it against your contract terms, and alerts you only when it finds a mistake.",
@@ -163,7 +163,8 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
             },
             generation_metadata: {
                 source: 'System',
-                model: 'Static Template'
+                model: 'Static Template',
+                fallback_reason: fallbackReason
             }
         });
     } else {

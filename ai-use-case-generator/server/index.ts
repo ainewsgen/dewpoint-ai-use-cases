@@ -71,6 +71,11 @@ app.post('/api/debug/fix-schema', async (req, res) => {
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
         await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
+        // Fully Comprehensive Schema Repair
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS name TEXT;`); // Essential missing column
+        await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
+        await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
         await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;`);
 
         // Ensure core columns exist (in case of partial migration)
@@ -106,6 +111,9 @@ const server = app.listen(PORT, () => {
             console.log("🛠️ Checking Database Schema...");
             // Force add 'metadata' column if missing
             await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+
+            // Force add 'name' column (critical fix)
+            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS name TEXT;`);
 
             // Force add 'provider' column matching schema (was missing in prod DB likely)
             await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);

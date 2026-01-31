@@ -156,9 +156,13 @@ router.get('/admin/leads', async (req, res) => {
             .leftJoin(companies, eq(leads.companyId, companies.id));
 
         res.json({ leads: allLeads });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Get all leads error:', error);
-        res.status(500).json({ error: 'Failed to get leads' });
+        res.status(500).json({
+            error: 'Failed to get leads',
+            details: error.message,
+            stack: error.stack
+        });
     }
 });
 

@@ -424,14 +424,24 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>System Prompt Template</label>
                             <textarea
-                                defaultValue={`You are an expert Solutions Architect. Given the user's Tech Stack: {{stack}} and Pain Point: {{pain}}, generate 3 high-impact automation blueprints.
-Each blueprint must include:
+                                defaultValue={`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+
+User Profile:
+- Company URL: {{url}}
+- Industry: {{industry}}
+- Company Size: {{size}}
+- Role: {{role}}
+- Tech Stack: {{stack}}
+- Primary Pain Point: {{painPoint}}
+
+Generate 3 custom automation blueprints. Each blueprint must include:
 1. A catchy title.
 2. A technical breakdown of the workflow.
 3. A realistic ROI estimate (time or money).
-4. A step-by-step implementation plan.`}
+4. A step-by-step implementation plan.
+5. A detailed technical stack breakdown (Tool + Role).`}
                                 style={{
-                                    width: '100%', minHeight: '150px',
+                                    width: '100%', minHeight: '250px',
                                     background: '#111', color: '#eee',
                                     border: '1px solid #333', borderRadius: '6px',
                                     fontFamily: 'monospace', padding: '1rem', lineHeight: '1.5'

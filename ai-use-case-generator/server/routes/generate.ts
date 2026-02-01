@@ -41,8 +41,8 @@ router.post('/generate', async (req, res) => {
             ? decrypt(activeInt.apiKey)
             : process.env.OPENAI_API_KEY!;
 
-        if (!companyData || !companyData.role || !companyData.painPoint) {
-            return res.status(400).json({ error: 'Missing required company data' });
+        if (!companyData || !companyData.painPoint) {
+            return res.status(400).json({ error: 'Missing required company data (painPoint is required)' });
         }
 
         // Default Prompt (Fallback until DB persistence in Phase 2)

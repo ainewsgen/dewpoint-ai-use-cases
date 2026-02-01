@@ -97,7 +97,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
         // Fetch from Backend
         const fetchLibrary = async () => {
             try {
-                const apiBase = 'https://dewpoint-ai-use-cases.onrender.com/api';
+                const apiBase = 'https://dewpoint-strategy-app.onrender.com/api';
 
                 // 1. Fetch Static Library
                 const staticRes = await fetch(`${apiBase}/library`);

@@ -1101,9 +1101,8 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                                         body: JSON.stringify({ title: r.title })
                                                                     });
                                                                     if (res.ok) {
-                                                                        // Optimistic UI Update
-                                                                        const updatedRecipes = (activeUser.allRecipes || activeUser.recipes).filter((receipe: any) => receipe.title !== r.title);
-                                                                        setActiveUser({ ...activeUser, allRecipes: updatedRecipes, recipes: updatedRecipes });
+                                                                        // Refresh the leads data to update the UI
+                                                                        fetchLeads();
                                                                     } else {
                                                                         alert("Failed to delete recipe");
                                                                     }

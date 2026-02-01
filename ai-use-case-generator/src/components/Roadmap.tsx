@@ -28,7 +28,7 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
             if (user?.email) {
                 setIsLocked(false);
                 try {
-                    const res = await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/roadmap/${user.email}`);
+                    const res = await fetch(`https://dewpoint-strategy-app.onrender.com/api/roadmap/${user.email}`);
 
                     if (res.ok) {
                         const data = await res.json();
@@ -89,7 +89,7 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
         if (user?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads/sync`, {
+                await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

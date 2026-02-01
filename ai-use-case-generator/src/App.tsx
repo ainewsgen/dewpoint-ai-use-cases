@@ -60,7 +60,7 @@ function App() {
         if (user?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads/sync`, {
+                await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ function App() {
         console.log("Matrix Loaded - Triggering Shadow Capture", opportunities.length);
         try {
             const shadowHeaders = TrackingService.getHeaders();
-            await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads`, {
+            await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ function App() {
         if (onboardingData && loggedInUser?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads/sync`, {
+                await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

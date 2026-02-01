@@ -169,6 +169,25 @@ router.delete('/admin/leads/:userId/recipes', async (req, res) => {
     }
 });
 
+// Delete a Lead (remove from list, keep user)
+router.delete('/admin/leads/user/:userId', async (req, res) => {
+    try {
+        const userId = parseInt(req.params.userId);
+
+        // Delete the lead record
+        await db.delete(leads).where(eq(leads.userId, userId));
+
+        // Optionally, we could also delete the company record if we wanted to be thorough, 
+        // but keeping it might be useful if the user generates a new lead later.
+        // For now, just removing the lead record removes it from the dashboard list.
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Delete lead error:', error);
+        res.status(500).json({ error: 'Failed to delete lead' });
+    }
+});
+
 // Get All Leads (Admin)
 router.get('/admin/leads', async (req, res) => {
     try {

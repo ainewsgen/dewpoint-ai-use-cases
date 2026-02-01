@@ -383,14 +383,13 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         }
     };
 
-    const handleDeleteUserReal = async (id: number) => {
-        if (confirm('Are you sure you want to deactivate this user?')) {
+    const handleDeleteLead = async (id: number) => {
+        if (confirm('Are you sure you want to remove this lead? The user account will remain active.')) {
             try {
-                await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                await fetch(`/api/admin/leads/user/${id}`, { method: 'DELETE' });
                 fetchLeads(); // Refresh the leads list which powers the UI
-                fetchUsers(); // Keep users list in sync too
             } catch (error) {
-                console.error('Delete user failed', error);
+                console.error('Delete lead failed', error);
             }
         }
     };
@@ -997,9 +996,9 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDeleteUserReal(user.id);
+                                                handleDeleteLead(user.id);
                                             }}
-                                            title="Delete User"
+                                            title="Delete Lead (Keep User)"
                                             className="btn-danger-icon"
                                             style={{ padding: '0.25rem' }}
                                         >

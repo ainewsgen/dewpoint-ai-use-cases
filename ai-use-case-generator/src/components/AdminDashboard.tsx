@@ -394,7 +394,9 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 await fetch(`/api/admin/leads/user/${id}`, { method: 'DELETE' });
                 fetchLeads(); // Refresh the leads list which powers the UI
             } catch (error) {
-                console.error('Delete lead failed', error);
+                fetchUsers(); // Keep users list in sync too
+            } catch (error) {
+                console.error('Delete user failed', error);
             }
         }
     };

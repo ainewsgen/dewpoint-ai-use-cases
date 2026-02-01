@@ -158,8 +158,37 @@ function App() {
         }
     };
 
-    const handleLoginSuccess = (loggedInUser: any) => {
+    const handleLoginSuccess = async (loggedInUser: any) => {
         setAuthModal(null);
+
+        // Retrieve onboarding data from localStorage
+        const storedOnboardingData = localStorage.getItem('dpg_onboarding_data');
+        const onboardingData = storedOnboardingData ? JSON.parse(storedOnboardingData) : null;
+
+        // Save onboarding data to backend if it exists
+        if (onboardingData && loggedInUser?.email) {
+            try {
+                const token = localStorage.getItem('dpg_auth_token');
+                await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads/sync`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        email: loggedInUser.email,
+                        companyData: onboardingData,
+                        recipes: [] // Will be updated when user saves cards
+                    })
+                });
+                // Clear onboarding data from localStorage after successful save
+                localStorage.removeItem('dpg_onboarding_data');
+            } catch (error) {
+                console.error('Failed to save onboarding data:', error);
+            }
+        }
+
+        // Handle pending save (if user was trying to save a card)
         if (pendingSave) {
             saveToBackend(pendingSave, loggedInUser).then((action) => {
                 setPendingSave(null);

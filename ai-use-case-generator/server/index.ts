@@ -21,6 +21,7 @@ import integrationsRoutes from './routes/integrations';
 import scanRoutes from './routes/scan';
 import generateRoutes from './routes/generate';
 import usageRoutes from './routes/usage';
+import debugUsersRoutes from './routes/debug-users';
 import { runMigrations } from './db/migrate';
 import { sql } from 'drizzle-orm';
 import { db } from './db';
@@ -31,6 +32,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ... middlewares ...
+
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
         ? (process.env.CLIENT_URL || 'https://dewpoint-ai-use-cases.onrender.com')
@@ -39,6 +42,10 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
+
+// Debug Routes
+app.use('/api/debug', debugUsersRoutes);
+
 
 // Custom Middleware
 import { shadowTracking } from './middleware/shadow';
@@ -230,7 +237,7 @@ if (fs.existsSync(distPath)) {
         if (req.method === 'GET' && !req.path.startsWith('/api')) {
             res.sendFile(path.join(distPath, 'index.html'));
         } else {
-             res.status(404).send('Antigravity Server: Route Not Found');
+            res.status(404).send('Antigravity Server: Route Not Found');
         }
     });
 } else {

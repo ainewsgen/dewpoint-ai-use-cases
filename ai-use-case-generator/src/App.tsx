@@ -44,7 +44,11 @@ function App() {
 
     // Handlers
     const handleOnboardingComplete = async (data: Partial<CompanyData>) => {
-        setData(prev => ({ ...prev, ...data }));
+        const updatedData = { ...data };
+        setData(prev => ({ ...prev, ...updatedData }));
+
+        // Always save to localStorage for persistence (anonymous or logged in)
+        localStorage.setItem('dpg_onboarding_data', JSON.stringify(updatedData));
 
         // Save company data to backend if user is logged in
         if (user?.email) {
@@ -58,7 +62,7 @@ function App() {
                     },
                     body: JSON.stringify({
                         email: user.email,
-                        companyData: { ...data },
+                        companyData: updatedData,
                         recipes: [] // Empty recipes initially, will be added after generation
                     })
                 });

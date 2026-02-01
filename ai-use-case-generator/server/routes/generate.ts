@@ -11,15 +11,16 @@ import { AuthRequest, requireAuth } from '../middleware/auth';
 
 const router = express.Router();
 
-router.post('/generate', requireAuth, async (req, res) => {
+router.post('/generate', async (req, res) => {
     try {
         const { companyData, promptDetails } = req.body;
         // Check for Admin Key in DB (Integrations table)
         // We assume there's a system-wide or admin-owned integration named 'OpenAI'
         // In a multi-user app, we might check req.user.id, but here it's a platform key.
 
+        // Optional: Get user context if authenticated (but don't require it)
         const authReq = req as AuthRequest;
-        const userId = authReq.user?.id || 1; // Default to admin (1) if user context missing, to prevent crash
+        const userId = authReq.user?.id || null; // null for anonymous users
 
         // Check for ANY active AI integration (Global Scope)
         const integrationsList = await db.select().from(integrations)
@@ -115,8 +116,10 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
             const promptTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(JSON.stringify(companyData).length / 4);
             const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
 
-            // Pass userId to ensure DB integrity
-            UsageService.logUsage(userId, promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
+            // Log usage only if user is authenticated
+            if (userId) {
+                UsageService.logUsage(userId, promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
+            }
 
             // 3. Return Blueprints with Metadata
             const finalBlueprints = Array.isArray(result.blueprints || result.opportunities)

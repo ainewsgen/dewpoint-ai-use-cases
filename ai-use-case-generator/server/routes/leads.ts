@@ -9,30 +9,39 @@ const router = Router();
 router.post('/leads', async (req, res) => {
     try {
         const { email, companyData, recipes } = req.body;
+        const shadowId = (req as any).shadowId;
 
-        if (!email || !recipes) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        // Validation: Need EITHER email OR shadowId
+        if ((!email && !shadowId) || !recipes) {
+            return res.status(400).json({ error: 'Missing required fields (email or shadowId required)' });
         }
 
-        // Get or create user
-        const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
-
-        if (user.length === 0) {
-            return res.status(404).json({ error: 'User not found. Please login first.' });
+        let userId: number | null = null;
+        if (email) {
+            // Get user
+            const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
+            if (user.length > 0) {
+                userId = user[0].id;
+            } else {
+                return res.status(404).json({ error: 'User not found. Please login first.' });
+            }
         }
 
-        const userId = user[0].id;
         const newRecipes = Array.isArray(recipes) ? recipes : [recipes];
 
-        // Check for existing lead for this user
-        const existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
+        // Check for existing lead
+        let existingLead = [];
+        if (userId) {
+            existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
+        } else if (shadowId) {
+            existingLead = await db.select().from(leads).where(eq(leads.shadowId, shadowId)).limit(1);
+        }
 
         if (existingLead.length > 0) {
             // Update existing lead
             const currentRecipes = existingLead[0].recipes as any[];
-
-            // Merge and Dedupe
             const mergedRecipes = [...currentRecipes];
+
             newRecipes.forEach((newR: any) => {
                 if (!mergedRecipes.find((r: any) => r.title === newR.title)) {
                     mergedRecipes.push(newR);
@@ -40,36 +49,54 @@ router.post('/leads', async (req, res) => {
             });
 
             const updatedLead = await db.update(leads)
-                .set({
-                    recipes: mergedRecipes,
-                    // We could update company info too, but let's keep the original "profile" 
-                    // or maybe update it if provided? User asked to "track cards", so recipes are key.
-                })
+                .set({ recipes: mergedRecipes })
                 .where(eq(leads.id, existingLead[0].id))
                 .returning();
 
             return res.json({ success: true, lead: updatedLead[0] });
 
         } else {
-            // Create new lead (and company if needed, though strictly we might just link to a dummy company if data missing)
+            // Create New Lead
+            // 1. Create Company (if data provided, or link to null)
+            // If shadow user, we still want a company record to store their manually entered data (industry, etc)
+            let companyId: number;
 
-            // Create company record (or find?) - For now, creating new one for the user if they don't have one?
-            // "One entry per user" -> Maybe one Company per user too? 
-            // For simplicity, let's just insert one.
-            const company = await db.insert(companies).values({
-                userId,
-                url: companyData?.url || null,
-                industry: companyData?.industry || null,
-                role: companyData?.role || null,
-                size: companyData?.size || null,
-                painPoint: companyData?.painPoint || null,
-                stack: companyData?.stack || [],
-            }).returning();
+            // Check for existing company for this user/shadow
+            let existingCompany = [];
+            if (userId) {
+                existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
+            } else {
+                // For shadow users, we don't have a shadowId on companies table yet? 
+                // Wait, companies.userId is nullable too. But we didn't add shadowId to companies table.
+                // We should probably rely on leads->company relationship.
+                // For now, always create a new company for a new lead? Or try to reuse?
+                // Without shadowId on companies, we can't easily find a shadow user's company unless we query leads first.
+                // But we are in "Create New Lead" block, so no lead exists.
+                // Thus, create new company.
+            }
 
-            // Create lead record
+            if (existingCompany.length > 0) {
+                companyId = existingCompany[0].id;
+                // Optionally update company data here if provided
+            } else {
+                const company = await db.insert(companies).values({
+                    userId: userId, // null for shadow
+                    url: companyData?.url || null,
+                    industry: companyData?.industry || null,
+                    naicsCode: companyData?.naicsCode || null, // NEW
+                    role: companyData?.role || null,
+                    size: companyData?.size || null,
+                    painPoint: companyData?.painPoint || null,
+                    stack: companyData?.stack || [],
+                }).returning();
+                companyId = company[0].id;
+            }
+
+            // 2. Create Lead
             const lead = await db.insert(leads).values({
-                userId,
-                companyId: company[0].id,
+                userId: userId,
+                companyId: companyId,
+                shadowId: shadowId || null,
                 recipes: newRecipes,
             }).returning();
 
@@ -81,79 +108,119 @@ router.post('/leads', async (req, res) => {
     }
 });
 
-// Sync/Replace Roadmap (For Deletions/Reordering)
+// Sync/Replace Roadmap (For Deletions/Reordering/Registration Sync)
 router.put('/leads/sync', async (req, res) => {
     try {
         const { email, recipes, companyData } = req.body;
+        const shadowId = (req as any).shadowId;
 
-        if (!email || !recipes) {
+        // Need email OR shadowId
+        if ((!email && !shadowId) || !recipes) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
-        if (user.length === 0) return res.status(404).json({ error: 'User not found' });
+        let userId: number | null = null;
+        if (email) {
+            const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
+            if (user.length > 0) userId = user[0].id;
+            else return res.status(404).json({ error: 'User not found' });
+        }
 
-        const userId = user[0].id;
-        const existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
+        // Check for existing lead
+        let existingLead = [];
+        if (userId) {
+            existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
+        } else if (shadowId) {
+            existingLead = await db.select().from(leads).where(eq(leads.shadowId, shadowId)).limit(1);
+        }
 
-        // Handle company data if provided
+        // Handle Company Data
         let companyId: number;
-        if (companyData) {
-            const existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
+        // Logic to Find/Create Company...
+        // If userId exists, use it. If not, create new company with null userId.
 
-            if (existingCompany.length > 0) {
-                // Update existing company
-                const [updated] = await db.update(companies)
-                    .set({
-                        url: companyData.url || existingCompany[0].url,
-                        industry: companyData.industry || existingCompany[0].industry,
-                        role: companyData.role || existingCompany[0].role,
-                        size: companyData.size || existingCompany[0].size,
-                        painPoint: companyData.painPoint || existingCompany[0].painPoint,
-                        stack: companyData.stack || existingCompany[0].stack,
-                    })
-                    .where(eq(companies.id, existingCompany[0].id))
-                    .returning();
-                companyId = updated.id;
-            } else {
-                // Create new company
-                const [newCompany] = await db.insert(companies).values({
-                    userId,
-                    url: companyData.url || null,
-                    industry: companyData.industry || null,
-                    role: companyData.role || null,
-                    size: companyData.size || null,
-                    painPoint: companyData.painPoint || null,
-                    stack: companyData.stack || [],
-                }).returning();
-                companyId = newCompany.id;
+        let existingCompany = [];
+        if (userId) {
+            existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
+        }
+        // Note: For shadow users, we effectively create a new company every time we create a new lead? 
+        // Or we should update the company linked to the existing lead.
+
+        if (existingLead.length > 0) {
+            // Use company from existing lead
+            companyId = existingLead[0].companyId!;
+
+            if (companyData) {
+                await db.update(companies).set({
+                    url: companyData.url || undefined,
+                    industry: companyData.industry || undefined,
+                    naicsCode: companyData.naicsCode || undefined,
+                    role: companyData.role || undefined,
+                    size: companyData.size || undefined,
+                    painPoint: companyData.painPoint || undefined,
+                    stack: companyData.stack || undefined,
+                    // If we are converting shadow -> registered, assign userId to company
+                    userId: userId || undefined
+                }).where(eq(companies.id, companyId));
             }
         } else {
-            // No company data provided, use existing or create dummy
-            const existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
-            if (existingCompany.length > 0) {
-                companyId = existingCompany[0].id;
-            } else {
-                const [newCompany] = await db.insert(companies).values({ userId }).returning();
-                companyId = newCompany.id;
-            }
+            // Create New Company
+            const newCompany = await db.insert(companies).values({
+                userId: userId,
+                url: companyData?.url || null,
+                industry: companyData?.industry || null,
+                naicsCode: companyData?.naicsCode || null,
+                role: companyData?.role || null,
+                size: companyData?.size || null,
+                painPoint: companyData?.painPoint || null,
+                stack: companyData?.stack || [],
+            }).returning();
+            companyId = newCompany[0].id;
         }
 
         if (existingLead.length > 0) {
-            // REPLACING the recipes array explicitly
+            // MERGE logic if converting shadow -> registered?
+            // "Sync" usually implies replacement (from localStorage to DB).
+            // But if we have shadow data in DB already, we might want to attach userId to it.
+
             const updated = await db.update(leads)
                 .set({
                     recipes: recipes,
-                    companyId: companyId // Update company reference
+                    companyId: companyId,
+                    userId: userId || undefined, // Assign user if they just registered
+                    // Keep shadowId? Yes, for tracking history.
                 })
                 .where(eq(leads.id, existingLead[0].id))
                 .returning();
             return res.json({ success: true, lead: updated[0] });
         } else {
-            // If no lead exists yet, create one
+            // Check if there was a SHADOW lead that we should maintain connection to?
+            // If the request came with a userId, but we found no lead for that userId.
+            // Check if there is a lead for the shadowId (if provided).
+            if (userId && shadowId) {
+                const shadowLead = await db.select().from(leads).where(eq(leads.shadowId, shadowId)).limit(1);
+                if (shadowLead.length > 0) {
+                    // Found a shadow lead! Convert it to this user.
+                    // Also need to update company ownership
+                    const shadowCompanyId = shadowLead[0].companyId!;
+                    await db.update(companies).set({ userId: userId }).where(eq(companies.id, shadowCompanyId));
+
+                    const converted = await db.update(leads)
+                        .set({
+                            userId: userId,
+                            recipes: recipes // Use the payload recipes (which might be merged on client)
+                        })
+                        .where(eq(leads.id, shadowLead[0].id))
+                        .returning();
+                    return res.json({ success: true, lead: converted[0], converted: true });
+                }
+            }
+
+            // Create brand new
             const lead = await db.insert(leads).values({
                 userId,
                 companyId: companyId,
+                shadowId: shadowId || null,
                 recipes: recipes
             }).returning();
             return res.json({ success: true, lead: lead[0] });
@@ -258,7 +325,7 @@ router.get('/admin/leads', async (req, res) => {
 });
 
 // Get Public Library (All Generated Recipes)
-router.get('/library', async (req, res) => {
+router.get('/community-library', async (req, res) => {
     try {
         const allLeads = await db.select({
             recipes: leads.recipes

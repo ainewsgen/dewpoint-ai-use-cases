@@ -14,6 +14,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Footer } from './components/Footer';
 
 
+import { TrackingService } from './lib/tracking';
+
 type ViewState = 'DISCOVERY' | 'ANALYSIS' | 'MATRIX' | 'LIBRARY' | 'ROADMAP' | 'ADMIN';
 
 // Simulated database
@@ -40,6 +42,10 @@ function App() {
     // ... (keep useEffect) ...
     useEffect(() => {
         console.log("DewPoint App v3.15 Loaded - API Check Pending");
+
+        // Initialize Shadow Tracking
+        const shadowId = TrackingService.getShadowId();
+        console.log("Shadow ID Active:", shadowId);
     }, []);
 
     // Handlers
@@ -54,7 +60,7 @@ function App() {
         if (user?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads/sync`, {
+                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -74,14 +80,41 @@ function App() {
         setView('ANALYSIS');
     };
 
-    const handleAnalysisComplete = (opportunities: Opportunity[]) => {
-        setLeads([{
-            id: Date.now().toString(),
-            timestamp: new Date().toISOString(),
-            company: data,
-            recipes: opportunities
-        }]);
+    const handleAnalysisComplete = () => {
+        // Transition to Matrix view
+        // Logic for capturing leads moved to Matrix component on load
         setView('MATRIX');
+    };
+
+    const handleMatrixLoaded = async (opportunities: Opportunity[]) => {
+        // Shadow Lead Capture: Automatically save upon generation
+        console.log("Matrix Loaded - Triggering Shadow Capture", opportunities.length);
+        try {
+            const shadowHeaders = TrackingService.getHeaders();
+            await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...shadowHeaders
+                },
+                body: JSON.stringify({
+                    recipes: opportunities,
+                    companyData: data
+                })
+            });
+            console.log("Shadow Lead Captured Successfully");
+
+            // Update local session history
+            setLeads(prev => [{
+                id: Date.now().toString(),
+                timestamp: new Date().toISOString(),
+                company: data,
+                recipes: opportunities
+            }, ...prev]);
+
+        } catch (err) {
+            console.error("Failed to capture shadow lead", err);
+        }
     };
 
     const handleCaptureLead = (lead: any) => {
@@ -169,7 +202,7 @@ function App() {
         if (onboardingData && loggedInUser?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads/sync`, {
+                await fetch(`https://dewpoint-ai-use-cases.onrender.com/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -316,6 +349,7 @@ function App() {
                         isAdmin={isAdminMode}
                         onSaveRequest={handleRequestSave}
                         user={user}
+                        onLoaded={handleMatrixLoaded}
                     />
                 )}
                 {view === 'LIBRARY' && (

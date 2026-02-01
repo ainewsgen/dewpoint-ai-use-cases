@@ -97,20 +97,59 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
         // Fetch from Backend
         const fetchLibrary = async () => {
             try {
-                const res = await fetch(`${import.meta.env.PROD ? '/api' : 'http://localhost:3000/api'}/library`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.recipes && data.recipes.length > 0) {
-                        // Merge defaults with fetched, deduping by title
-                        const merged = [...DEFAULT_RECIPES];
-                        data.recipes.forEach((r: Opportunity) => {
-                            if (!merged.find(m => m.title === r.title)) {
-                                merged.push(r);
-                            }
-                        });
-                        setLibRecipes(merged);
-                    }
+                const apiBase = 'https://dewpoint-ai-use-cases.onrender.com/api';
+
+                // 1. Fetch Static Library
+                const staticRes = await fetch(`${apiBase}/library`);
+                let staticCases: any[] = [];
+                if (staticRes.ok) {
+                    const data = await staticRes.json();
+                    staticCases = data.useCases || [];
                 }
+
+                // 2. Fetch Community Library
+                const communityRes = await fetch(`${apiBase}/community-library`);
+                let communityCases: Opportunity[] = [];
+                if (communityRes.ok) {
+                    const data = await communityRes.json();
+                    communityCases = data.recipes || [];
+                }
+
+                // 3. Map Static to Opportunity
+                const formattedStatic: Opportunity[] = staticCases.map(sc => ({
+                    title: sc.title,
+                    department: "General",
+                    industry: sc.industry,
+                    public_view: {
+                        problem: sc.description,
+                        solution_narrative: sc.description,
+                        value_proposition: "Verified Use Case",
+                        roi_estimate: sc.roiEstimate,
+                        detailed_explanation: sc.description,
+                        example_scenario: `Industry: ${sc.industry}. Difficulty: ${sc.difficulty}`,
+                        walkthrough_steps: []
+                    },
+                    admin_view: {
+                        tech_stack: sc.tags || [],
+                        implementation_difficulty: sc.difficulty as any,
+                        workflow_steps: "Refer to documentation.",
+                        upsell_opportunity: "Consultation"
+                    },
+                    generation_metadata: { source: 'System', model: 'Static Library' }
+                }));
+
+                // 4. Merge
+                const merged = [...DEFAULT_RECIPES];
+
+                formattedStatic.forEach(r => {
+                    if (!merged.find(m => m.title === r.title)) merged.push(r);
+                });
+
+                communityCases.forEach(r => {
+                    if (!merged.find(m => m.title === r.title)) merged.push(r);
+                });
+
+                setLibRecipes(merged);
             } catch (err) {
                 console.error("Failed to load library", err);
             }

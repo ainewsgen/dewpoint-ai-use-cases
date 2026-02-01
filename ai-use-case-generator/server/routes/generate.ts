@@ -1,7 +1,7 @@
 import express from 'express';
 import { db } from '../db';
-import { integrations } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { integrations, industryIcps } from '../db/schema';
+import { eq, ilike } from 'drizzle-orm';
 import { decrypt } from '../utils/encryption';
 import { OpenAIService } from '../services/openai';
 import { UsageService } from '../services/usage';
@@ -45,8 +45,33 @@ router.post('/generate', async (req, res) => {
             return res.status(400).json({ error: 'Missing required company data (painPoint is required)' });
         }
 
+        // 0. Industry ICP Lookup & Context Injection
+        let icpContext = "";
+        let strategyDirective = "";
+
+        if (companyData.industry) {
+            const icpMatch = await db.select().from(industryIcps)
+                .where(ilike(industryIcps.industry, companyData.industry))
+                .limit(1);
+
+            if (icpMatch.length > 0) {
+                const icp = icpMatch[0];
+                console.log(`[Generate] Applied Industry ICP: ${icp.industry}`);
+
+                icpContext = `\n\n*** INDUSTRY INTELLIGENCE ACTIVE ***
+Target Persona: ${icp.icpPersona}
+Strategic Focus: ${icp.promptInstructions}
+Economic Drivers: ${icp.economicDrivers || "N/A"}
+Negative Constraints (Avoid): ${icp.negativeIcps || "None"}
+`;
+                // We could also pass discoveryGuidance if the AI was doing lead finding, but here it's solution design.
+                // We'll keep it focused on the SOLUTION design.
+            }
+        }
+
         // Default Prompt (Fallback until DB persistence in Phase 2)
         const defaultSystemPrompt = `You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+${icpContext}
 
 User Profile:
 - Industry: {{industry}}
@@ -119,7 +144,8 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
             // Log usage for all requests (authenticated and anonymous)
             // Use userId if available, otherwise use null for anonymous tracking
             const userIdForLogging = userId || null;
-            UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
+            const shadowId = (req as any).shadowId;
+            UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, 'gpt-4o', shadowId).catch(err => console.error("Usage Log Error:", err));
 
             // 3. Return Blueprints with Metadata
             const finalBlueprints = Array.isArray(result.blueprints || result.opportunities)

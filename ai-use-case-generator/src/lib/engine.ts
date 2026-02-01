@@ -1,11 +1,9 @@
-/**
- * Engine.ts
- * Simulates the "DewPoint Strategy Core" logic.
- */
+import { TrackingService } from './tracking';
 
 export interface CompanyData {
     url: string;
     industry?: string;
+    naicsCode?: string;
     role: string;
     size: string;
     stack: string[];
@@ -58,9 +56,13 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
 
     try {
         // Try to fetch from Production AI Endpoint
+        const shadowHeaders = TrackingService.getHeaders();
         const response = await fetch('/api/generate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...shadowHeaders
+            },
             body: JSON.stringify({ companyData, promptDetails })
         });
 

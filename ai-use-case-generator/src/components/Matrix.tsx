@@ -10,9 +10,10 @@ interface MatrixProps {
     isAdmin: boolean;
     onSaveRequest: (recipe: Opportunity) => void;
     user: any;
+    onLoaded?: (recipes: Opportunity[]) => void; // Optional callback for shadow save
 }
 
-export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user }: MatrixProps) {
+export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user, onLoaded }: MatrixProps) {
     // Fix: generateOpportunities is async, so we must handle it with state
     const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +27,8 @@ export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user }: 
                 if (mounted) {
                     setOpportunities(opps);
                     setIsLoading(false);
+                    // Trigger shadow save (or parent update)
+                    if (onLoaded) onLoaded(opps);
                 }
             } catch (err) {
                 console.error("Failed to generate opportunities", err);
@@ -36,7 +39,7 @@ export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user }: 
         fetchOpportunities();
 
         return () => { mounted = false; };
-    }, [companyData]);
+    }, [companyData, onLoaded]);
 
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
 

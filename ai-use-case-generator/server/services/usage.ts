@@ -44,19 +44,20 @@ export class UsageService {
      * Logs usage and cost to the DB.
      * Accepts null userId for anonymous users.
      */
-    static async logUsage(userId: number | null, promptTokens: number, completionTokens: number, model = 'gpt-4o') {
+    static async logUsage(userId: number | null, promptTokens: number, completionTokens: number, model = 'gpt-4o', shadowId?: string) {
         const cost = (promptTokens * this.GPT4O_INPUT_COST) + (completionTokens * this.GPT4O_OUTPUT_COST);
 
         try {
             await db.insert(apiUsage).values({
                 userId, // Can be null for anonymous users
+                shadowId: shadowId || null,
                 model,
                 promptTokens,
                 completionTokens,
                 totalCost: cost.toFixed(6), // Store as string/decimal
                 timestamp: new Date()
             });
-            const userLabel = userId ? `User ${userId}` : 'Anonymous';
+            const userLabel = userId ? `User ${userId}` : `Anonymous (Shadow: ${shadowId || 'none'})`;
             console.log(`[Usage] Logged: $${cost.toFixed(6)} (${promptTokens}in/${completionTokens}out) for ${userLabel}`);
         } catch (e) {
             console.error("Failed to insert api_usage log (non-fatal):", e);

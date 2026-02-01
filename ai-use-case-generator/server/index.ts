@@ -32,6 +32,10 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 
+// Custom Middleware
+import { shadowTracking } from './middleware/shadow';
+app.use(shadowTracking);
+
 // Health Check (before other API routes for priority)
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', version: 'v3.22', timestamp: new Date().toISOString() });
@@ -40,6 +44,9 @@ app.get('/api/health', (req, res) => {
 
 
 
+
+import icpsRoutes from './routes/icps';
+import libraryRoutes from './routes/library';
 
 // API Routes
 app.use('/api/auth', authEnhancedRoutes); // Enhanced auth with JWT
@@ -51,6 +58,8 @@ app.use('/api', integrationsRoutes); // Enhanced integrations
 app.use('/api', scanRoutes); // Server-side scanning
 app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats
+app.use('/api', icpsRoutes); // Industry ICPs
+app.use('/api', libraryRoutes); // Use Case Library
 
 
 

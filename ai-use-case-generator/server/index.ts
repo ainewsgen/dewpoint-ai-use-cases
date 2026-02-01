@@ -230,7 +230,7 @@ if (fs.existsSync(distPath)) {
         if (req.method === 'GET' && !req.path.startsWith('/api')) {
             res.sendFile(path.join(distPath, 'index.html'));
         } else {
-            res.status(404).json({ error: 'Not Found' });
+             res.status(404).send('Antigravity Server: Route Not Found');
         }
     });
 } else {

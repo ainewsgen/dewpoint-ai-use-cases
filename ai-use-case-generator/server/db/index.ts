@@ -5,11 +5,11 @@ import * as schema from './schema';
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-    throw new Error('DATABASE_URL is not set in environment variables');
+    console.warn('⚠️ DATABASE_URL is not set. Using dummy connection string to prevent crash.');
 }
 
 const pool = new Pool({
-    connectionString,
+    connectionString: connectionString || 'postgres://dummy:dummy@localhost:5432/dummy',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 });
 

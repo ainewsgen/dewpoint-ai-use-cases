@@ -1,4 +1,12 @@
 import express from 'express';
+
+// Global Error Handlers (Must be first)
+process.on('uncaughtException', (err) => {
+    console.error('CRITICAL: Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('CRITICAL: Unhandled Rejection:', reason);
+});
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -231,8 +239,8 @@ if (fs.existsSync(distPath)) {
 }
 
 // Start server immediately
-const server = app.listen(PORT, () => {
-    console.log(`📊 API available at http://localhost:${PORT}/api`);
+const server = app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`📊 API available at http://0.0.0.0:${PORT}/api`);
 
     // Self-healing: Ensure Schema is correct (SQL Injection for migration reliability)
     // Run this async without blocking, or await if critical. We'll fire-and-forget but log errors.

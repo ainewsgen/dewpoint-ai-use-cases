@@ -394,6 +394,16 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 await fetch(`/api/admin/leads/user/${id}`, { method: 'DELETE' });
                 fetchLeads(); // Refresh the leads list which powers the UI
             } catch (error) {
+                console.error('Delete lead failed', error);
+            }
+        }
+    };
+
+    const handleDeleteUserReal = async (id: number) => {
+        if (confirm('Are you sure you want to deactivate this user?')) {
+            try {
+                await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                fetchLeads(); // Refresh the leads list which powers the UI
                 fetchUsers(); // Keep users list in sync too
             } catch (error) {
                 console.error('Delete user failed', error);

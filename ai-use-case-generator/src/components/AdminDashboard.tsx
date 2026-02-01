@@ -1153,23 +1153,108 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                         )}
                                                     </div>
                                                 </div>
-                                                {/* ... recipes details ... */}
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
-                                                    <div>
-                                                        <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>Tech Stack</label>
-                                                        <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                                            {/* Shim: Use stack_details if available, else map tech_stack to generic details */}
-                                                            {(r.admin_view.stack_details || (r.admin_view.tech_stack || []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).map((detail: any, i: number) => (
-                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', background: 'hsl(var(--accent-secondary))', color: 'white', padding: '4px 8px', borderRadius: '4px', border: '1px solid hsl(var(--accent-primary))' }}>
-                                                                    <span style={{ fontWeight: 600, color: 'white' }}>{detail.tool}</span>
-                                                                    <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.75rem', fontStyle: 'italic' }}>{detail.role}</span>
-                                                                </div>
-                                                            ))}
+                                                {/* Recipe Card Details */}
+                                                <div style={{ display: 'grid', gap: '1rem', fontSize: '0.9rem' }}>
+                                                    {/* Public View Section */}
+                                                    <div style={{ background: 'hsl(var(--bg-secondary))', padding: '1rem', borderRadius: '6px', border: '1px solid hsl(var(--border-glass))' }}>
+                                                        <h5 style={{ margin: '0 0 0.75rem 0', color: 'hsl(var(--accent-primary))', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Public View</h5>
+
+                                                        <div style={{ marginBottom: '0.75rem' }}>
+                                                            <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Problem</label>
+                                                            <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5 }}>{r.public_view?.problem || 'N/A'}</p>
                                                         </div>
+
+                                                        <div style={{ marginBottom: '0.75rem' }}>
+                                                            <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Solution</label>
+                                                            <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5 }}>{r.public_view?.solution_narrative || 'N/A'}</p>
+                                                        </div>
+
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                            <div>
+                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Value Proposition</label>
+                                                                <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5 }}>{r.public_view?.value_proposition || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>ROI Estimate</label>
+                                                                <p style={{ margin: 0, color: 'hsl(140, 70%, 50%)', fontWeight: 600, lineHeight: 1.5 }}>{r.public_view?.roi_estimate || 'N/A'}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {r.public_view?.detailed_explanation && (
+                                                            <div style={{ marginTop: '0.75rem' }}>
+                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Detailed Explanation</label>
+                                                                <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5, fontSize: '0.85rem' }}>{r.public_view.detailed_explanation}</p>
+                                                            </div>
+                                                        )}
+
+                                                        {r.public_view?.walkthrough_steps && r.public_view.walkthrough_steps.length > 0 && (
+                                                            <div style={{ marginTop: '0.75rem' }}>
+                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Walkthrough Steps</label>
+                                                                <ol style={{ margin: '0.5rem 0 0 1.25rem', padding: 0, color: 'hsl(var(--text-main))', lineHeight: 1.6 }}>
+                                                                    {r.public_view.walkthrough_steps.map((step: string, i: number) => (
+                                                                        <li key={i} style={{ fontSize: '0.85rem' }}>{step}</li>
+                                                                    ))}
+                                                                </ol>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div>
-                                                        <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Upsell Opp</label>
-                                                        <p style={{ color: 'hsl(140, 70%, 50%)' }}>{r.admin_view.upsell_opportunity}</p>
+
+                                                    {/* Admin View Section */}
+                                                    <div style={{ background: 'hsl(var(--bg-secondary))', padding: '1rem', borderRadius: '6px', border: '1px solid hsl(var(--border-glass))' }}>
+                                                        <h5 style={{ margin: '0 0 0.75rem 0', color: 'hsl(var(--accent-gold))', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin View</h5>
+
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                                                            <div>
+                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Implementation Difficulty</label>
+                                                                <span style={{
+                                                                    display: 'inline-block',
+                                                                    padding: '0.25rem 0.75rem',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '0.8rem',
+                                                                    fontWeight: 600,
+                                                                    background: r.admin_view?.implementation_difficulty === 'Low' ? 'hsl(140, 70%, 90%)' :
+                                                                        r.admin_view?.implementation_difficulty === 'Med' ? 'hsl(45, 90%, 85%)' :
+                                                                            'hsl(0, 70%, 90%)',
+                                                                    color: r.admin_view?.implementation_difficulty === 'Low' ? 'hsl(140, 70%, 30%)' :
+                                                                        r.admin_view?.implementation_difficulty === 'Med' ? 'hsl(45, 90%, 30%)' :
+                                                                            'hsl(0, 70%, 30%)'
+                                                                }}>
+                                                                    {r.admin_view?.implementation_difficulty || 'N/A'}
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Tech Stack</label>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                                                                    {(r.admin_view?.stack_details || (r.admin_view?.tech_stack || []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).slice(0, 3).map((detail: any, i: number) => (
+                                                                        <span key={i} style={{
+                                                                            fontSize: '0.75rem',
+                                                                            background: 'hsl(var(--accent-secondary))',
+                                                                            color: 'white',
+                                                                            padding: '2px 6px',
+                                                                            borderRadius: '3px',
+                                                                            fontWeight: 600
+                                                                        }}>
+                                                                            {detail.tool}
+                                                                        </span>
+                                                                    ))}
+                                                                    {(r.admin_view?.stack_details || r.admin_view?.tech_stack || []).length > 3 && (
+                                                                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>
+                                                                            +{(r.admin_view?.stack_details || r.admin_view?.tech_stack || []).length - 3} more
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style={{ marginBottom: '0.75rem' }}>
+                                                            <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Workflow Steps</label>
+                                                            <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5, fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>{r.admin_view?.workflow_steps || 'N/A'}</p>
+                                                        </div>
+
+                                                        <div>
+                                                            <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Upsell Opportunity</label>
+                                                            <p style={{ margin: 0, color: 'hsl(140, 70%, 50%)', fontWeight: 600, lineHeight: 1.5 }}>{r.admin_view?.upsell_opportunity || 'N/A'}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

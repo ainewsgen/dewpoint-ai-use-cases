@@ -139,6 +139,8 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             fetchIntegrations();
         } else if (activeTab === 'observability') {
             fetchUsageStats();
+        } else if (activeTab === 'users') {
+            fetchUsers();
         }
     }, [activeTab]);
 

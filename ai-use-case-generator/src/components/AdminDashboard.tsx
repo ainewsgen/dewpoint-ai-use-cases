@@ -90,9 +90,14 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                     id: row.lead.id,
                     timestamp: row.lead.createdAt || new Date().toISOString(),
                     company: {
-                        ...row.company,
-                        email: row.user?.email || 'unknown', // Enrich with user email
-                        name: row.company?.name || row.user?.name || 'Anonymous'
+                        name: row.company?.name || row.user?.name || 'Anonymous',
+                        email: row.user?.email || 'unknown',
+                        url: row.company?.url || '',
+                        industry: row.company?.industry || '',
+                        role: row.company?.role || '',
+                        size: row.company?.size || '',
+                        painPoint: row.company?.painPoint || '',
+                        stack: row.company?.stack || [],
                     },
                     recipes: row.lead.recipes || [],
                     // Keep original user object if needed

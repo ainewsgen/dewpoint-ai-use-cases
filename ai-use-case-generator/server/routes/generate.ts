@@ -116,10 +116,10 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
             const promptTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(JSON.stringify(companyData).length / 4);
             const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
 
-            // Log usage only if user is authenticated
-            if (userId) {
-                UsageService.logUsage(userId, promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
-            }
+            // Log usage for all requests (authenticated and anonymous)
+            // Use userId if available, otherwise use null for anonymous tracking
+            const userIdForLogging = userId || null;
+            UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, 'gpt-4o').catch(err => console.error("Usage Log Error:", err));
 
             // 3. Return Blueprints with Metadata
             const finalBlueprints = Array.isArray(result.blueprints || result.opportunities)

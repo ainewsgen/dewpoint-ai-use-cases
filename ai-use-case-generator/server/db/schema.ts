@@ -61,7 +61,7 @@ export const integrations = pgTable('integrations', {
 
 export const apiUsage = pgTable('api_usage', {
     id: serial('id').primaryKey(),
-    userId: serial('user_id').references(() => users.id),
+    userId: integer('user_id').references(() => users.id), // Allow null for anonymous users
     model: text('model'),
     promptTokens: integer('prompt_tokens'),
     completionTokens: integer('completion_tokens'),

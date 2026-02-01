@@ -1526,11 +1526,27 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                 activeTab === 'users' && (
                     <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3>Registered Users</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <h3>Registered Users <span style={{ fontSize: '0.8rem', color: '#888' }}>({users.length})</span></h3>
+                                <button onClick={fetchUsers} className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}>
+                                    <RefreshCw size={12} /> Force Refresh
+                                </button>
+                            </div>
                             <button onClick={() => openEditUserModal()} className="btn-primary">
                                 <Plus size={18} /> Add User
                             </button>
                         </div>
+
+                        {/* Debug Raw State */}
+                        {users.length === 0 && (
+                            <div style={{ padding: '1rem', background: 'rgba(255,100,100,0.1)', border: '1px solid salmon', borderRadius: '8px', marginBottom: '1rem' }}>
+                                <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ list is empty. Debug info:</p>
+                                <pre style={{ fontSize: '0.7rem', color: '#ccc' }}>
+                                    Active Tab: {activeTab}{'\n'}
+                                    Users State Array Length: {users.length}
+                                </pre>
+                            </div>
+                        )}
 
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>

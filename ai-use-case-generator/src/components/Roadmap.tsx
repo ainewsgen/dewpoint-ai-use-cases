@@ -1,7 +1,7 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { Bookmark, Frown, Sparkles, Trash2, ArrowRight, Server, Lock, ArrowDownUp, Map, Shield } from 'lucide-react';
+import { Frown, Sparkles, Trash2, ArrowRight, Server, Lock, Map } from 'lucide-react';
 
 
 
@@ -16,7 +16,7 @@ type SortOption = 'ROI' | 'DEPARTMENT' | 'NEWEST';
 export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
     const [isLocked, setIsLocked] = useState(true);
-    const [sortBy, setSortBy] = useState<SortOption>('ROI');
+    const [sortBy] = useState<SortOption>('ROI');
 
     useEffect(() => {
         const fetchRoadmap = async () => {
@@ -69,9 +69,7 @@ export function Roadmap({ isAdmin, user, leads = [] }: RoadmapProps) {
         fetchRoadmap();
     }, [user]);
 
-    const handleLoginSuccess = () => {
-        // ... handled by App.tsx passed prop now
-    };
+
 
     const removeRecipe = async (index: number) => {
         if (!confirm("Are you sure you want to remove this blueprint?")) return;

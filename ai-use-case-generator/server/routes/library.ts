@@ -18,9 +18,9 @@ router.get('/library', async (req, res) => {
 
         const cases = await query.orderBy(useCaseLibrary.industry);
         res.json({ useCases: cases });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Get library error:', error);
-        res.status(500).json({ error: 'Failed to fetch library' });
+        res.status(500).json({ error: 'Failed to fetch library', details: error.message });
     }
 });
 

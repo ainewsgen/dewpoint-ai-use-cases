@@ -1042,6 +1042,27 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                 <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Primary Pain Point</label>
                                                 <p>"{activeUser.company.painPoint}"</p>
                                             </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Industry</label>
+                                                <p>{activeUser.company.industry || 'Not specified'}</p>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Tech Stack</label>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                    {(activeUser.company.stack || []).map((tech: string, i: number) => (
+                                                        <span key={i} style={{
+                                                            background: 'hsl(var(--accent-secondary))',
+                                                            color: 'white',
+                                                            padding: '0.25rem 0.75rem',
+                                                            borderRadius: '4px',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 600
+                                                        }}>
+                                                            {tech}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1050,10 +1071,17 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     </h3>
                                     <div style={{ display: 'grid', gap: '1.5rem' }}>
                                         {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
-                                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                                            <div key={idx} style={{
+                                                background: 'white',
+                                                padding: '1.5rem',
+                                                borderRadius: '8px',
+                                                border: '2px solid hsl(var(--border-glass))',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                transition: 'all 0.2s ease'
+                                            }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                        <h4 style={{ fontSize: '1.1rem', margin: 0 }}>{r.title}</h4>
+                                                        <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'hsl(var(--text-main))' }}>{r.title}</h4>
                                                     </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                         <button
@@ -1084,7 +1112,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                         >
                                                             <Trash size={14} />
                                                         </button>
-                                                        <span className="badge" style={{ background: '#333' }}>{r.department}</span>
+                                                        <span className="badge" style={{ background: 'hsl(var(--accent-primary))', color: 'white' }}>{r.department}</span>
                                                         {r.industry && (
                                                             <span style={{
                                                                 fontSize: '0.65rem',
@@ -1111,13 +1139,13 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                 {/* ... recipes details ... */}
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
                                                     <div>
-                                                        <label style={{ color: '#888', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
+                                                        <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>Tech Stack</label>
                                                         <div style={{ display: 'grid', gap: '0.5rem' }}>
                                                             {/* Shim: Use stack_details if available, else map tech_stack to generic details */}
                                                             {(r.admin_view.stack_details || (r.admin_view.tech_stack || []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).map((detail: any, i: number) => (
-                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', background: '#222', padding: '4px 8px', borderRadius: '4px', border: '1px solid #444' }}>
+                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', background: 'hsl(var(--accent-secondary))', color: 'white', padding: '4px 8px', borderRadius: '4px', border: '1px solid hsl(var(--accent-primary))' }}>
                                                                     <span style={{ fontWeight: 600, color: 'white' }}>{detail.tool}</span>
-                                                                    <span style={{ color: '#888', fontSize: '0.75rem', fontStyle: 'italic' }}>{detail.role}</span>
+                                                                    <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.75rem', fontStyle: 'italic' }}>{detail.role}</span>
                                                                 </div>
                                                             ))}
                                                         </div>

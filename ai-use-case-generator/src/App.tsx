@@ -43,8 +43,30 @@ function App() {
     }, []);
 
     // Handlers
-    const handleOnboardingComplete = (data: Partial<CompanyData>) => {
+    const handleOnboardingComplete = async (data: Partial<CompanyData>) => {
         setData(prev => ({ ...prev, ...data }));
+
+        // Save company data to backend if user is logged in
+        if (user?.email) {
+            try {
+                const token = localStorage.getItem('dpg_auth_token');
+                await fetch(`${import.meta.env.PROD ? '' : 'http://localhost:3000'}/api/leads/sync`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        email: user.email,
+                        companyData: { ...data },
+                        recipes: [] // Empty recipes initially, will be added after generation
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to save company data:', error);
+            }
+        }
+
         setView('ANALYSIS');
     };
 

@@ -84,7 +84,7 @@ router.post('/leads', async (req, res) => {
 // Sync/Replace Roadmap (For Deletions/Reordering)
 router.put('/leads/sync', async (req, res) => {
     try {
-        const { email, recipes } = req.body;
+        const { email, recipes, companyData } = req.body;
 
         if (!email || !recipes) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -96,20 +96,64 @@ router.put('/leads/sync', async (req, res) => {
         const userId = user[0].id;
         const existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
 
+        // Handle company data if provided
+        let companyId: number;
+        if (companyData) {
+            const existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
+
+            if (existingCompany.length > 0) {
+                // Update existing company
+                const [updated] = await db.update(companies)
+                    .set({
+                        url: companyData.url || existingCompany[0].url,
+                        industry: companyData.industry || existingCompany[0].industry,
+                        role: companyData.role || existingCompany[0].role,
+                        size: companyData.size || existingCompany[0].size,
+                        painPoint: companyData.painPoint || existingCompany[0].painPoint,
+                        stack: companyData.stack || existingCompany[0].stack,
+                    })
+                    .where(eq(companies.id, existingCompany[0].id))
+                    .returning();
+                companyId = updated.id;
+            } else {
+                // Create new company
+                const [newCompany] = await db.insert(companies).values({
+                    userId,
+                    url: companyData.url || null,
+                    industry: companyData.industry || null,
+                    role: companyData.role || null,
+                    size: companyData.size || null,
+                    painPoint: companyData.painPoint || null,
+                    stack: companyData.stack || [],
+                }).returning();
+                companyId = newCompany.id;
+            }
+        } else {
+            // No company data provided, use existing or create dummy
+            const existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
+            if (existingCompany.length > 0) {
+                companyId = existingCompany[0].id;
+            } else {
+                const [newCompany] = await db.insert(companies).values({ userId }).returning();
+                companyId = newCompany.id;
+            }
+        }
+
         if (existingLead.length > 0) {
             // REPLACING the recipes array explicitly
             const updated = await db.update(leads)
-                .set({ recipes: recipes })
+                .set({
+                    recipes: recipes,
+                    companyId: companyId // Update company reference
+                })
                 .where(eq(leads.id, existingLead[0].id))
                 .returning();
             return res.json({ success: true, lead: updated[0] });
         } else {
-            // If no lead exists yet, create one (same as POST but explicit list)
-            // Create dummy company if needed
-            const company = await db.insert(companies).values({ userId }).returning();
+            // If no lead exists yet, create one
             const lead = await db.insert(leads).values({
                 userId,
-                companyId: company[0].id,
+                companyId: companyId,
                 recipes: recipes
             }).returning();
             return res.json({ success: true, lead: lead[0] });

@@ -36,9 +36,13 @@ app.use(cookieParser());
 import { shadowTracking } from './middleware/shadow';
 app.use(shadowTracking);
 
-// Health Check (before other API routes for priority)
+// Health Check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: 'v3.22', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', version: 'v3.23', timestamp: new Date().toISOString() });
+});
+
+app.get('/ping', (req, res) => {
+    res.send('pong');
 });
 
 
@@ -204,15 +208,26 @@ app.get('/api/debug/db-check', async (req, res) => {
     }
 });
 
-// Serve static frontend files in production (AFTER API routes)
-if (process.env.NODE_ENV === 'production') {
-    const staticPath = path.join(__dirname, '../..');
-    app.use(express.static(path.join(staticPath, 'dist')));
+// Serve static frontend files (Robust check)
+const staticPath = path.join(__dirname, '../..');
+const distPath = path.join(staticPath, 'dist');
+const fs = require('fs');
 
-    // Catch-all: send index.html for any remaining routes (SPA routing)
+if (fs.existsSync(distPath)) {
+    console.log(`Serving static files from ${distPath}`);
+    app.use(express.static(distPath));
+
+    // Catch-all for SPA
     app.use((req, res) => {
-        res.sendFile(path.join(staticPath, 'dist', 'index.html'));
+        if (req.method === 'GET' && !req.path.startsWith('/api')) {
+            res.sendFile(path.join(distPath, 'index.html'));
+        } else {
+            res.status(404).json({ error: 'Not Found' });
+        }
     });
+} else {
+    console.warn(`Static files not found at ${distPath}`);
+    app.get('/', (req, res) => res.send('API Server Running (Static files not found)'));
 }
 
 // Start server immediately

@@ -11,7 +11,7 @@
     "dev:server": "tsx watch server/index.ts",
     "build:server": "(tsc -p tsconfig.server.json || true) && mkdir -p dist/server/db && cp server/db/migrations.sql dist/server/db/ && echo '{\"type\":\"commonjs\"}' > dist/server/package.json",
     "build": "rm -rf dist && npx vite build && npm run build:server",
-    "start": "node server/fallback.js",
+    "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/db/migrate-cli.ts",
     "db:reset": "tsx server/scripts/reset-db.ts",

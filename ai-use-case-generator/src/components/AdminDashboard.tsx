@@ -88,6 +88,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                 // Map to flat structure expected by the dashboard
                 const formattedLeads = (data.leads || []).map((row: any) => ({
                     id: row.lead.id,
+                    userId: row.user?.id, // Add user ID for deletion
                     timestamp: row.lead.createdAt || new Date().toISOString(),
                     company: {
                         name: row.company?.name || row.user?.name || 'Anonymous',
@@ -1013,7 +1014,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDeleteLead(user.id);
+                                                handleDeleteLead(user.userId);
                                             }}
                                             title="Delete Lead (Keep User)"
                                             className="btn-danger-icon"

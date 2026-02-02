@@ -1,5 +1,5 @@
 
-import { pgTable, text, serial, timestamp, jsonb, boolean, integer, decimal } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, timestamp, jsonb, boolean, integer, decimal, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),
@@ -51,7 +51,8 @@ export const cmsContents = pgTable('cms_contents', {
 
 export const industryIcps = pgTable('industry_icps', {
     id: serial('id').primaryKey(),
-    industry: text('industry').unique().notNull(),
+    industry: text('industry').notNull(), // Removed unique() to allow variants
+    perspective: text('perspective').default('Business Owner').notNull(), // New column
     naicsCode: text('naics_code'),
     icpPersona: text('icp_persona').notNull(), // e.g. "Plant Manager" or "Segment Name"
     promptInstructions: text('prompt_instructions').notNull(), // The main AI directive
@@ -62,7 +63,10 @@ export const industryIcps = pgTable('industry_icps', {
     economicDrivers: text('economic_drivers'), // Why they are valuable
 
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (t) => ({
+    // unique constraint on industry + perspective
+    unq: uniqueIndex('industry_perspective_idx').on(t.industry, t.perspective),
+}));
 
 export const useCaseLibrary = pgTable('use_case_library', {
     id: serial('id').primaryKey(),

@@ -312,22 +312,89 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Perspective</label>
-                        <div className="input-group">
-                            <select
-                                value={(scrapedContext as any)?.icpType || 'dewpoint'}
-                                onChange={e => {
-                                    setScrapedContext({ ...scrapedContext, icpType: e.target.value });
+                        <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)', letterSpacing: '0.02em' }}>
+                            Perspective <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Whose problems are we solving?</span>
+                        </label>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            {/* Option 1: Business Owner */}
+                            <button
+                                type="button"
+                                onClick={() => setScrapedContext({ ...scrapedContext, icpType: 'dewpoint' })}
+                                style={{
+                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                                    padding: '1.25rem',
+                                    background: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType // Default
+                                        ? 'hsla(var(--accent-gold)/0.15)'
+                                        : 'rgba(255,255,255,0.03)',
+                                    border: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType
+                                        ? '2px solid hsl(var(--accent-gold))'
+                                        : '1px solid var(--border-glass)',
+                                    borderRadius: '12px',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative',
+                                    boxShadow: (scrapedContext as any)?.icpType === 'dewpoint' ? '0 4px 20px hsla(var(--accent-gold)/0.2)' : 'none'
                                 }}
-                                style={{ width: '100%', background: 'transparent', border: 'none', color: 'white', outline: 'none' }}
                             >
-                                <option value="dewpoint">Business Owner (Operational Efficiency)</option>
-                                <option value="internal">End Customer (Sales & Growth)</option>
-                            </select>
+                                <div style={{
+                                    background: 'hsla(var(--accent-gold)/0.2)',
+                                    padding: '0.5rem', borderRadius: '8px', marginBottom: '0.75rem',
+                                    color: 'hsl(var(--accent-gold))'
+                                }}>
+                                    <Briefcase size={20} />
+                                </div>
+                                <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--text-main)' }}>Business Owner</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                                    Optimize internal operations, cut costs, and improve efficiency.
+                                </div>
+                                {((scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType) && (
+                                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'hsl(var(--accent-gold))' }}>
+                                        <Sparkles size={16} fill="currentColor" />
+                                    </div>
+                                )}
+                            </button>
+
+                            {/* Option 2: End Customer */}
+                            <button
+                                type="button"
+                                onClick={() => setScrapedContext({ ...scrapedContext, icpType: 'internal' })}
+                                style={{
+                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                                    padding: '1.25rem',
+                                    background: (scrapedContext as any)?.icpType === 'internal'
+                                        ? 'hsla(var(--accent-primary)/0.15)'
+                                        : 'rgba(255,255,255,0.03)',
+                                    border: (scrapedContext as any)?.icpType === 'internal'
+                                        ? '2px solid hsl(var(--accent-primary))'
+                                        : '1px solid var(--border-glass)',
+                                    borderRadius: '12px',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative',
+                                    boxShadow: (scrapedContext as any)?.icpType === 'internal' ? '0 4px 20px hsla(var(--accent-primary)/0.2)' : 'none'
+                                }}
+                            >
+                                <div style={{
+                                    background: 'hsla(var(--accent-primary)/0.2)',
+                                    padding: '0.5rem', borderRadius: '8px', marginBottom: '0.75rem',
+                                    color: 'hsl(var(--accent-primary))'
+                                }}>
+                                    <Globe size={20} />
+                                </div>
+                                <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--text-main)' }}>End Customer</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                                    Drive sales, improve customer experience, and grow revenue.
+                                </div>
+                                {(scrapedContext as any)?.icpType === 'internal' && (
+                                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'hsl(var(--accent-primary))' }}>
+                                        <Sparkles size={16} fill="currentColor" />
+                                    </div>
+                                )}
+                            </button>
                         </div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                            Are you looking to optimize operations (Owner) or sell more to your customers (End Customer)?
-                        </p>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>

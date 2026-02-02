@@ -58,7 +58,6 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [isEditingRealUser, setIsEditingRealUser] = useState(false);
     const [currentRealUser, setCurrentRealUser] = useState<any>(null);
     const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
-    const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
     const [isDiagnosing, setIsDiagnosing] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
 

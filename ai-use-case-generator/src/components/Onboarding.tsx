@@ -339,11 +339,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             <div className="input-group" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem', padding: 0, background: 'none', border: 'none' }}>
                                 <div style={{ position: 'relative', width: '100%' }}>
                                     <input
-                                        type="text" placeholder="company.com"
+                                        type="text" placeholder="www.company.com"
                                         value={url} onChange={e => { setUrl(e.target.value); setError(false); }}
                                         style={{ width: '100%', paddingLeft: '2.5rem', background: 'var(--bg-card)' }}
                                     />
-                                    <Globe className="input-icon" size={18} style={{ left: '1rem' }} />
+                                    <Globe className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                 </div>
                                 <button
                                     onClick={scanUrl}
@@ -355,124 +355,134 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 </button>
                             </div>
                             <div style={{ marginTop: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Or what's your industry?</label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Legal, Manufacturing, Dental..."
-                                        value={industry}
-                                        onChange={e => setIndustry(e.target.value)}
-                                        style={{ background: 'var(--bg-card)' }}
-                                    />
-                                    <Briefcase className="input-icon" size={18} />
-                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Legal, Manufacturing, Dental..."
+                                    value={industry}
+                                    onChange={e => setIndustry(e.target.value)}
+                                    style={{ background: 'var(--bg-card)', width: '100%', paddingLeft: '2.5rem' }}
+                                />
+                                <Briefcase className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             </div>
                         </div>
-
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 600 }}>Company Size</label>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {['Solopreneur (1)', 'Micro (1-10)', 'Small (11-50)', 'Mid-Sized (50+)'].map(opt => {
-                                    const val = opt.split(' ')[0] === 'Solopreneur' ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || opt;
-                                    const rawVal = opt.split(' ')[0] === 'Solopreneur' ? opt : opt; // Match logic in state
-                                    // Actually state uses: Solopreneur, 1-10, 11-50, 50+
-                                    // Let's normalize visually vs value
-                                    const stateVal = opt.includes('Solopreneur') ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || '1-10';
-
-                                    return (
-                                        <button
-                                            key={opt}
-                                            onClick={() => setSize(stateVal)}
-                                            style={{
-                                                padding: '0.75rem 1rem',
-                                                borderRadius: '8px',
-                                                border: size === stateVal ? '1px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
-                                                // Change to SOLID blue background for White text, OR Light BG with Blue Text.
-                                                // Going with Light BG + Dark Text for "Soft" feel but accessible
-                                                background: size === stateVal ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                                color: size === stateVal ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                                fontSize: '0.9rem',
-                                                fontWeight: size === stateVal ? 700 : 400,
-                                                cursor: 'pointer',
-                                                textAlign: 'left',
-                                                transition: 'all 0.1s'
-                                            }}
-                                        >
-                                            {opt}
-                                        </button>
-                                    );
-                                })}
+                        <div style={{ marginTop: '1rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>What is your role?</label>
+                            <div className="input-group" style={{ position: 'relative' }}>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Founder, CEO, Manager..."
+                                    value={role}
+                                    onChange={e => setRole(e.target.value)}
+                                    style={{ background: 'var(--bg-card)', width: '100%' }}
+                                />
                             </div>
                         </div>
                     </div>
 
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 600 }}>Company Size</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {['Solopreneur (1)', 'Micro (1-10)', 'Small (11-50)', 'Mid-Sized (50+)'].map(opt => {
+                                const val = opt.split(' ')[0] === 'Solopreneur' ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || opt;
+                                const rawVal = opt.split(' ')[0] === 'Solopreneur' ? opt : opt; // Match logic in state
+                                // Actually state uses: Solopreneur, 1-10, 11-50, 50+
+                                // Let's normalize visually vs value
+                                const stateVal = opt.includes('Solopreneur') ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || '1-10';
 
-                    {/* TECH STACK SECTION */}
-                    <div style={{ marginTop: '1rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
-                        <label className="section-label" style={{
-                            display: 'block', fontSize: '0.75rem', fontWeight: 800,
-                            color: 'hsl(var(--accent-primary))', marginBottom: '1.5rem',
-                            textTransform: 'uppercase', letterSpacing: '0.1em'
-                        }}>
-                            What tools do you use?
-                        </label>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
-                            {Object.entries({
-                                ...techCategories,
-                                "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect']
-                            }).map(([category, tools]) => (
-                                <div key={category}>
-                                    <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>{category}</h4>
-                                    <div className="chips-grid" style={{ gap: '0.5rem' }}>
-                                        {tools.map(t => (
-                                            <button
-                                                key={t}
-                                                className={`chip ${stack.includes(t) ? 'active' : ''}`}
-                                                onClick={() => toggleTech(t)}
-                                                style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
-                                            >
-                                                {t}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
+                                return (
+                                    <button
+                                        key={opt}
+                                        onClick={() => setSize(stateVal)}
+                                        style={{
+                                            padding: '0.75rem 1rem',
+                                            borderRadius: '8px',
+                                            border: size === stateVal ? '1px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
+                                            // Change to SOLID blue background for White text, OR Light BG with Blue Text.
+                                            // Going with Light BG + Dark Text for "Soft" feel but accessible
+                                            background: size === stateVal ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                            color: size === stateVal ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                            fontSize: '0.9rem',
+                                            fontWeight: size === stateVal ? 700 : 400,
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            transition: 'all 0.1s'
+                                        }}
+                                    >
+                                        {opt}
+                                    </button>
+                                );
+                            })}
                         </div>
+                    </div>
+                </div>
 
-                        {/* Custom Tech Input */}
-                        <div style={{ marginTop: '2rem' }}>
-                            <input
-                                type="text"
-                                placeholder="Add any other tools... (Press Enter)"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        const val = e.currentTarget.value.trim();
-                                        if (val && !stack.includes(val)) {
-                                            setStack(prev => [...prev, val]);
-                                            e.currentTarget.value = '';
-                                        }
-                                    }
-                                }}
-                                style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'white' }}
-                            />
-                            {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).length > 0 && (
-                                <div className="chips-grid" style={{ marginTop: '1rem' }}>
-                                    {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).map(s => (
-                                        <button key={s} className="chip active" onClick={() => toggleTech(s)}>{s}</button>
+
+                {/* TECH STACK SECTION */}
+                <div style={{ marginTop: '1rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
+                    <label className="section-label" style={{
+                        display: 'block', fontSize: '0.75rem', fontWeight: 800,
+                        color: 'hsl(var(--accent-primary))', marginBottom: '1.5rem',
+                        textTransform: 'uppercase', letterSpacing: '0.1em'
+                    }}>
+                        What tools do you use?
+                    </label>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
+                        {Object.entries({
+                            ...techCategories,
+                            "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect']
+                        }).map(([category, tools]) => (
+                            <div key={category}>
+                                <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>{category}</h4>
+                                <div className="chips-grid" style={{ gap: '0.5rem' }}>
+                                    {tools.map(t => (
+                                        <button
+                                            key={t}
+                                            className={`chip ${stack.includes(t) ? 'active' : ''}`}
+                                            onClick={() => toggleTech(t)}
+                                            style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
+                                        >
+                                            {t}
+                                        </button>
                                     ))}
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Custom Tech Input */}
+                    <div style={{ marginTop: '2rem' }}>
+                        <input
+                            type="text"
+                            placeholder="Add any other tools... (Press Enter)"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const val = e.currentTarget.value.trim();
+                                    if (val && !stack.includes(val)) {
+                                        setStack(prev => [...prev, val]);
+                                        e.currentTarget.value = '';
+                                    }
+                                }
+                            }}
+                            style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'white' }}
+                        />
+                        {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).length > 0 && (
+                            <div className="chips-grid" style={{ marginTop: '1rem' }}>
+                                {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).map(s => (
+                                    <button key={s} className="chip active" onClick={() => toggleTech(s)}>{s}</button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
+            </div>
 
-                <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick={handleSubmit} className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
-                        Generate Roadmap <Sparkles size={18} style={{ marginLeft: '8px' }} />
-                    </button>
-                </div>
+            <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={handleSubmit} className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
+                    Generate Roadmap <Sparkles size={18} style={{ marginLeft: '8px' }} />
+                </button>
             </div>
         </div>
+        </div >
     );
 }

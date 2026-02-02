@@ -85,29 +85,29 @@ router.post('/force-repair', async (req, res) => {
         };
 
         // 1. Companies
-        await run(sql`CREATE TABLE IF NOT EXISTS companies (id SERIAL PRIMARY KEY, user_id INTEGER, url TEXT, industry TEXT, naics_code TEXT, role TEXT, size TEXT, pain_point TEXT, stack JSONB, created_at TIMESTAMP DEFAULT NOW())`);
+        await run(sql.raw(`CREATE TABLE IF NOT EXISTS companies (id SERIAL PRIMARY KEY, user_id INTEGER, url TEXT, industry TEXT, naics_code TEXT, role TEXT, size TEXT, pain_point TEXT, stack JSONB, created_at TIMESTAMP DEFAULT NOW())`));
 
         // 2. Leads Columns
-        await run(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER`);
-        await run(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS recipes JSONB DEFAULT '[]'::jsonb`);
-        await run(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS shadow_id TEXT`);
-        await run(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT`);
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER`));
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS recipes JSONB DEFAULT '[]'::jsonb`));
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS shadow_id TEXT`));
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT`));
 
         // 3. Companies Columns (just in case)
-        await run(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT`);
+        await run(sql.raw(`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT`));
 
         // 4. ICP Migration (Perspectives)
         // Add perspective column
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS perspective TEXT DEFAULT 'Business Owner' NOT NULL`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS perspective TEXT DEFAULT 'Business Owner' NOT NULL`));
 
         // Drop old unique constraint on industry (if it exists)
         // Note: Drizzle usually names it table_column_unique
-        await run(sql`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_unique`);
-        await run(sql`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_key`); // Postgres default naming
+        await run(sql.raw(`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_unique`));
+        await run(sql.raw(`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_key`)); // Postgres default naming
 
         // Create new unique index (composite)
         // We use CREATE UNIQUE INDEX IF NOT EXISTS logic via a DO block or just try/catch wrappers in 'run'
-        await run(sql`CREATE UNIQUE INDEX IF NOT EXISTS industry_perspective_idx ON industry_icps (industry, perspective)`);
+        await run(sql.raw(`CREATE UNIQUE INDEX IF NOT EXISTS industry_perspective_idx ON industry_icps (industry, perspective)`));
 
         // 5. DewPoint GTM Enums & Columns
         const enums = [
@@ -130,44 +130,44 @@ router.post('/force-repair', async (req, res) => {
         }
 
         // Add Columns
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS icp_type dewpoint_icp_type DEFAULT 'dewpoint'`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS target_company_description TEXT`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS employee_min INTEGER`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS employee_max INTEGER`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS revenue_min_usd NUMERIC(20,0)`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS revenue_max_usd NUMERIC(20,0)`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS ownership_model TEXT`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS buyer_titles TEXT[]`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS primary_region TEXT[]`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS icp_type dewpoint_icp_type DEFAULT 'dewpoint'`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS target_company_description TEXT`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS employee_min INTEGER`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS employee_max INTEGER`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS revenue_min_usd NUMERIC(20,0)`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS revenue_max_usd NUMERIC(20,0)`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS ownership_model TEXT`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS buyer_titles TEXT[]`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS primary_region TEXT[]`));
 
         // Scoring
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS profit_score INTEGER`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS ltv_score INTEGER`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS speed_to_close_score INTEGER`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS satisfaction_score INTEGER`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS overall_attractiveness NUMERIC(4,2)`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS profit_score INTEGER`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS ltv_score INTEGER`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS speed_to_close_score INTEGER`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS satisfaction_score INTEGER`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS overall_attractiveness NUMERIC(4,2)`));
 
         // GTM
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS gtm_primary dewpoint_gtm_motion`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS gtm_secondary dewpoint_gtm_motion`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS gtm_primary dewpoint_gtm_motion`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS gtm_secondary dewpoint_gtm_motion`));
 
         // Pain
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS primary_pain_category dewpoint_pain_category`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS time_to_value dewpoint_time_to_value`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS buying_complexity dewpoint_buying_complexity`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS budget_ownership dewpoint_budget_ownership`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS primary_pain_category dewpoint_pain_category`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS time_to_value dewpoint_time_to_value`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS buying_complexity dewpoint_buying_complexity`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS budget_ownership dewpoint_budget_ownership`));
 
         // Marketing
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS content_resonance_type dewpoint_content_resonance`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS objection_profile TEXT[]`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS content_resonance_type dewpoint_content_resonance`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS objection_profile TEXT[]`));
 
         // Delivery
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS operational_readiness dewpoint_readiness`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS change_tolerance dewpoint_tolerance`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS operational_readiness dewpoint_readiness`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS change_tolerance dewpoint_tolerance`));
 
         // Portfolio
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS reference_value dewpoint_reference_value`);
-        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS expansion_potential dewpoint_expansion_potential`);
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS reference_value dewpoint_reference_value`));
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS expansion_potential dewpoint_expansion_potential`));
 
         res.json({ trace });
     } catch (error: any) {

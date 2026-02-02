@@ -91,7 +91,7 @@ function App() {
         console.log("Matrix Loaded - Triggering Shadow Capture", opportunities.length);
         try {
             const shadowHeaders = TrackingService.getHeaders();
-            await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads`, {
+            await fetch(`/api/leads`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

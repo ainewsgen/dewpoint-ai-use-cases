@@ -1020,20 +1020,19 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             key = row.user.email || row.company?.url || 'unknown_user';
                         } else {
                             // Anonymous: Use unique lead ID to prevent grouping
-                            // GUARD: Ensure row.lead exists before accessing ID
-                            key = row.lead?.id ? `anon_${row.lead.id}` : `anon_unknown_${Math.random()}`;
+                            key = row.id ? `anon_${row.id}` : `anon_unknown_${Math.random()}`;
                         }
 
                         if (!acc[key]) {
                             acc[key] = {
                                 ...row,
                                 // Use the row's specific recipe as the initial array
-                                allRecipes: row.lead?.recipes ? (Array.isArray(row.lead.recipes) ? row.lead.recipes : [row.lead.recipes]) : [],
+                                allRecipes: row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [],
                                 interactionCount: 1
                             };
                         } else {
                             // Merge recipes for registered users
-                            const newRecipes = row.lead?.recipes ? (Array.isArray(row.lead.recipes) ? row.lead.recipes : [row.lead.recipes]) : [];
+                            const newRecipes = row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [];
                             acc[key].allRecipes.push(...newRecipes);
                             acc[key].interactionCount += 1;
                         }

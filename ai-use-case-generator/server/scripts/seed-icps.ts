@@ -84,6 +84,38 @@ Return valid JSON matching this structure:
     }
 }
 
+// Helper to validate and fallback Enums
+function validateEnum(val: string, allowed: string[], fallback: string, fieldName: string): string {
+    if (!val) return fallback;
+    const normalized = val.toLowerCase().trim().replace(/ /g, '_'); // "Cost Overrun" -> "cost_overrun"
+
+    // 1. Direct match
+    if (allowed.includes(normalized)) return normalized;
+
+    // 2. Fuzzy/Logic Mapping (Common AI Hallucinations)
+    if (fieldName === 'pain') {
+        if (normalized.includes('efficiency') || normalized.includes('slow')) return 'capacity_constraint';
+        if (normalized.includes('compliance') || normalized.includes('risk')) return 'compliance_risk';
+        if (normalized.includes('cost') || normalized.includes('budget')) return 'cost_overrun';
+        if (normalized.includes('revenue') || normalized.includes('leakage')) return 'revenue_leakage';
+        if (normalized.includes('data') || normalized.includes('silo')) return 'data_fragmentation';
+        return 'revenue_leakage'; // Default safe fallback
+    }
+
+    // 3. General Fallback
+    console.warn(`   ⚠️ Warning: Invalid enum for ${fieldName}: "${val}". Used fallback: "${fallback}"`);
+    return fallback;
+}
+
+// Allowed Enum Values (Must match DB schema exact strings)
+const ENUMS = {
+    pain: ['revenue_leakage', 'capacity_constraint', 'cost_overrun', 'compliance_risk', 'customer_experience', 'data_fragmentation'],
+    gtm: ['outbound', 'content', 'community', 'partner'],
+    timeToValue: ['<30_days', '30_60_days', '60_90_days', 'gt_90_days'],
+    complexity: ['single_decision_maker', 'dual_approval', 'committee_light', 'committee_heavy'],
+    readiness: ['low', 'medium', 'high']
+};
+
 async function seed() {
     console.log("🌱 Starting ICP Seeding Process...");
     const apiKey = await getOpenAIKey();
@@ -100,24 +132,28 @@ async function seed() {
         if (!existingB2B) {
             const profile = await generateProfile(ind, 'dewpoint', apiKey);
             if (profile) {
+                // Validate Enums
+                const validPain = validateEnum(profile.primaryPainCategory, ENUMS.pain, 'capacity_constraint', 'pain');
+                const validGtm = validateEnum(profile.gtmPrimary, ENUMS.gtm, 'outbound', 'gtm');
+
                 await db.insert(industryIcps).values({
                     industry: ind.industry,
                     icpType: 'dewpoint',
-                    perspective: 'Business Owner', // Legacy compat
+                    perspective: 'Business Owner',
                     naicsCode: ind.naics,
                     icpPersona: profile.icpPersona,
                     promptInstructions: profile.promptInstructions,
-                    primaryPainCategory: profile.primaryPainCategory,
+                    primaryPainCategory: validPain as any, // Cast for Drizzle
                     profitScore: profile.profitScore,
                     ltvScore: profile.ltvScore,
                     speedToCloseScore: profile.speedToCloseScore,
                     economicDrivers: profile.economicDrivers,
                     negativeIcps: profile.negativeIcps,
                     discoveryGuidance: profile.discoveryGuidance,
-                    gtmPrimary: profile.gtmPrimary
+                    gtmPrimary: validGtm as any
                 });
                 console.log(`   ✅ Created B2B Profile`);
-                await delay(500); // Rate limit throttle
+                await delay(500);
             }
         } else {
             console.log(`   ✓ B2B Profile exists`);
@@ -131,21 +167,25 @@ async function seed() {
         if (!existingB2C) {
             const profile = await generateProfile(ind, 'internal', apiKey);
             if (profile) {
+                // Validate Enums
+                const validPain = validateEnum(profile.primaryPainCategory, ENUMS.pain, 'customer_experience', 'pain');
+                const validGtm = validateEnum(profile.gtmPrimary, ENUMS.gtm, 'content', 'gtm');
+
                 await db.insert(industryIcps).values({
                     industry: ind.industry,
                     icpType: 'internal',
-                    perspective: 'End Customer', // Legacy compat
+                    perspective: 'End Customer',
                     naicsCode: ind.naics,
                     icpPersona: profile.icpPersona,
                     promptInstructions: profile.promptInstructions,
-                    primaryPainCategory: profile.primaryPainCategory,
+                    primaryPainCategory: validPain as any,
                     profitScore: profile.profitScore,
                     ltvScore: profile.ltvScore,
                     speedToCloseScore: profile.speedToCloseScore,
                     economicDrivers: profile.economicDrivers,
                     negativeIcps: profile.negativeIcps,
                     discoveryGuidance: profile.discoveryGuidance,
-                    gtmPrimary: profile.gtmPrimary
+                    gtmPrimary: validGtm as any
                 });
                 console.log(`   ✅ Created End Customer Profile`);
                 await delay(500);

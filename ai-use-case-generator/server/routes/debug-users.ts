@@ -24,4 +24,31 @@ router.get('/debug-users-dump', async (req, res) => {
     }
 });
 
+router.get('/debug-tables', async (req, res) => {
+    try {
+        console.log("🔍 Inspecting Tables...");
+
+        // List Tables
+        const tables = await db.execute(sql`
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        `);
+
+        // Describe Leads
+        const leadsCols = await db.execute(sql`
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'leads'
+        `);
+
+        res.json({
+            tables: tables.rows,
+            leads_columns: leadsCols.rows
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

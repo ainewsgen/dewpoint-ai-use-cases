@@ -26,7 +26,10 @@ router.get('/users', async (req, res) => {
 
         // Fetch related data
         // Optimization: In a real large app, use JOINs. Here, separate queries are fine.
-        const allCompanies = await db.select().from(companies); // Need to import companies
+        // Fallback to Raw SQL for companies due to persistent Drizzle/Schema hydration issues in Prod
+        const companiesResult = await db.execute(sql`SELECT * FROM companies`);
+        const allCompanies = companiesResult.rows as any[];
+
         const allLeads = await db.select().from(leads); // Need to import leads
 
         const enrichedUsers = allUsers.map(u => {

@@ -1103,7 +1103,23 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                 <div>
                                                     <h1 style={{ marginBottom: '0.5rem' }}>{activeUser.company.name || "Anonymous User"}</h1>
                                                     <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem' }}>{activeUser.company.email}</p>
-                                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>{activeUser.company.url}</p>
+                                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                        {activeUser.company.url}
+                                                        {activeUser.company.scannerSource === 'AI' ? (
+                                                            <span style={{ fontSize: '0.7rem', background: 'hsl(var(--accent-primary))', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <Sparkles size={10} /> AI Enhanced
+                                                            </span>
+                                                        ) : (
+                                                            <span style={{ fontSize: '0.7rem', background: 'var(--border-glass)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                ⚡ System
+                                                            </span>
+                                                        )}
+                                                        {activeUser.company.naicsCode && (
+                                                            <span style={{ fontSize: '0.7rem', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px' }}>
+                                                                NAICS: {activeUser.company.naicsCode}
+                                                            </span>
+                                                        )}
+                                                    </p>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                                     <button onClick={(e) => openEditUser(activeUser, e)} className="btn-secondary">

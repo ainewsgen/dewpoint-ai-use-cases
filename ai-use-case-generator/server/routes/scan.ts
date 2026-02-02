@@ -167,7 +167,8 @@ router.post('/scan-url', async (req, res) => {
                     h2,
                     bodySnippet: bodyText.substring(0, 500),
                     signals,
-                    naics: aiAnalysis?.naics || null // Pass NAICS if AI found it
+                    naics: aiAnalysis?.naics || null, // Pass NAICS if AI found it
+                    source: aiAnalysis ? 'AI' : 'System' // Tracking Source
                 }
             }
         });

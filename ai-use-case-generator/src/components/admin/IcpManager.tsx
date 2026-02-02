@@ -15,6 +15,12 @@ interface Icp {
     discoveryGuidance?: string;
     economicDrivers?: string;
 
+    // Schema v2 Fields
+    communities?: any;
+    searchQueries?: any;
+    regulatoryRequirements?: string;
+    buyerTitles?: string[];
+
     // Scoring (1-5)
     profitScore?: number;
     ltvScore?: number;

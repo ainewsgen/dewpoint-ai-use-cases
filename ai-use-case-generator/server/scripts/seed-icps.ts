@@ -1,209 +1,238 @@
 
 import { db } from '../db';
-import { industryIcps, integrations } from '../db/schema';
-import { eq, and } from 'drizzle-orm';
+import { industryIcps } from '../db/schema';
 import { OpenAIService } from '../services/openai';
 import { decrypt } from '../utils/encryption';
 import industries from '../data/industries.json';
 import smb1 from '../data/industries-smb.json';
 import smb2 from '../data/industries-smb-2.json';
 import dotenv from 'dotenv';
+import { eq, and } from 'drizzle-orm';
 
 dotenv.config();
 
 const allIndustries = [...industries, ...smb1, ...smb2];
-
-// Delay helper to avoid rate limits
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// --- 1. Utilities ---
+
 async function getOpenAIKey() {
-    // 1. Try Env
     if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
-
-    // 2. Try DB
-    console.log("   Looking for API Key in DB...");
-
-    // Debug: List all enabled
-    const allEnabled = await db.query.integrations.findMany({
-        where: (t, { eq }) => eq(t.enabled, true)
-    });
-    console.log(`   Found ${allEnabled.length} enabled integrations: ${allEnabled.map(i => i.name).join(', ')}`);
-
-    // Priority 1: OpenAI (Case insensitive)
-    let integration = allEnabled.find(i => i.name?.toLowerCase().includes('openai'));
-
-    // Priority 2: Any enabled integration with a key
-    if (!integration && allEnabled.length > 0) {
-        console.log("   No explicit 'OpenAI' integration found, using first available enabled integration.");
-        integration = allEnabled[0];
-    }
-
-    if (integration && integration.apiKey) {
-        console.log(`   Using Integration: ${integration.name}`);
-        return decrypt(integration.apiKey);
-    }
-
-    throw new Error(`No usable API Key found. Checked ${allEnabled.length} integrations.`);
+    const allEnabled = await db.query.integrations.findMany({ where: (t, { eq }) => eq(t.enabled, true) });
+    let integration = allEnabled.find(i => i.name?.toLowerCase().includes('openai')) || allEnabled[0];
+    if (integration?.apiKey) return decrypt(integration.apiKey);
+    throw new Error(`No usable API Key found.`);
 }
 
-async function generateProfile(industry: any, type: 'dewpoint' | 'internal', apiKey: string) {
-    const isB2B = type === 'dewpoint';
-    const perspective = isB2B ? 'Business Owner' : 'End Customer';
-
-    console.log(`   Generating ${perspective} profile for ${industry.industry}...`);
-
-    const systemPrompt = `You are an expert GTM strategist. Generate a detailed Ideal Customer Profile (ICP) for the "${industry.industry}" industry (NAICS: ${industry.naics}).
-    
-Perspective: ${perspective}
-- If Business Owner (B2B): Focus on the owner/executive of a company in this industry. Their pains are operational inefficiencies, costs, compliance, and scaling.
-- If End Customer (B2C/B2B2C): Focus on the person or entity buying FROM this industry. Their pains are service quality, price, speed, and trust.
-
-Return valid JSON matching this structure:
-{
-    "icpPersona": "Job Title or Persona Name",
-    "promptInstructions": "Strategic focus for AI generation (e.g. 'Focus on automated scheduling to reduce admin overhead')",
-    "primaryPainCategory": "One of: revenue_leakage, capacity_constraint, cost_overrun, compliance_risk, customer_experience, data_fragmentation",
-    "profitScore": 1-5 integer,
-    "speedToCloseScore": 1-5 integer,
-    "ltvScore": 1-5 integer,
-    "economicDrivers": "What maximizes their profit/value?",
-    "negativeIcps": "Who strictly NOT to target",
-    "discoveryGuidance": "One sentence on how to verify this prospect",
-    "gtmPrimary": "One of: outbound, content, community, partner"
-}`;
-
-    const params = {
-        systemPrompt,
-        userContext: `Industry: ${industry.industry}`,
-        apiKey,
-        model: 'gpt-4o'
-    };
-
-    try {
-        const data = await OpenAIService.generateJSON(params);
-        return data; // Assume valid if JSON parses
-    } catch (e: any) {
-        console.error(`   Failed to generate for ${industry.industry}: ${e.message}`);
-        return null;
-    }
-}
-
-// Helper to validate and fallback Enums
 function validateEnum(val: string, allowed: string[], fallback: string, fieldName: string): string {
     if (!val) return fallback;
-    const normalized = val.toLowerCase().trim().replace(/ /g, '_'); // "Cost Overrun" -> "cost_overrun"
-
-    // 1. Direct match
+    const normalized = val.toLowerCase().trim().replace(/ /g, '_');
     if (allowed.includes(normalized)) return normalized;
-
-    // 2. Fuzzy/Logic Mapping (Common AI Hallucinations)
     if (fieldName === 'pain') {
         if (normalized.includes('efficiency') || normalized.includes('slow')) return 'capacity_constraint';
         if (normalized.includes('compliance') || normalized.includes('risk')) return 'compliance_risk';
         if (normalized.includes('cost') || normalized.includes('budget')) return 'cost_overrun';
         if (normalized.includes('revenue') || normalized.includes('leakage')) return 'revenue_leakage';
-        if (normalized.includes('data') || normalized.includes('silo')) return 'data_fragmentation';
-        return 'revenue_leakage'; // Default safe fallback
+        return 'revenue_leakage';
     }
-
-    // 3. General Fallback
-    console.warn(`   ⚠️ Warning: Invalid enum for ${fieldName}: "${val}". Used fallback: "${fallback}"`);
     return fallback;
 }
 
-// Allowed Enum Values (Must match DB schema exact strings)
 const ENUMS = {
     pain: ['revenue_leakage', 'capacity_constraint', 'cost_overrun', 'compliance_risk', 'customer_experience', 'data_fragmentation'],
     gtm: ['outbound', 'content', 'community', 'partner'],
-    timeToValue: ['<30_days', '30_60_days', '60_90_days', 'gt_90_days'],
-    complexity: ['single_decision_maker', 'dual_approval', 'committee_light', 'committee_heavy'],
-    readiness: ['low', 'medium', 'high']
 };
 
+// --- 2. Prompts (Split Brain) ---
+
+async function generateB2B(industry: any, apiKey: string) {
+    const systemPrompt = `You are a GTM Strategist for DewPoint, selling services TO business owners in the ${industry.industry} industry.
+    
+    Target: Business Owner / Executive
+    Goal: Identify their operational pains, regulatory needs, and where they hang out.
+
+    Return JSON:
+    {
+        "icpPersona": "Exact Title of Owner/Buyer",
+        "buyerTitles": ["Title 1", "Title 2"],
+        "primaryPainCategory": "Enum: revenue_leakage, capacity_constraint, cost_overrun, compliance_risk",
+        "regulatoryRequirements": "Specific regulations (e.g. OSHA 1910, SOC2, HIPAA)",
+        "techSignals": ["Specific Software they use (e.g. Procore, Salesforce, QuickBooks)"],
+        "communities": [
+            { "name": "Specific Association or Event Name", "type": "physical", "region": "Global/US" },
+            { "name": "Specific Subreddit or Forum", "type": "virtual", "region": "Online" }
+        ],
+        "profitScore": 1-5,
+        "ltvScore": 1-5,
+        "speedToCloseScore": 1-5,
+        "gtmPrimary": "Enum: outbound, content, community, partner",
+        "promptInstructions": "Strategic focus for generating use cases",
+        "negativeIcps": "Who NOT to sell to",
+        "discoveryGuidance": "One question to ask to disqualify them"
+    }`;
+
+    try {
+        const data = await OpenAIService.generateJSON({
+            systemPrompt,
+            userContext: `Industry: ${industry.industry} (NAICS: ${industry.naics})`,
+            apiKey,
+            model: 'gpt-4o'
+        });
+        return data;
+    } catch (e: any) {
+        console.error(`   Failed B2B for ${industry.industry}: ${e.message}`);
+        return null;
+    }
+}
+
+async function generateB2C(industry: any, apiKey: string) {
+    const systemPrompt = `You are a Marketing Strategist helping a company in ${industry.industry} find more customers.
+    
+    Target: End Customer (Consumer or Client buying FROM the industry)
+    Goal: Understand how they search, what they value, and why they buy.
+
+    Return JSON:
+    {
+        "icpPersona": "Description of the End Customer",
+        "searchQueries": [
+            { "channel": "Google", "query": "Specific search term 1" },
+            { "channel": "Google", "query": "Specific search term 2" }
+        ],
+        "keywords": {
+            "pain": ["keyword1", "keyword2"],
+            "seo": ["keyword1", "keyword2"]
+        },
+        "primaryPainCategory": "Enum: customer_experience, price, trust",
+        "profitScore": 1-5, 
+        "ltvScore": 1-5,
+        "gtmPrimary": "Enum: content, community, ads",
+        "promptInstructions": "Focus for AI use cases targeting end customers",
+        "economicDrivers": "What maximizes value for the customer?",
+        "negativeIcps": "Customers to avoid"
+    }`;
+
+    try {
+        const data = await OpenAIService.generateJSON({
+            systemPrompt,
+            userContext: `Industry: ${industry.industry}`,
+            apiKey,
+            model: 'gpt-4o'
+        });
+        return data;
+    } catch (e: any) {
+        console.error(`   Failed B2C for ${industry.industry}: ${e.message}`);
+        return null;
+    }
+}
+
+
+// --- 3. Main Loop ---
+
 async function seed() {
-    console.log("🌱 Starting ICP Seeding Process...");
+    console.log("🌱 Starting ICP Seeding Process (Schema v2)...");
     const apiKey = await getOpenAIKey();
-    console.log("   API Key detected.");
 
+    // We want to RE-SEED to get new data. 
+    // Option A: Delete all? No, that might break IDs. 
+    // Option B: Upsert/Update.
+
+    let processed = 0;
     for (const ind of allIndustries) {
-        console.log(`\nProcessing [${ind.rank}/200]: ${ind.industry} (${ind.category})`);
+        processed++;
+        console.log(`\n[${processed}/200] ${ind.industry}`);
 
-        // Check & Create Generic/B2B (DewPoint)
-        const existingB2B = await db.query.industryIcps.findFirst({
-            where: (t, { eq, and }) => and(eq(t.industry, ind.industry), eq(t.icpType, 'dewpoint'))
-        });
+        // --- B2B ---
+        const b2b = await generateB2B(ind, apiKey);
+        if (b2b) {
+            const validPain = validateEnum(b2b.primaryPainCategory, ENUMS.pain, 'capacity_constraint', 'pain');
+            const validGtm = validateEnum(b2b.gtmPrimary, ENUMS.gtm, 'outbound', 'gtm');
 
-        if (!existingB2B) {
-            const profile = await generateProfile(ind, 'dewpoint', apiKey);
-            if (profile) {
-                // Validate Enums
-                const validPain = validateEnum(profile.primaryPainCategory, ENUMS.pain, 'capacity_constraint', 'pain');
-                const validGtm = validateEnum(profile.gtmPrimary, ENUMS.gtm, 'outbound', 'gtm');
+            // Upsert Logic (Delete then Insert to keep ID or Update?)
+            // Drizzle 'onConflictDoUpdate' is best, but basic update if exists is safer for now.
+            const existing = await db.query.industryIcps.findFirst({
+                where: (t, { and, eq }) => and(eq(t.industry, ind.industry), eq(t.icpType, 'dewpoint'))
+            });
 
-                await db.insert(industryIcps).values({
-                    industry: ind.industry,
-                    icpType: 'dewpoint',
-                    perspective: 'Business Owner',
-                    naicsCode: ind.naics,
-                    icpPersona: profile.icpPersona,
-                    promptInstructions: profile.promptInstructions,
-                    primaryPainCategory: validPain as any, // Cast for Drizzle
-                    profitScore: profile.profitScore,
-                    ltvScore: profile.ltvScore,
-                    speedToCloseScore: profile.speedToCloseScore,
-                    economicDrivers: profile.economicDrivers,
-                    negativeIcps: profile.negativeIcps,
-                    discoveryGuidance: profile.discoveryGuidance,
-                    gtmPrimary: validGtm as any
-                });
-                console.log(`   ✅ Created B2B Profile`);
-                await delay(500);
+            const values = {
+                industry: ind.industry,
+                icpType: 'dewpoint' as const,
+                perspective: 'Business Owner',
+                naicsCode: ind.naics,
+                icpPersona: b2b.icpPersona,
+                promptInstructions: b2b.promptInstructions,
+                primaryPainCategory: validPain as any,
+                gtmPrimary: validGtm as any,
+
+                // New Fields
+                communities: b2b.communities,
+                buyerTitles: b2b.buyerTitles,
+                techSignals: b2b.techSignals,
+                regulatoryRequirements: b2b.regulatoryRequirements,
+                negativeIcps: b2b.negativeIcps,
+                discoveryGuidance: b2b.discoveryGuidance,
+
+                // Scores
+                profitScore: b2b.profitScore,
+                ltvScore: b2b.ltvScore,
+                speedToCloseScore: b2b.speedToCloseScore,
+            };
+
+            if (existing) {
+                await db.update(industryIcps)
+                    .set(values)
+                    .where(eq(industryIcps.id, existing.id));
+                console.log(`   ✅ Updated B2B Profile (v2)`);
+            } else {
+                await db.insert(industryIcps).values(values as any);
+                console.log(`   ✅ Created B2B Profile (v2)`);
             }
-        } else {
-            console.log(`   ✓ B2B Profile exists`);
         }
 
-        // Check & Create End Customer (Internal)
-        const existingB2C = await db.query.industryIcps.findFirst({
-            where: (t, { eq, and }) => and(eq(t.industry, ind.industry), eq(t.icpType, 'internal'))
-        });
+        // --- B2C ---
+        const b2c = await generateB2C(ind, apiKey);
+        if (b2c) {
+            const validPain = validateEnum(b2c.primaryPainCategory, ENUMS.pain, 'customer_experience', 'pain');
 
-        if (!existingB2C) {
-            const profile = await generateProfile(ind, 'internal', apiKey);
-            if (profile) {
-                // Validate Enums
-                const validPain = validateEnum(profile.primaryPainCategory, ENUMS.pain, 'customer_experience', 'pain');
-                const validGtm = validateEnum(profile.gtmPrimary, ENUMS.gtm, 'content', 'gtm');
+            const existing = await db.query.industryIcps.findFirst({
+                where: (t, { and, eq }) => and(eq(t.industry, ind.industry), eq(t.icpType, 'internal'))
+            });
 
-                await db.insert(industryIcps).values({
-                    industry: ind.industry,
-                    icpType: 'internal',
-                    perspective: 'End Customer',
-                    naicsCode: ind.naics,
-                    icpPersona: profile.icpPersona,
-                    promptInstructions: profile.promptInstructions,
-                    primaryPainCategory: validPain as any,
-                    profitScore: profile.profitScore,
-                    ltvScore: profile.ltvScore,
-                    speedToCloseScore: profile.speedToCloseScore,
-                    economicDrivers: profile.economicDrivers,
-                    negativeIcps: profile.negativeIcps,
-                    discoveryGuidance: profile.discoveryGuidance,
-                    gtmPrimary: validGtm as any
-                });
-                console.log(`   ✅ Created End Customer Profile`);
-                await delay(500);
+            const values = {
+                industry: ind.industry,
+                icpType: 'internal' as const,
+                perspective: 'End Customer',
+                naicsCode: ind.naics,
+                icpPersona: b2c.icpPersona,
+                promptInstructions: b2c.promptInstructions,
+                primaryPainCategory: validPain as any,
+
+                // New Fields
+                searchQueries: b2c.searchQueries,
+                keywords: b2c.keywords,
+                economicDrivers: b2c.economicDrivers,
+                negativeIcps: b2c.negativeIcps,
+
+                // Scores
+                profitScore: b2c.profitScore,
+                ltvScore: b2c.ltvScore
+            };
+
+            if (existing) {
+                await db.update(industryIcps)
+                    .set(values)
+                    .where(eq(industryIcps.id, existing.id));
+                console.log(`   ✅ Updated End Customer Profile (v2)`);
+            } else {
+                await db.insert(industryIcps).values(values as any);
+                console.log(`   ✅ Created End Customer Profile (v2)`);
             }
-        } else {
-            console.log(`   ✓ End Customer Profile exists`);
         }
+
+        await delay(200); // Slight delay
     }
 
     console.log("\n✨ Seeding Complete!");
     process.exit(0);
 }
 
-seed().catch(err => {
-    console.error(err);
-    process.exit(1);
-});
+seed().catch(console.error);

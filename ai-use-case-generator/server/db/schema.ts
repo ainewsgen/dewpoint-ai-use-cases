@@ -75,6 +75,16 @@ export const industryIcps = pgTable('industry_icps', {
     discoveryGuidance: text('discovery_guidance'),
     economicDrivers: text('economic_drivers'),
 
+    // Schema v2: Specific B2B/B2C Fields
+    communities: jsonb('communities'), // Array of { name, type, region }
+    searchQueries: jsonb('search_queries'), // Array of { channel, query }
+    linkedinAngles: jsonb('linkedin_angles'), // Array of strings
+    techSignals: text('tech_signals').array(), // Array of strings
+    keywords: jsonb('keywords'), // Dictionary of { pain: [], seo: [] }
+    regulatoryRequirements: text('regulatory_requirements'),
+    regionSpecificity: text('region_specificity').array(),
+    buyerTitles: text('buyer_titles').array(),
+
     // DewPoint GTM Intelligence Fields
     icpType: icpTypeEnum('icp_type').default('dewpoint'),
     targetCompanyDescription: text('target_company_description'),
@@ -83,8 +93,8 @@ export const industryIcps = pgTable('industry_icps', {
     revenueMinUsd: decimal('revenue_min_usd', { precision: 20, scale: 0 }),
     revenueMaxUsd: decimal('revenue_max_usd', { precision: 20, scale: 0 }),
     ownershipModel: text('ownership_model'),
-    buyerTitles: text('buyer_titles').array(), // Requires array support? otherwise text with delimiter
-    primaryRegion: text('primary_region').array(),
+    // buyerTitles: text('buyer_titles').array(), // REPLACED by Schema v2 version above
+    // primaryRegion: text('primary_region').array(), // REPLACED by Schema v2 version above
 
     // Scoring (1-5)
     profitScore: integer('profit_score'),

@@ -14,6 +14,7 @@
     "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/db/migrate-cli.ts",
+    "db:migrate:v2": "tsx server/scripts/migrate-v2.ts",
     "db:reset": "tsx server/scripts/reset-db.ts",
     "seed:icps": "tsx server/scripts/seed-icps.ts",
     "preview": "vite preview"

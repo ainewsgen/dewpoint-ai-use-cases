@@ -74,7 +74,7 @@ router.post('/admin/library/sync', requireAuth, requireAdmin, async (req, res) =
 
     } catch (error: any) {
         console.error('Sync Library Error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message, stack: error.stack });
     }
 });
 

@@ -273,6 +273,20 @@ const server = app.listen(Number(PORT), '0.0.0.0', () => {
                 );
             `);
 
+            // 2. Create Use Case Library Table (Was missing)
+            await db.execute(sql`
+                CREATE TABLE IF NOT EXISTS use_case_library (
+                    id SERIAL PRIMARY KEY,
+                    industry TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    roi_estimate TEXT,
+                    difficulty TEXT,
+                    tags JSONB,
+                    created_at TIMESTAMP DEFAULT NOW()
+                );
+            `);
+
             // 2. Fix Leads Table (Schema Mismatch)
             // Add reference to companies
             await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id);`);

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { db } from '../db';
 import { users, companies, leads } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 
 const router = Router();

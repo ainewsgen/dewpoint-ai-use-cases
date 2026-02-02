@@ -97,7 +97,7 @@ export function IcpManager() {
         <div className="animate-fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Industry ICPs</h3>
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Industry ICPs <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>(v2.1)</span></h3>
                     <p style={{ color: 'var(--text-muted)' }}>Manage Ideal Customer Profiles and prompt injection rules.</p>
                 </div>
                 <button

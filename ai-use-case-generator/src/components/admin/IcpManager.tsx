@@ -272,16 +272,26 @@ export function IcpManager() {
         <div className="animate-fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Industry ICPs</h3>
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Industry ICPs <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({icps.length} Records)</span></h3>
                     <p style={{ color: 'var(--text-muted)' }}>Manage Ideal Customer Profiles and prompt injection rules.</p>
                 </div>
-                <button
-                    onClick={() => { setCurrentIcp({ icpType: 'dewpoint' }); setIsEditing(true); }}
-                    className="btn-primary"
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                    <Plus size={18} /> Add New ICP
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                        onClick={fetchIcps}
+                        className="btn-secondary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        title="Refresh List"
+                    >
+                        Refresh
+                    </button>
+                    <button
+                        onClick={() => { setCurrentIcp({ icpType: 'dewpoint' }); setIsEditing(true); }}
+                        className="btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <Plus size={18} /> Add New ICP
+                    </button>
+                </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>

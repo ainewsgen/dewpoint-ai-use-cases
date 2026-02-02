@@ -33,7 +33,7 @@ router.get('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
 // Admin: Create ICP
 router.post('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { industry, naicsCode, icpPersona, promptInstructions, negativeIcps, discoveryGuidance, economicDrivers } = req.body;
+        const { industry, perspective, naicsCode, icpPersona, promptInstructions, negativeIcps, discoveryGuidance, economicDrivers } = req.body;
 
         if (!industry || !icpPersona || !promptInstructions) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -41,6 +41,7 @@ router.post('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
 
         const newIcp = await db.insert(industryIcps).values({
             industry,
+            perspective: perspective || 'Business Owner',
             naicsCode: naicsCode || null,
             icpPersona,
             promptInstructions,
@@ -53,7 +54,7 @@ router.post('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
     } catch (error: any) {
         console.error('Create ICP error:', error);
         if (error.code === '23505') { // Unique constraint violation
-            return res.status(409).json({ error: 'Industry already exists' });
+            return res.status(409).json({ error: 'ICP variant already exists' });
         }
         res.status(500).json({ error: 'Failed to create ICP' });
     }
@@ -63,11 +64,12 @@ router.post('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
 router.put('/admin/icps/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { industry, naicsCode, icpPersona, promptInstructions, negativeIcps, discoveryGuidance, economicDrivers } = req.body;
+        const { industry, perspective, naicsCode, icpPersona, promptInstructions, negativeIcps, discoveryGuidance, economicDrivers } = req.body;
 
         const updatedIcp = await db.update(industryIcps)
             .set({
                 industry,
+                perspective: perspective || 'Business Owner',
                 naicsCode: naicsCode || null,
                 icpPersona,
                 promptInstructions,

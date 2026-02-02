@@ -59,6 +59,19 @@ router.get('/debug-tables', async (req, res) => {
     }
 });
 
+router.get('/debug-companies-dump', async (req, res) => {
+    try {
+        console.log("🔍 Dumping Companies...");
+        const result = await db.execute(sql`SELECT * FROM companies`);
+        res.json({
+            count: result.rows.length,
+            rows: result.rows
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 router.post('/force-repair', async (req, res) => {
     try {
         const trace = [];
@@ -82,6 +95,19 @@ router.post('/force-repair', async (req, res) => {
 
         // 3. Companies Columns (just in case)
         await run(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT`);
+
+        // 4. ICP Migration (Perspectives)
+        // Add perspective column
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS perspective TEXT DEFAULT 'Business Owner' NOT NULL`);
+
+        // Drop old unique constraint on industry (if it exists)
+        // Note: Drizzle usually names it table_column_unique
+        await run(sql`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_unique`);
+        await run(sql`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_key`); // Postgres default naming
+
+        // Create new unique index (composite)
+        // We use CREATE UNIQUE INDEX IF NOT EXISTS logic via a DO block or just try/catch wrappers in 'run'
+        await run(sql`CREATE UNIQUE INDEX IF NOT EXISTS industry_perspective_idx ON industry_icps (industry, perspective)`);
 
         res.json({ trace });
     } catch (error: any) {

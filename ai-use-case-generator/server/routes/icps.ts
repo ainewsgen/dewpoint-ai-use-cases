@@ -33,21 +33,39 @@ router.get('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
 // Admin: Create ICP
 router.post('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { industry, perspective, naicsCode, icpPersona, promptInstructions, negativeIcps, discoveryGuidance, economicDrivers } = req.body;
+        const {
+            industry, icpType, naicsCode, icpPersona, promptInstructions,
+            negativeIcps, discoveryGuidance, economicDrivers,
+            // DewPoint GTM Fields
+            profitScore, ltvScore, speedToCloseScore, satisfactionScore,
+            gtmPrimary, primaryPainCategory
+        } = req.body;
 
         if (!industry || !icpPersona || !promptInstructions) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        // Map icpType to legacy perspective for DB constraint compatibility
+        const perspectiveVal = (icpType === 'internal') ? 'Sales Target' : 'Business Owner';
+
         const newIcp = await db.insert(industryIcps).values({
             industry,
-            perspective: perspective || 'Business Owner',
+            icpType: icpType || 'dewpoint',
+            perspective: perspectiveVal, // Maintain legacy column
             naicsCode: naicsCode || null,
             icpPersona,
             promptInstructions,
             negativeIcps: negativeIcps || null,
             discoveryGuidance: discoveryGuidance || null,
-            economicDrivers: economicDrivers || null
+            economicDrivers: economicDrivers || null,
+
+            // New Fields
+            profitScore: profitScore || null,
+            ltvScore: ltvScore || null,
+            speedToCloseScore: speedToCloseScore || null,
+            satisfactionScore: satisfactionScore || null,
+            gtmPrimary: gtmPrimary || null,
+            primaryPainCategory: primaryPainCategory || null
         }).returning();
 
         res.json({ icp: newIcp[0] });
@@ -64,18 +82,36 @@ router.post('/admin/icps', requireAuth, requireAdmin, async (req, res) => {
 router.put('/admin/icps/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { industry, perspective, naicsCode, icpPersona, promptInstructions, negativeIcps, discoveryGuidance, economicDrivers } = req.body;
+        const {
+            industry, icpType, naicsCode, icpPersona, promptInstructions,
+            negativeIcps, discoveryGuidance, economicDrivers,
+            // DewPoint GTM Fields
+            profitScore, ltvScore, speedToCloseScore, satisfactionScore,
+            gtmPrimary, primaryPainCategory
+        } = req.body;
+
+        // Map icpType to legacy perspective
+        const perspectiveVal = (icpType === 'internal') ? 'Sales Target' : 'Business Owner';
 
         const updatedIcp = await db.update(industryIcps)
             .set({
                 industry,
-                perspective: perspective || 'Business Owner',
+                icpType: icpType || 'dewpoint',
+                perspective: perspectiveVal,
                 naicsCode: naicsCode || null,
                 icpPersona,
                 promptInstructions,
                 negativeIcps: negativeIcps || null,
                 discoveryGuidance: discoveryGuidance || null,
-                economicDrivers: economicDrivers || null
+                economicDrivers: economicDrivers || null,
+
+                // New Fields
+                profitScore: profitScore || null,
+                ltvScore: ltvScore || null,
+                speedToCloseScore: speedToCloseScore || null,
+                satisfactionScore: satisfactionScore || null,
+                gtmPrimary: gtmPrimary || null,
+                primaryPainCategory: primaryPainCategory || null
             })
             .where(eq(industryIcps.id, parseInt(id as string)))
             .returning();

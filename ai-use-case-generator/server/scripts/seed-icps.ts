@@ -17,14 +17,29 @@ async function getOpenAIKey() {
     if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
 
     // 2. Try DB
-    const integration = await db.query.integrations.findFirst({
-        where: (t, { eq, and }) => and(eq(t.name, 'openai'), eq(t.enabled, true))
+    console.log("   Looking for API Key in DB...");
+
+    // Debug: List all enabled
+    const allEnabled = await db.query.integrations.findMany({
+        where: (t, { eq }) => eq(t.enabled, true)
     });
+    console.log(`   Found ${allEnabled.length} enabled integrations: ${allEnabled.map(i => i.name).join(', ')}`);
+
+    // Priority 1: OpenAI (Case insensitive)
+    let integration = allEnabled.find(i => i.name?.toLowerCase().includes('openai'));
+
+    // Priority 2: Any enabled integration with a key
+    if (!integration && allEnabled.length > 0) {
+        console.log("   No explicit 'OpenAI' integration found, using first available enabled integration.");
+        integration = allEnabled[0];
+    }
 
     if (integration && integration.apiKey) {
+        console.log(`   Using Integration: ${integration.name}`);
         return decrypt(integration.apiKey);
     }
-    throw new Error("No OpenAI API Key found in ENV or DB Integrations.");
+
+    throw new Error(`No usable API Key found. Checked ${allEnabled.length} integrations.`);
 }
 
 async function generateProfile(industry: any, type: 'dewpoint' | 'internal', apiKey: string) {

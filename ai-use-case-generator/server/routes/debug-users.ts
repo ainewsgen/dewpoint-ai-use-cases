@@ -109,6 +109,66 @@ router.post('/force-repair', async (req, res) => {
         // We use CREATE UNIQUE INDEX IF NOT EXISTS logic via a DO block or just try/catch wrappers in 'run'
         await run(sql`CREATE UNIQUE INDEX IF NOT EXISTS industry_perspective_idx ON industry_icps (industry, perspective)`);
 
+        // 5. DewPoint GTM Enums & Columns
+        const enums = [
+            `CREATE TYPE dewpoint_icp_type AS ENUM ('dewpoint', 'internal')`,
+            `CREATE TYPE dewpoint_gtm_motion AS ENUM ('outbound', 'content', 'community', 'partner')`,
+            `CREATE TYPE dewpoint_pain_category AS ENUM ('revenue_leakage', 'capacity_constraint', 'cost_overrun', 'compliance_risk', 'customer_experience', 'data_fragmentation')`,
+            `CREATE TYPE dewpoint_time_to_value AS ENUM ('<30_days', '30_60_days', '60_90_days', 'gt_90_days')`,
+            `CREATE TYPE dewpoint_buying_complexity AS ENUM ('single_decision_maker', 'dual_approval', 'committee_light', 'committee_heavy')`,
+            `CREATE TYPE dewpoint_budget_ownership AS ENUM ('owner_discretionary', 'departmental', 'centralized_procurement')`,
+            `CREATE TYPE dewpoint_content_resonance AS ENUM ('operator_story', 'peer_case_study', 'data_benchmark', 'contrarian_insight')`,
+            `CREATE TYPE dewpoint_readiness AS ENUM ('low', 'medium', 'high')`,
+            `CREATE TYPE dewpoint_tolerance AS ENUM ('low', 'medium', 'high')`,
+            `CREATE TYPE dewpoint_reference_value AS ENUM ('low', 'medium', 'high')`,
+            `CREATE TYPE dewpoint_expansion_potential AS ENUM ('workflow_only', 'multi_workflow', 'platform_candidate')`
+        ];
+
+        for (const enumSql of enums) {
+            // Postgres doesn't support IF NOT EXISTS for TYPE easily in one line, so wrap in simple block
+            await run(sql.raw(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = '${enumSql.split(' ')[2]}') THEN ${enumSql}; END IF; END $$;`));
+        }
+
+        // Add Columns
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS icp_type dewpoint_icp_type DEFAULT 'dewpoint'`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS target_company_description TEXT`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS employee_min INTEGER`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS employee_max INTEGER`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS revenue_min_usd NUMERIC(20,0)`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS revenue_max_usd NUMERIC(20,0)`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS ownership_model TEXT`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS buyer_titles TEXT[]`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS primary_region TEXT[]`);
+
+        // Scoring
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS profit_score INTEGER`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS ltv_score INTEGER`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS speed_to_close_score INTEGER`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS satisfaction_score INTEGER`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS overall_attractiveness NUMERIC(4,2)`);
+
+        // GTM
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS gtm_primary dewpoint_gtm_motion`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS gtm_secondary dewpoint_gtm_motion`);
+
+        // Pain
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS primary_pain_category dewpoint_pain_category`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS time_to_value dewpoint_time_to_value`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS buying_complexity dewpoint_buying_complexity`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS budget_ownership dewpoint_budget_ownership`);
+
+        // Marketing
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS content_resonance_type dewpoint_content_resonance`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS objection_profile TEXT[]`);
+
+        // Delivery
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS operational_readiness dewpoint_readiness`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS change_tolerance dewpoint_tolerance`);
+
+        // Portfolio
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS reference_value dewpoint_reference_value`);
+        await run(sql`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS expansion_potential dewpoint_expansion_potential`);
+
         res.json({ trace });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

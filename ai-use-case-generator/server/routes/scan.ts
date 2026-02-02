@@ -1,5 +1,11 @@
 import { Router } from 'express';
 import { load } from 'cheerio';
+import { db } from '../db';
+import { integrations } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { decrypt } from '../utils/encryption';
+import { OpenAIService } from '../services/openai';
+import { buildScanPrompt } from '../lib/prompts';
 
 const router = Router();
 
@@ -62,39 +68,7 @@ router.post('/scan-url', async (req, res) => {
         // Combine text for "AI" classification
         const combinedText = `${title} ${description} ${h1} ${h2} ${bodyText}`.toLowerCase();
 
-        // 5. Determine Industry (Keyword Heuristics on Content)
-        let industry = '';
-        const heuristics: Record<string, string[]> = {
-            'Legal': ['law', 'legal', 'attorney', 'lawyer', 'firm', 'litigation', 'counsel', 'juridical'],
-            'Medical': ['medical', 'clinic', 'health', 'doctor', 'patient', 'surgery', 'care', 'dental', 'pharmacy', 'hospital'],
-            'Real Estate': ['real estate', 'realty', 'property', 'properties', 'listings', 'home', 'housing', 'broker', 'agent', 'leasing'],
-            'Construction': ['construction', 'build', 'contractor', 'renovation', 'roofing', 'hvac', 'plumbing', 'electric', 'engineering', 'drafting', 'blueprint', 'cad', 'architecture', 'architect', 'design build'],
-            'Finance': ['finance', 'financial', 'invest', 'capital', 'wealth', 'bank', 'fund', 'asset', 'tax', 'accounting', 'cpa', 'bookkeeping'],
-            'Marketing': ['marketing', 'agency', 'brand', 'digital', 'social media', 'creative', 'advertising', 'pr', 'media', 'seo', 'content'],
-            'Consulting': ['consulting', 'consultancy', 'advisory', 'advisor', 'strategy', 'management', 'partner', 'coaching'],
-            'Technology': ['software', 'technology', 'tech', 'saas', 'app', 'platform', 'cloud', 'cyber', 'data', 'ai', 'automation', 'it services'],
-            'Manufacturing': ['manufacturing', 'industrial', 'factory', 'production', 'machinery', 'automation', 'supply chain', '3d modeling', 'prototyping', 'fabrication'],
-            'Retail': ['shop', 'store', 'retail', 'fashion', 'clothing', 'apparel', 'boutique', 'ecommerce', 'cart', 'consumer goods'],
-            'Education': ['education', 'school', 'university', 'academy', 'learning', 'training', 'course', 'student', 'tutor'],
-            'Hospitality': ['hotel', 'resort', 'travel', 'booking', 'restaurant', 'cafe', 'food', 'dining', 'hospitality', 'event']
-        };
-
-        // Score Matches
-        let bestScore = 0;
-        for (const [ind, keywords] of Object.entries(heuristics)) {
-            let score = 0;
-            keywords.forEach(kw => {
-                if (combinedText.includes(kw)) score++;
-                // Triple points for Title/H1 match
-                if (`${title} ${h1}`.toLowerCase().includes(kw)) score += 3;
-            });
-            if (score > bestScore) {
-                bestScore = score;
-                industry = ind;
-            }
-        }
-
-        // Tech Stack Guessing
+        // Initial Tech Stack Guessing (Regex)
         const stack: string[] = [];
         if (signals.isWordPress) stack.push('WordPress');
         if (signals.isShopify) stack.push('Shopify');
@@ -105,19 +79,95 @@ router.post('/scan-url', async (req, res) => {
         if (html.includes('calendly')) stack.push('Calendly');
         if (html.includes('intercom')) stack.push('Intercom');
 
+        // ---------------------------------------------------------
+        // INTELLIGENT SCAN (AI)
+        // ---------------------------------------------------------
+        let industry = '';
+        let aiAnalysis: any = null;
+
+        // Check for Active AI Integration
+        const integrationsList = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true));
+        const activeInt = integrationsList.find(i => i.enabled && (i.apiKey || i.apiSecret));
+
+        if (activeInt && activeInt.apiKey) {
+            try {
+                const apiKey = decrypt(activeInt.apiKey);
+                const systemPrompt = buildScanPrompt({ url, title, description, h1, h2, bodySnippet: bodyText.substring(0, 800) });
+
+                aiAnalysis = await OpenAIService.generateJSON({
+                    apiKey,
+                    model: 'gpt-4o',
+                    systemPrompt,
+                    userContext: "Analyze the website content above."
+                });
+
+                if (aiAnalysis?.industry) {
+                    industry = aiAnalysis.industry;
+                    console.log(`[Scan] AI Classified: ${industry} (NAICS: ${aiAnalysis.naics})`);
+
+                    // Merge AI stack findings
+                    if (Array.isArray(aiAnalysis.stack_additions)) {
+                        aiAnalysis.stack_additions.forEach((t: string) => {
+                            if (!stack.includes(t)) stack.push(t);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn("[Scan] AI analysis failed, falling back to heuristics:", err);
+            }
+        }
+
+        // ---------------------------------------------------------
+        // FALLBACK: HEURISTICS
+        // ---------------------------------------------------------
+        if (!industry) {
+            // 5. Determine Industry (Keyword Heuristics on Content)
+            const heuristics: Record<string, string[]> = {
+                'Legal': ['law', 'legal', 'attorney', 'lawyer', 'firm', 'litigation', 'counsel', 'juridical'],
+                'Medical': ['medical', 'clinic', 'health', 'doctor', 'patient', 'surgery', 'care', 'dental', 'pharmacy', 'hospital'],
+                'Real Estate': ['real estate', 'realty', 'property', 'properties', 'listings', 'home', 'housing', 'broker', 'agent', 'leasing'],
+                'Construction': ['construction', 'build', 'contractor', 'renovation', 'roofing', 'hvac', 'plumbing', 'electric', 'engineering', 'drafting', 'blueprint', 'cad', 'architecture', 'architect', 'design build'],
+                'Finance': ['finance', 'financial', 'invest', 'capital', 'wealth', 'bank', 'fund', 'asset', 'tax', 'accounting', 'cpa', 'bookkeeping'],
+                'Marketing': ['marketing', 'agency', 'brand', 'digital', 'social media', 'creative', 'advertising', 'pr', 'media', 'seo', 'content'],
+                'Consulting': ['consulting', 'consultancy', 'advisory', 'advisor', 'strategy', 'management', 'partner', 'coaching'],
+                'Technology': ['software', 'technology', 'tech', 'saas', 'app', 'platform', 'cloud', 'cyber', 'data', 'ai', 'automation', 'it services'],
+                'Manufacturing': ['manufacturing', 'industrial', 'factory', 'production', 'machinery', 'automation', 'supply chain', '3d modeling', 'prototyping', 'fabrication'],
+                'Retail': ['shop', 'store', 'retail', 'fashion', 'clothing', 'apparel', 'boutique', 'ecommerce', 'cart', 'consumer goods'],
+                'Education': ['education', 'school', 'university', 'academy', 'learning', 'training', 'course', 'student', 'tutor'],
+                'Hospitality': ['hotel', 'resort', 'travel', 'booking', 'restaurant', 'cafe', 'food', 'dining', 'hospitality', 'event']
+            };
+
+            // Score Matches
+            let bestScore = 0;
+            for (const [ind, keywords] of Object.entries(heuristics)) {
+                let score = 0;
+                keywords.forEach(kw => {
+                    if (combinedText.includes(kw)) score++;
+                    // Triple points for Title/H1 match
+                    if (`${title} ${h1}`.toLowerCase().includes(kw)) score += 3;
+                });
+                if (score > bestScore) {
+                    bestScore = score;
+                    industry = ind;
+                }
+            }
+        }
+
         res.json({
             success: true,
             data: {
                 industry,
                 title,
-                description,
+                description: aiAnalysis?.summary || description, // Prefer AI summary if available
                 stack,
                 // Pass back rich context for the frontend to store -> send to Generate API
                 context: {
                     h1,
                     h2,
                     bodySnippet: bodyText.substring(0, 500),
-                    signals
+                    signals,
+                    naics: aiAnalysis?.naics || null // Pass NAICS if AI found it
                 }
             }
         });

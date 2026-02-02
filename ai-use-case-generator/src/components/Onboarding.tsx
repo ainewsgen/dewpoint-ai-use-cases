@@ -355,29 +355,31 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 </button>
                             </div>
                             <div style={{ marginTop: '1rem' }}>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Legal, Manufacturing, Dental..."
-                                    value={industry}
-                                    onChange={e => setIndustry(e.target.value)}
-                                    style={{ background: 'var(--bg-card)', width: '100%', paddingLeft: '2.5rem' }}
-                                />
-                                <Briefcase className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Or what's your industry?</label>
+                                <div className="input-group" style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Legal, Manufacturing, Dental..."
+                                        value={industry}
+                                        onChange={e => setIndustry(e.target.value)}
+                                        style={{ background: 'var(--bg-card)', width: '100%', paddingLeft: '2.5rem' }}
+                                    />
+                                    <Briefcase className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>What is your role?</label>
+                                <div className="input-group" style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Founder, CEO, Manager..."
+                                        value={role}
+                                        onChange={e => setRole(e.target.value)}
+                                        style={{ background: 'var(--bg-card)', width: '100%' }}
+                                    />
+                                </div>
                             </div>
                         </div>
-                        <div style={{ marginTop: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>What is your role?</label>
-                            <div className="input-group" style={{ position: 'relative' }}>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Founder, CEO, Manager..."
-                                    value={role}
-                                    onChange={e => setRole(e.target.value)}
-                                    style={{ background: 'var(--bg-card)', width: '100%' }}
-                                />
-                            </div>
-                        </div>
-                    </div>
 
                     <div>
                         <label style={{ display: 'block', marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 600 }}>Company Size</label>

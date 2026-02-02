@@ -7,6 +7,7 @@ import { OpenAIService } from '../services/openai';
 import { UsageService } from '../services/usage';
 import { GeminiService } from '../services/gemini'; // Static import
 import { AuthRequest, requireAuth } from '../middleware/auth';
+import { buildIcpContext } from '../lib/prompts';
 
 
 const router = express.Router();
@@ -59,23 +60,13 @@ router.post('/generate', async (req, res) => {
                 ))
                 .limit(1);
 
+            // ... inside route ...
+
             if (icpMatch.length > 0) {
                 const icp = icpMatch[0];
                 console.log(`[Generate] Applied ICP: ${icp.industry} (${targetType})`);
 
-                icpContext = `\n\n*** INDUSTRY INTELLIGENCE ACTIVE ***
-Target Persona: ${icp.icpPersona}
-Perspective: ${targetType === 'dewpoint' ? 'Business Owner (Operational Efficiency)' : 'End Customer (Growth/Sales)'}
-Strategic Focus: ${icp.promptInstructions}
-Primary Pain Category: ${icp.primaryPainCategory || "General"}
-GTM Motion: ${icp.gtmPrimary || "Standard"}
-DewPoint Scores (1-5): Profit=${icp.profitScore || "N/A"}, Speed=${icp.speedToCloseScore || "N/A"}, LTV=${icp.ltvScore || "N/A"}
-
-Economic Drivers: ${icp.economicDrivers || "N/A"}
-Negative Constraints (Avoid): ${icp.negativeIcps || "None"}
-
-Discovery Guidance: ${icp.discoveryGuidance || "N/A"}
-`;
+                icpContext = buildIcpContext(icp, targetType);
             } else {
                 console.log(`[Generate] No specific ICP found for ${companyData.industry} (${targetType}), using generic fallback.`);
             }

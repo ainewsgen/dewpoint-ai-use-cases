@@ -1009,17 +1009,30 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {
                 activeTab === 'leads' && (() => {
                     // Group duplicates by Email (or URL if no email)
-                    const uniqueUsers = adminLeads.reduce((acc: any, lead: any) => {
-                        const key = lead.company?.email || lead.company?.url || 'unknown';
+                    const uniqueUsers = adminLeads.reduce((acc: any, row: any) => {
+                        // Logic Change: Registered users grouped by User ID/Email.
+                        // Anonymous users (no userId) are tracked SEPARATELY per run (using lead.id).
+                        const isRegistered = !!row.user?.id;
+
+                        let key;
+                        if (isRegistered) {
+                            key = row.user.email || row.company?.url || 'unknown_user';
+                        } else {
+                            // Anonymous: Use unique lead ID to prevent grouping
+                            key = `anon_${row.lead.id}`;
+                        }
+
                         if (!acc[key]) {
                             acc[key] = {
-                                ...lead,
-                                allRecipes: [...(lead.recipes || [])],
+                                ...row,
+                                // Use the row's specific recipe as the initial array
+                                allRecipes: row.lead?.recipes ? (Array.isArray(row.lead.recipes) ? row.lead.recipes : [row.lead.recipes]) : [],
                                 interactionCount: 1
                             };
                         } else {
-                            // Merge recipes
-                            acc[key].allRecipes.push(...(lead.recipes || []));
+                            // Merge recipes for registered users
+                            const newRecipes = row.lead?.recipes ? (Array.isArray(row.lead.recipes) ? row.lead.recipes : [row.lead.recipes]) : [];
+                            acc[key].allRecipes.push(...newRecipes);
                             acc[key].interactionCount += 1;
                         }
                         return acc;
@@ -1244,7 +1257,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                                 <div style={{ marginTop: '0.75rem' }}>
                                                                     <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Walkthrough Steps</label>
                                                                     <ol style={{ margin: '0.5rem 0 0 1.25rem', padding: 0, color: 'hsl(var(--text-main))', lineHeight: 1.6 }}>
-                                                                        {r.public_view.walkthrough_steps.map((step: string, i: number) => (
+                                                                        {(Array.isArray(r.public_view.walkthrough_steps) ? r.public_view.walkthrough_steps : []).map((step: string, i: number) => (
                                                                             <li key={i} style={{ fontSize: '0.85rem' }}>{step}</li>
                                                                         ))}
                                                                     </ol>

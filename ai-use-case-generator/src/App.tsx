@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Onboarding } from './components/Onboarding';
 import { Analysis } from './components/Analysis';
 import { Matrix } from './components/Matrix';
@@ -86,7 +86,7 @@ function App() {
         setView('MATRIX');
     };
 
-    const handleMatrixLoaded = async (opportunities: Opportunity[]) => {
+    const handleMatrixLoaded = useCallback(async (opportunities: Opportunity[]) => {
         // Shadow Lead Capture: Automatically save upon generation
         console.log("Matrix Loaded - Triggering Shadow Capture", opportunities.length);
         try {
@@ -115,7 +115,7 @@ function App() {
         } catch (err) {
             console.error("Failed to capture shadow lead", err);
         }
-    };
+    }, [data]);
 
     const handleCaptureLead = (lead: any) => {
         // Logic to unlock functionality

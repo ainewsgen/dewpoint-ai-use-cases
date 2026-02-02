@@ -1278,7 +1278,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                                 <div>
                                                                     <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Tech Stack</label>
                                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                                                                        {(r.admin_view?.stack_details || (r.admin_view?.tech_stack || []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).slice(0, 3).map((detail: any, i: number) => (
+                                                                        {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).slice(0, 3).map((detail: any, i: number) => (
                                                                             <span key={i} style={{
                                                                                 fontSize: '0.75rem',
                                                                                 background: 'hsl(var(--accent-secondary))',
@@ -1290,9 +1290,9 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                                                 {detail.tool}
                                                                             </span>
                                                                         ))}
-                                                                        {(r.admin_view?.stack_details || r.admin_view?.tech_stack || []).length > 3 && (
+                                                                        {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : [])).length > 3 && (
                                                                             <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>
-                                                                                +{(r.admin_view?.stack_details || r.admin_view?.tech_stack || []).length - 3} more
+                                                                                +{(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : [])).length - 3} more
                                                                             </span>
                                                                         )}
                                                                     </div>

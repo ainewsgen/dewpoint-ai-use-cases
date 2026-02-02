@@ -5,9 +5,13 @@ import { eq, and } from 'drizzle-orm';
 import { OpenAIService } from '../services/openai';
 import { decrypt } from '../utils/encryption';
 import industries from '../data/industries.json';
+import smb1 from '../data/industries-smb.json';
+import smb2 from '../data/industries-smb-2.json';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const allIndustries = [...industries, ...smb1, ...smb2];
 
 // Delay helper to avoid rate limits
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -121,8 +125,8 @@ async function seed() {
     const apiKey = await getOpenAIKey();
     console.log("   API Key detected.");
 
-    for (const ind of industries) {
-        console.log(`\nProcessing [${ind.rank}/100]: ${ind.industry} (${ind.category})`);
+    for (const ind of allIndustries) {
+        console.log(`\nProcessing [${ind.rank}/200]: ${ind.industry} (${ind.category})`);
 
         // Check & Create Generic/B2B (DewPoint)
         const existingB2B = await db.query.industryIcps.findFirst({

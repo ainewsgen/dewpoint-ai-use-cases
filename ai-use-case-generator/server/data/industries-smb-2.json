@@ -1,0 +1,302 @@
+[
+    {
+        "rank": 151,
+        "industry": "Vending Machine Operators",
+        "naics": "812990",
+        "category": "Healthy snack focus; passive income play."
+    },
+    {
+        "rank": 152,
+        "industry": "Commercial Kitchen Rentals",
+        "naics": "531120",
+        "category": "Powering the 'Ghost Kitchen' economy."
+    },
+    {
+        "rank": 153,
+        "industry": "Pet Grooming (Mobile)",
+        "naics": "812910",
+        "category": "High-growth; emotional consumer spending."
+    },
+    {
+        "rank": 154,
+        "industry": "Boutique Hotel Management",
+        "naics": "721110",
+        "category": "Personalized guest tech; 'Lifestyle' branding."
+    },
+    {
+        "rank": 155,
+        "industry": "Home Staging for Real Estate",
+        "naics": "541410",
+        "category": "High velocity; linked to Realtor lead cycles."
+    },
+    {
+        "rank": 156,
+        "industry": "Cybersecurity Training",
+        "naics": "611420",
+        "category": "Selling 'Human Firewall' training to mid-market."
+    },
+    {
+        "rank": 157,
+        "industry": "Specialty Printing (Signage)",
+        "naics": "323111",
+        "category": "Local brand refreshes; high trade show demand."
+    },
+    {
+        "rank": 158,
+        "industry": "Diversity & Inclusion Consulting",
+        "naics": "541612",
+        "category": "Corporate vendor compliance requirement."
+    },
+    {
+        "rank": 159,
+        "industry": "E-bike Sales & Repair",
+        "naics": "811490",
+        "category": "Explosion in urban green commuting."
+    },
+    {
+        "rank": 160,
+        "industry": "Backflow Prevention Testing",
+        "naics": "541990",
+        "category": "Mandatory annual local compliance testing."
+    },
+    {
+        "rank": 161,
+        "industry": "Art Curation for HNWIs",
+        "naics": "711510",
+        "category": "Serving the high-end alternative asset market."
+    },
+    {
+        "rank": 162,
+        "industry": "Small-Scale Hydroponics",
+        "naics": "111419",
+        "category": "Urban farming and local restaurant supply."
+    },
+    {
+        "rank": 163,
+        "industry": "Private Investigation/Diligence",
+        "naics": "561611",
+        "category": "Due diligence for high-stakes business deals."
+    },
+    {
+        "rank": 164,
+        "industry": "Commercial Janitorial (Medical)",
+        "naics": "561720",
+        "category": "High-compliance cleaning; premium pricing."
+    },
+    {
+        "rank": 165,
+        "industry": "Luxury Watch & Jewelry Repair",
+        "naics": "811490",
+        "category": "Niche artisan skill; high hourly value."
+    },
+    {
+        "rank": 166,
+        "industry": "Drone Photography & Mapping",
+        "naics": "541922",
+        "category": "Essential for site inspection and marketing."
+    },
+    {
+        "rank": 167,
+        "industry": "Talent Representation (Creators)",
+        "naics": "711410",
+        "category": "Managing the 'Influencer economy' contracts."
+    },
+    {
+        "rank": 168,
+        "industry": "Micro-Fulfillment Centers",
+        "naics": "493110",
+        "category": "Last-mile delivery backbone for small brands."
+    },
+    {
+        "rank": 169,
+        "industry": "Commercial Interior Plant Care",
+        "naics": "561730",
+        "category": "'Biophilic' office design is a major trend."
+    },
+    {
+        "rank": 170,
+        "industry": "Appliance Repair (Luxury Brands)",
+        "naics": "811412",
+        "category": "Focus on Miele, Sub-Zero, and high-end tech."
+    },
+    {
+        "rank": 171,
+        "industry": "Translation (Legal/Technical)",
+        "naics": "541930",
+        "category": "High-precision AI-human hybrid workflows."
+    },
+    {
+        "rank": 172,
+        "industry": "Business Valuation Services",
+        "naics": "541219",
+        "category": "High demand due to Boomer business exits."
+    },
+    {
+        "rank": 173,
+        "industry": "Independent Financial Planning",
+        "naics": "523930",
+        "category": "Navigating the 'Great Wealth Transfer'."
+    },
+    {
+        "rank": 174,
+        "industry": "Specialized Courier (Medical)",
+        "naics": "492110",
+        "category": "'Chain of Custody' delivery for bio-labs."
+    },
+    {
+        "rank": 175,
+        "industry": "Music Production (Corporate)",
+        "naics": "711510",
+        "category": "Creating 'Sonic Branding' for digital media."
+    },
+    {
+        "rank": 176,
+        "industry": "Lawn Equipment Repair",
+        "naics": "811411",
+        "category": "Seasonal demand; specialized technical niche."
+    },
+    {
+        "rank": 177,
+        "industry": "Pool & Spa Maintenance",
+        "naics": "561790",
+        "category": "Recurring revenue; focus on smart automation."
+    },
+    {
+        "rank": 178,
+        "industry": "Trade Show Booth Design",
+        "naics": "541430",
+        "category": "High-value, seasonal B2B project fees."
+    },
+    {
+        "rank": 179,
+        "industry": "Sustainability Consulting (ESG)",
+        "naics": "541620",
+        "category": "Helping small manufacturers meet mandates."
+    },
+    {
+        "rank": 180,
+        "industry": "Online Tutoring (Specialized)",
+        "naics": "611691",
+        "category": "Test prep and technical certifications."
+    },
+    {
+        "rank": 181,
+        "industry": "Mediation & Conflict Resolution",
+        "naics": "541199",
+        "category": "Low overhead; high specialized business value."
+    },
+    {
+        "rank": 182,
+        "industry": "Subscription Box Fulfillment",
+        "naics": "561910",
+        "category": "Operational backbone for DTC brands."
+    },
+    {
+        "rank": 183,
+        "industry": "Social Commerce Consulting",
+        "naics": "541613",
+        "category": "Helping SMBs sell directly on TikTok Shop."
+    },
+    {
+        "rank": 184,
+        "industry": "Small-Scale Beverage Brewing",
+        "naics": "312120",
+        "category": "Focus on functional teas and craft sodas."
+    },
+    {
+        "rank": 185,
+        "industry": "Corporate Retreat Planning",
+        "naics": "561920",
+        "category": "Focus on 'Digital Detox' for remote teams."
+    },
+    {
+        "rank": 186,
+        "industry": "Apparel Alterations (Boutique)",
+        "naics": "811490",
+        "category": "High-end tailoring and vintage upcycling."
+    },
+    {
+        "rank": 187,
+        "industry": "Industrial Design (Prototyping)",
+        "naics": "541420",
+        "category": "High-margin R&D fees for local inventors."
+    },
+    {
+        "rank": 188,
+        "industry": "Florist & Floral Design (Events)",
+        "naics": "453110",
+        "category": "High-ticket design fees over simple product."
+    },
+    {
+        "rank": 189,
+        "industry": "Home Automation (IoT) Setup",
+        "naics": "238210",
+        "category": "Retrofitting older homes for modern living."
+    },
+    {
+        "rank": 190,
+        "industry": "Independent Insurance Agencies",
+        "naics": "524210",
+        "category": "High renewal commissions; data-heavy leads."
+    },
+    {
+        "rank": 191,
+        "industry": "Wellness Retreat Centers",
+        "naics": "721199",
+        "category": "Experiential tourism; high nightly revenue."
+    },
+    {
+        "rank": 192,
+        "industry": "Personal Chef Services",
+        "naics": "722310",
+        "category": "Serving the high-earner 'time-poor' demographic."
+    },
+    {
+        "rank": 193,
+        "industry": "Book Publishing (Indie/Self)",
+        "naics": "513130",
+        "category": "Helping experts build authority via books."
+    },
+    {
+        "rank": 194,
+        "industry": "Child Day Care Services",
+        "naics": "624410",
+        "category": "Massive demand; focus on 'Elite' early ed."
+    },
+    {
+        "rank": 195,
+        "industry": "Beauty Salons (Specialized)",
+        "naics": "812112",
+        "category": "Focus on skin health and high-end tech."
+    },
+    {
+        "rank": 196,
+        "industry": "Bicycle Sales & Repair (E-bike)",
+        "naics": "441227",
+        "category": "Urban infrastructure is favoring e-commuters."
+    },
+    {
+        "rank": 197,
+        "industry": "Trust & Fiduciary Services",
+        "naics": "523991",
+        "category": "Managing wealth for local estates."
+    },
+    {
+        "rank": 198,
+        "industry": "Landscape Architectural Svcs",
+        "naics": "541320",
+        "category": "High-value design for urban developments."
+    },
+    {
+        "rank": 199,
+        "industry": "Drycleaning (Wash-and-Fold)",
+        "naics": "812320",
+        "category": "Rebounding for busy urban professionals."
+    },
+    {
+        "rank": 200,
+        "industry": "Apparel Manufacturing (Niche)",
+        "naics": "315220",
+        "category": "'Made in USA' boutique athletic wear."
+    }
+]

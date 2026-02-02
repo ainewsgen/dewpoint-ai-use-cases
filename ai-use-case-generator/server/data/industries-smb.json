@@ -1,0 +1,302 @@
+[
+    {
+        "rank": 101,
+        "industry": "Digital Marketing Agencies",
+        "naics": "541810",
+        "category": "High churn; desperate for AI content & reporting automation."
+    },
+    {
+        "rank": 102,
+        "industry": "Boutique IT/Cybersecurity MSPs",
+        "naics": "541519",
+        "category": "Fragmented local market; high demand for security automation."
+    },
+    {
+        "rank": 103,
+        "industry": "Business & Executive Coaching",
+        "naics": "813910",
+        "category": "High-margin; lead-gen is their biggest bottleneck."
+    },
+    {
+        "rank": 104,
+        "industry": "Specialized Dental Spas",
+        "naics": "621210",
+        "category": "High-ticket elective procedures; need automated follow-ups."
+    },
+    {
+        "rank": 105,
+        "industry": "Residential HVAC & Plumbing",
+        "naics": "238220",
+        "category": "Non-discretionary; high dispatch and scheduling complexity."
+    },
+    {
+        "rank": 106,
+        "industry": "Home Health & Personal Care",
+        "naics": "621610",
+        "category": "High labor turnover; huge opportunity for HR automations."
+    },
+    {
+        "rank": 107,
+        "industry": "Boutique IP & Tech Law Firms",
+        "naics": "541110",
+        "category": "Efficiency-led gains in discovery; high hourly value."
+    },
+    {
+        "rank": 108,
+        "industry": "AgTech Support & Irrigation",
+        "naics": "115112",
+        "category": "Mission-critical for food security; low tech adoption today."
+    },
+    {
+        "rank": 109,
+        "industry": "Landscaping & Biophilic Design",
+        "naics": "561730",
+        "category": "Recurring commercial contracts; focus on 'Wellness Spaces'."
+    },
+    {
+        "rank": 110,
+        "industry": "Niche Tech Staffing Firms",
+        "naics": "561311",
+        "category": "Specialized niche placement (AI/Data Science); high fees."
+    },
+    {
+        "rank": 111,
+        "industry": "Virtual Assistant Agencies",
+        "naics": "561110",
+        "category": "Scalable service model using 'AI + Human' pods."
+    },
+    {
+        "rank": 112,
+        "industry": "Senior Concierge Services",
+        "naics": "624120",
+        "category": "Helping HNWIs 'Age in Place'; high trust, high margin."
+    },
+    {
+        "rank": 113,
+        "industry": "Short-Term Rental Management",
+        "naics": "531311",
+        "category": "Tech-stack heavy; guests demand instant AI responses."
+    },
+    {
+        "rank": 114,
+        "industry": "Fractional CMO/CFO Services",
+        "naics": "541611",
+        "category": "High-value, C-suite expertise for growing firms."
+    },
+    {
+        "rank": 115,
+        "industry": "Instructional Design (e-Learning)",
+        "naics": "611710",
+        "category": "Creating custom LMS content for small teams."
+    },
+    {
+        "rank": 116,
+        "industry": "Property Management (Residential)",
+        "naics": "531311",
+        "category": "Low churn; desperate for tenant screening automations."
+    },
+    {
+        "rank": 117,
+        "industry": "Mental Health Tele-Counseling",
+        "naics": "621420",
+        "category": "100% remote delivery; high margin per session."
+    },
+    {
+        "rank": 118,
+        "industry": "Architectural Rendering & Viz",
+        "naics": "541310",
+        "category": "3D/VR visuals for real estate and urban planning."
+    },
+    {
+        "rank": 119,
+        "industry": "Micro-SaaS Builders",
+        "naics": "513210",
+        "category": "Targeted solutions for specific business workflows."
+    },
+    {
+        "rank": 120,
+        "industry": "Security System Installation",
+        "naics": "561621",
+        "category": "High demand for IoT-integrated physical security."
+    },
+    {
+        "rank": 121,
+        "industry": "Mobile Fleet Maintenance",
+        "naics": "811111",
+        "category": "Convenience-based B2B service with high margins."
+    },
+    {
+        "rank": 122,
+        "industry": "Wellness & Longevity Coaching",
+        "naics": "812990",
+        "category": "Massive shift toward 'Bio-hacking' for executives."
+    },
+    {
+        "rank": 123,
+        "industry": "Language Localization Services",
+        "naics": "541930",
+        "category": "Helping local businesses go global via AI translation."
+    },
+    {
+        "rank": 124,
+        "industry": "MedTech Device Distribution",
+        "naics": "423450",
+        "category": "Distributing specialized elder-care tech."
+    },
+    {
+        "rank": 125,
+        "industry": "Specialty Food & Beverage Mfg",
+        "naics": "311999",
+        "category": "Focus on health-conscious and 'NoLo' niches."
+    },
+    {
+        "rank": 126,
+        "industry": "Event Strategy & Production",
+        "naics": "561920",
+        "category": "High-touch local events; transition to hybrid models."
+    },
+    {
+        "rank": 127,
+        "industry": "Small-Scale 3D Manufacturing",
+        "naics": "332999",
+        "category": "Rapid prototyping for local inventors."
+    },
+    {
+        "rank": 128,
+        "industry": "Corporate Wellness Program Mgmt",
+        "naics": "621999",
+        "category": "Essential for remote-first company compliance."
+    },
+    {
+        "rank": 129,
+        "industry": "Niche Bookkeeping (E-com)",
+        "naics": "541213",
+        "category": "Specialized accounting for high-complexity niches."
+    },
+    {
+        "rank": 130,
+        "industry": "Public Relations (Crisis/Niche)",
+        "naics": "541820",
+        "category": "Protecting reputations in the era of viral noise."
+    },
+    {
+        "rank": 131,
+        "industry": "Search Engine Optimization (SEO)",
+        "naics": "541511",
+        "category": "Shifting to Search Generative Experience (SGE) strategy."
+    },
+    {
+        "rank": 132,
+        "industry": "Direct Mail (Hyper-Local)",
+        "naics": "541860",
+        "category": "High ROI as digital inbox noise becomes unbearable."
+    },
+    {
+        "rank": 133,
+        "industry": "Sustainable Apparel Boutiques",
+        "naics": "448140",
+        "category": "Higher margins through ethical/vintage curation."
+    },
+    {
+        "rank": 134,
+        "industry": "Human Resources Consulting",
+        "naics": "541612",
+        "category": "Compliance focus for remote-first small teams."
+    },
+    {
+        "rank": 135,
+        "industry": "Diagnostic Labs (Specialized)",
+        "naics": "621511",
+        "category": "DNA and personalized nutrition testing leads."
+    },
+    {
+        "rank": 136,
+        "industry": "Graphic & Digital Design",
+        "naics": "541430",
+        "category": "High volume; transitioning to 'AI Orchestrators'."
+    },
+    {
+        "rank": 137,
+        "industry": "Social Media Community Mgmt",
+        "naics": "541810",
+        "category": "High-touch engagement for niche online groups."
+    },
+    {
+        "rank": 138,
+        "industry": "Medical Billing Outsourcing",
+        "naics": "561110",
+        "category": "Reducing overhead for small private practices."
+    },
+    {
+        "rank": 139,
+        "industry": "Renewable Retrofitting (Solar)",
+        "naics": "238210",
+        "category": "Upgrading older homes to meet 2026 mandates."
+    },
+    {
+        "rank": 140,
+        "industry": "Boutique Travel Concierge",
+        "naics": "561510",
+        "category": "Luxury, high-complexity logistics for HNWIs."
+    },
+    {
+        "rank": 141,
+        "industry": "Dry Cleaning (Eco-Friendly)",
+        "naics": "812320",
+        "category": "Niche premium service; low competition."
+    },
+    {
+        "rank": 142,
+        "industry": "Furniture Repair & Restoration",
+        "naics": "811420",
+        "category": "High-end craftsmanship; circular economy focus."
+    },
+    {
+        "rank": 143,
+        "industry": "Podcasting & Audio Agencies",
+        "naics": "512240",
+        "category": "Building 'Brand-as-a-Media-House' for CEOs."
+    },
+    {
+        "rank": 144,
+        "industry": "Self-Storage Facility Mgmt",
+        "naics": "531130",
+        "category": "Low labor cost; high asset appreciation."
+    },
+    {
+        "rank": 145,
+        "industry": "Market Research (Local Retail)",
+        "naics": "541910",
+        "category": "Sentiment analysis for local retail clusters."
+    },
+    {
+        "rank": 146,
+        "industry": "Catering & Corporate Food Svc",
+        "naics": "722320",
+        "category": "Rebounding with 'Return to Office' perks."
+    },
+    {
+        "rank": 147,
+        "industry": "Physical Therapy Clinics",
+        "naics": "621340",
+        "category": "Aging demographic; high financeable equipment."
+    },
+    {
+        "rank": 148,
+        "industry": "Pest Control Services",
+        "naics": "561710",
+        "category": "High recurring revenue; non-discretionary."
+    },
+    {
+        "rank": 149,
+        "industry": "Specialized Moving & Storage",
+        "naics": "484210",
+        "category": "Focus on white-glove art and high-value transport."
+    },
+    {
+        "rank": 150,
+        "industry": "Employee Safety/OSHA Consulting",
+        "naics": "541690",
+        "category": "Compliance as a Service for light manufacturing."
+    }
+]

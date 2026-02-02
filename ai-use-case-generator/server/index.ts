@@ -254,6 +254,33 @@ const server = app.listen(Number(PORT), '0.0.0.0', () => {
     (async () => {
         try {
             console.log("🛠️ Checking Database Schema...");
+
+            // 1. Create Companies Table (Missing in Prod)
+            await db.execute(sql`
+                CREATE TABLE IF NOT EXISTS companies (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id),
+                    url TEXT,
+                    industry TEXT,
+                    naics_code TEXT,
+                    role TEXT,
+                    size TEXT,
+                    pain_point TEXT,
+                    stack JSONB,
+                    created_at TIMESTAMP DEFAULT NOW()
+                );
+            `);
+
+            // 2. Fix Leads Table (Schema Mismatch)
+            // Add reference to companies
+            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id);`);
+            // Add recipes (JSONB)
+            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS recipes JSONB DEFAULT '[]'::jsonb;`);
+            // Add shadow_id
+            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS shadow_id TEXT;`);
+            // Add fingerprint
+            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT;`);
+
             // Force add 'metadata' column if missing
             await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
 

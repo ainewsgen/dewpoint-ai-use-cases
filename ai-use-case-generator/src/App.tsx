@@ -295,7 +295,8 @@ function App() {
                                 }
                                 // Gating Logic
                                 if (!user) {
-                                    setAuthModal('LOGIN');
+                                    // Default to Signup to encourage conversion
+                                    setAuthModal('SIGNUP');
                                 } else {
                                     setView('ROADMAP');
                                 }

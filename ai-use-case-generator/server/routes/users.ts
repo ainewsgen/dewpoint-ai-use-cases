@@ -52,9 +52,9 @@ router.get('/users', async (req, res) => {
         });
 
         res.json({ users: enrichedUsers });
-    } catch (error) {
+    } catch (error: any) {
         console.error('List users error:', error);
-        res.status(500).json({ error: 'Failed to fetch users' });
+        res.status(500).json({ error: 'Failed to fetch users', details: error.message, stack: error.stack });
     }
 });
 

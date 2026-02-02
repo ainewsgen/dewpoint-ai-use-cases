@@ -32,6 +32,8 @@ export function IcpManager() {
     const [currentIcp, setCurrentIcp] = useState<Partial<Icp>>({});
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [filterType, setFilterType] = useState<'all' | 'dewpoint' | 'internal'>('all');
+
     useEffect(() => {
         fetchIcps();
     }, []);
@@ -84,10 +86,12 @@ export function IcpManager() {
         }
     };
 
-    const filteredIcps = icps.filter(i =>
-        i.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        i.icpPersona.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredIcps = icps.filter(i => {
+        const matchesSearch = i.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            i.icpPersona.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = filterType === 'all' || i.icpType === filterType;
+        return matchesSearch && matchesType;
+    });
 
     return (
         <div className="animate-fade-in">
@@ -105,15 +109,34 @@ export function IcpManager() {
                 </button>
             </div>
 
-            <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Search size={18} style={{ color: 'var(--text-muted)' }} />
-                <input
-                    type="text"
-                    placeholder="Search industries or personas..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%' }}
-                />
+            <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                    <Search size={18} style={{ color: 'var(--text-muted)' }} />
+                    <input
+                        type="text"
+                        placeholder="Search industries or personas..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%' }}
+                    />
+                </div>
+                <div style={{ borderLeft: '1px solid var(--border-glass)', height: '20px', margin: '0 0.5rem' }}></div>
+                <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value as any)}
+                    style={{
+                        background: 'transparent',
+                        color: 'white',
+                        border: 'none',
+                        outline: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
+                    }}
+                >
+                    <option value="all" style={{ color: 'black' }}>All Types</option>
+                    <option value="dewpoint" style={{ color: 'black' }}>Business Owner (B2B)</option>
+                    <option value="internal" style={{ color: 'black' }}>End Customer (B2C)</option>
+                </select>
             </div>
 
             {isLoading ? (
@@ -172,7 +195,7 @@ export function IcpManager() {
                             {filteredIcps.length === 0 && (
                                 <tr>
                                     <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                        No ICPs found.
+                                        No ICPs found matching your filters.
                                     </td>
                                 </tr>
                             )}
@@ -184,10 +207,10 @@ export function IcpManager() {
             {isEditing && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)',
                     display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
                 }}>
-                    <div className="glass-panel" style={{ width: '500px', padding: '2rem', borderRadius: '12px' }}>
+                    <div className="glass-panel" style={{ width: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', borderRadius: '12px', background: '#1a1a1a', border: '1px solid var(--border-glass)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <h3>{currentIcp.id ? 'Edit ICP' : 'New ICP'}</h3>
                             <button onClick={() => setIsEditing(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>

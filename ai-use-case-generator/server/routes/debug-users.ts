@@ -42,9 +42,17 @@ router.get('/debug-tables', async (req, res) => {
             WHERE table_name = 'leads'
         `);
 
+        // Describe Companies
+        const companiesCols = await db.execute(sql`
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'companies'
+        `);
+
         res.json({
             tables: tables.rows,
-            leads_columns: leadsCols.rows
+            leads_columns: leadsCols.rows,
+            companies_columns: companiesCols.rows
         });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

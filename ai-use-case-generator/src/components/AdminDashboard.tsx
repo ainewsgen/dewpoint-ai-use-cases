@@ -58,7 +58,9 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     const [isEditingRealUser, setIsEditingRealUser] = useState(false);
     const [currentRealUser, setCurrentRealUser] = useState<any>(null);
     const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
+    const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
     const [isDiagnosing, setIsDiagnosing] = useState(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
 
 
     // Blueprint Edit State
@@ -117,13 +119,19 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     const fetchUsers = async () => {
         try {
+            setFetchError(null);
             const res = await fetch('/api/admin/users');
             if (res.ok) {
                 const data = await res.json();
                 setUsers(data.users);
+            } else {
+                const errText = await res.text();
+                setFetchError(`Status: ${res.status} ${res.statusText} - ${errText}`);
+                console.error('Fetch users failed:', res.status, errText);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to fetch users', error);
+            setFetchError(`Network Error: ${error.message}`);
         }
     };
 
@@ -1538,12 +1546,13 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         </div>
 
                         {/* Debug Raw State */}
-                        {users.length === 0 && (
+                        {(users.length === 0 || fetchError) && (
                             <div style={{ padding: '1rem', background: 'rgba(255,100,100,0.1)', border: '1px solid salmon', borderRadius: '8px', marginBottom: '1rem' }}>
-                                <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ list is empty. Debug info:</p>
+                                <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ Debug info:</p>
                                 <pre style={{ fontSize: '0.7rem', color: '#ccc' }}>
                                     Active Tab: {activeTab}{'\n'}
-                                    Users State Array Length: {users.length}
+                                    Users State Array Length: {users.length}{'\n'}
+                                    Fetch Error: {fetchError || 'None'}
                                 </pre>
                             </div>
                         )}

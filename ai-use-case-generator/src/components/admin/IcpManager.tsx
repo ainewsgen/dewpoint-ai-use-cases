@@ -4,6 +4,7 @@ import { Plus, Trash, Edit, Save, X, Search } from 'lucide-react';
 interface Icp {
     id: number;
     industry: string;
+    perspective?: string;
     naicsCode?: string;
     icpPersona: string;
     promptInstructions: string;
@@ -111,7 +112,7 @@ export function IcpManager() {
                         <thead style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid var(--border-glass)' }}>
                             <tr>
                                 <th style={{ padding: '1rem', textAlign: 'left' }}>Industry</th>
-                                <th style={{ padding: '1rem', textAlign: 'left' }}>NAICS</th>
+                                <th style={{ padding: '1rem', textAlign: 'left' }}>Perspective</th>
                                 <th style={{ padding: '1rem', textAlign: 'left' }}>Persona</th>
                                 <th style={{ padding: '1rem', textAlign: 'left' }}>Prompt Instructions</th>
                                 <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
@@ -121,7 +122,17 @@ export function IcpManager() {
                             {filteredIcps.map(icp => (
                                 <tr key={icp.id} style={{ borderBottom: '1px solid var(--border-glass)' }}>
                                     <td style={{ padding: '1rem', fontWeight: 600 }}>{icp.industry}</td>
-                                    <td style={{ padding: '1rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{icp.naicsCode || '-'}</td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span style={{
+                                            padding: '0.2rem 0.5rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.8rem',
+                                            background: icp.perspective === 'Sales Target' ? 'rgba(100,200,255,0.2)' : 'rgba(255,200,100,0.2)',
+                                            color: icp.perspective === 'Sales Target' ? '#8cf' : '#fc8'
+                                        }}>
+                                            {icp.perspective || 'Business Owner'}
+                                        </span>
+                                    </td>
                                     <td style={{ padding: '1rem' }}>{icp.icpPersona}</td>
                                     <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         {icp.promptInstructions}
@@ -182,6 +193,19 @@ export function IcpManager() {
                                     onChange={e => setCurrentIcp({ ...currentIcp, industry: e.target.value })}
                                     placeholder="e.g. Manufacturing"
                                 />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Perspective (Variant)</label>
+                                <select
+                                    className="input-field"
+                                    value={currentIcp.perspective || 'Business Owner'}
+                                    onChange={e => setCurrentIcp({ ...currentIcp, perspective: e.target.value })}
+                                >
+                                    <option value="Business Owner">Business Owner (Operational/B2C)</option>
+                                    <option value="Sales Target">Sales Target (B2B Prospect)</option>
+                                    <option value="Employee">Employee / Staff</option>
+                                </select>
                             </div>
 
                             <div>

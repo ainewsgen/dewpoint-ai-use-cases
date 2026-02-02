@@ -25,6 +25,7 @@ export const companies = pgTable('companies', {
     industry: text('industry'),
     naicsCode: text('naics_code'), // NEW: for standard industry classification
     scannerSource: text('scanner_source'), // 'AI' | 'Heuristic'
+    description: text('description'), // Business Summary
     role: text('role'), // User's role in company
     size: text('size'),
     painPoint: text('pain_point'),

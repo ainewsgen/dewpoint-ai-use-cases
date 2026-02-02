@@ -1147,6 +1147,22 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                     <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Industry</label>
                                                     <p>{activeUser.company.industry || 'Not specified'}</p>
                                                 </div>
+                                                {activeUser.company.description && (
+                                                    <div style={{ gridColumn: 'span 2' }}>
+                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Analyzed Summary</label>
+                                                        <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: 'var(--text-main)' }}>{activeUser.company.description}</p>
+                                                    </div>
+                                                )}
+                                                {activeUser.company.stack && Array.isArray(activeUser.company.stack) && activeUser.company.stack.length > 0 && (
+                                                    <div style={{ gridColumn: 'span 2' }}>
+                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Detected Tech Stack</label>
+                                                        <div className="chips-grid" style={{ gap: '0.25rem', marginTop: '0.25rem' }}>
+                                                            {activeUser.company.stack.map((t: string) => (
+                                                                <span key={t} style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <div>
                                                     <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Tech Stack</label>
                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>

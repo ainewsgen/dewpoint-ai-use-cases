@@ -84,32 +84,7 @@ router.post('/force-repair', async (req, res) => {
             }
         };
 
-        // 1. Companies
-        await run(sql.raw(`CREATE TABLE IF NOT EXISTS companies (id SERIAL PRIMARY KEY, user_id INTEGER, url TEXT, industry TEXT, naics_code TEXT, role TEXT, size TEXT, pain_point TEXT, stack JSONB, created_at TIMESTAMP DEFAULT NOW())`));
-
-        // 2. Leads Columns
-        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER`));
-        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS recipes JSONB DEFAULT '[]'::jsonb`));
-        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS shadow_id TEXT`));
-        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT`));
-
-        // 3. Companies Columns (just in case)
-        await run(sql.raw(`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT`));
-
-        // 4. ICP Migration (Perspectives)
-        // Add perspective column
-        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS perspective TEXT DEFAULT 'Business Owner' NOT NULL`));
-
-        // Drop old unique constraint on industry (if it exists)
-        // Note: Drizzle usually names it table_column_unique
-        await run(sql.raw(`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_unique`));
-        await run(sql.raw(`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_key`)); // Postgres default naming
-
-        // Create new unique index (composite)
-        // We use CREATE UNIQUE INDEX IF NOT EXISTS logic via a DO block or just try/catch wrappers in 'run'
-        await run(sql.raw(`CREATE UNIQUE INDEX IF NOT EXISTS industry_perspective_idx ON industry_icps (industry, perspective)`));
-
-        // 5. DewPoint GTM Enums & Columns
+        // 0. Define Enums FIRST (Required for table creation)
         const enums = [
             `CREATE TYPE dewpoint_icp_type AS ENUM ('dewpoint', 'internal')`,
             `CREATE TYPE dewpoint_gtm_motion AS ENUM ('outbound', 'content', 'community', 'partner')`,
@@ -125,10 +100,46 @@ router.post('/force-repair', async (req, res) => {
         ];
 
         for (const enumSql of enums) {
-            // Postgres doesn't support IF NOT EXISTS for TYPE easily in one line, so wrap in simple block
             await run(sql.raw(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = '${enumSql.split(' ')[2]}') THEN ${enumSql}; END IF; END $$;`));
         }
 
+        // 1. Companies
+        await run(sql.raw(`CREATE TABLE IF NOT EXISTS companies (id SERIAL PRIMARY KEY, user_id INTEGER, url TEXT, industry TEXT, naics_code TEXT, role TEXT, size TEXT, pain_point TEXT, stack JSONB, created_at TIMESTAMP DEFAULT NOW())`));
+
+        // 2. Leads Columns
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER`));
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS recipes JSONB DEFAULT '[]'::jsonb`));
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS shadow_id TEXT`));
+        await run(sql.raw(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT`));
+
+        // 3. Companies Columns (just in case)
+        await run(sql.raw(`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT`));
+
+        // 3.5 Create Industry ICPs Table (If missing)
+        await run(sql.raw(`CREATE TABLE IF NOT EXISTS industry_icps (
+            id SERIAL PRIMARY KEY,
+            industry TEXT NOT NULL,
+            perspective TEXT DEFAULT 'Business Owner' NOT NULL,
+            naics_code TEXT,
+            icp_persona TEXT NOT NULL,
+            prompt_instructions TEXT NOT NULL,
+            negative_icps TEXT,
+            discovery_guidance TEXT,
+            economic_drivers TEXT,
+            created_at TIMESTAMP DEFAULT NOW()
+        )`));
+
+        // 4. ICP Migration (Perspectives) - logic works on existing table
+        await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS perspective TEXT DEFAULT 'Business Owner' NOT NULL`));
+
+        // Drop old unique constraint on industry (if it exists)
+        await run(sql.raw(`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_unique`));
+        await run(sql.raw(`ALTER TABLE industry_icps DROP CONSTRAINT IF EXISTS industry_icps_industry_key`));
+
+        // Create new unique index (composite)
+        await run(sql.raw(`CREATE UNIQUE INDEX IF NOT EXISTS industry_perspective_idx ON industry_icps (industry, perspective)`));
+
+        // 5. DewPoint GTM Columns (Enums already created)
         // Add Columns
         await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS icp_type dewpoint_icp_type DEFAULT 'dewpoint'`));
         await run(sql.raw(`ALTER TABLE industry_icps ADD COLUMN IF NOT EXISTS target_company_description TEXT`));

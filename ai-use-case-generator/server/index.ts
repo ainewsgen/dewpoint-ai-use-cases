@@ -290,6 +290,9 @@ const server = app.listen(Number(PORT), '0.0.0.0', () => {
             // Force add 'provider' column matching schema (was missing in prod DB likely)
             await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
 
+            // Force add 'priority' column
+            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0;`);
+
             // Make 'provider' nullable (backward compat)
             await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
             console.log("✅ Database Schema Verified/Patched.");

@@ -186,4 +186,44 @@ router.post('/force-repair', async (req, res) => {
     }
 });
 
+// Fix Schema Endpoint (Called by Frontend Troubleshoot Button)
+router.post('/fix-schema', async (req, res) => {
+    try {
+        console.log("🛠️ Manual Schema Fix Triggered...");
+        const trace = [];
+
+        // Integrations - Priority
+        try {
+            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0;`);
+            trace.push("Updated integrations: Added priority column");
+        } catch (e: any) { trace.push(`Integrations Error: ${e.message}`); }
+
+        // Integrations - Metadata
+        try {
+            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
+            trace.push("Updated integrations: Checked metadata column");
+        } catch (e: any) { trace.push(`Metadata Error: ${e.message}`); }
+
+        // Ensure api_usage exists
+        try {
+            await db.execute(sql`
+                CREATE TABLE IF NOT EXISTS api_usage (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id),
+                    model TEXT,
+                    prompt_tokens INTEGER,
+                    completion_tokens INTEGER,
+                    total_cost DECIMAL(10, 6),
+                    timestamp TIMESTAMP DEFAULT NOW()
+                );
+            `);
+            trace.push("Checked api_usage table");
+        } catch (e: any) { trace.push(`Usage Table Error: ${e.message}`); }
+
+        res.json({ success: true, trace });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

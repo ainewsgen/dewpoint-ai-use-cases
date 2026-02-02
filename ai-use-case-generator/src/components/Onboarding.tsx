@@ -33,6 +33,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const techCategories = {
         "CRM & Sales": ['Salesforce', 'HubSpot', 'Zoho CRM', 'Pipedrive', 'Monday.com Sales'],
         "Communication": ['Slack', 'Microsoft Teams', 'Zoom', 'Google Meet', 'Intercom'],
+        "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'],
         "Productivity": ['Notion', 'Asana', 'Jira', 'Trello', 'ClickUp', 'Monday.com', 'Airtable'],
         "Finance & HR": ['QuickBooks', 'Xero', 'NetSuite', 'Gusto', 'Rippling', 'Expensify'],
         "Marketing": ['Mailchimp', 'Klaviyo', 'Buffer', 'Hootsuite', 'Canva', 'Shopify'],
@@ -132,19 +133,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         // Basic Stack Guess
         setStack(prev => prev.includes('Gmail/GSuite') ? prev : [...prev, 'Gmail/GSuite']);
     };
-
-    if (step === 1) {
-        // ... (Keep Step 1 Render Logic identical, just skipping it in replace block to target Step 2 logic/render) ...
-        // Wait, replace_file_content replaces the BLOCK.
-        // I need to be careful not to delete Step 1 render if I start my replacement early.
-        // The instruction targets lines 61-290.
-        // This includes Step 1 render.
-        // I should split this into two replacements or use a precise range.
-
-        // Strategy: First update the logic (lines 61-90), then update the CSS (lines 260+).
-        // Let's do logic first.
-    }
-
 
     if (step === 1) {
         return (
@@ -259,74 +247,36 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     {announcement}
                 </div>
             )}
-            <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>
+            <div className="glass-panel form-card" style={{ width: '100%', maxWidth: '700px', padding: '3rem' }}>
                 <div className="progress-bar" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)' }}>
                     <div className="fill" style={{ width: '100%', height: '100%', background: 'hsl(var(--accent-primary))' }}></div>
                 </div>
 
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Business Context</h2>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>I need to know who I'm advising to generate relevant "Recipes".</p>
+                <h2 style={{ fontSize: '2rem', marginBottom: '0.75rem', fontWeight: 800 }}>Business Context</h2>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '1.1rem' }}>Customize your AI recipes based on who you serve and how you work.</p>
 
-                <div className="form-grid" style={{ display: 'grid', gap: '1.5rem' }}>
+                <div className="form-grid" style={{ display: 'grid', gap: '2rem' }}>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Company URL (Optional)</label>
-                        <div className="input-group" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem', background: 'transparent', border: 'none', padding: 0 }}>
-                            <div style={{ position: 'relative', width: '100%' }}>
-                                <input
-                                    type="text" placeholder="example.com"
-                                    value={url} onChange={e => {
-                                        setUrl(e.target.value);
-                                        setError(false);
-                                    }}
-                                    style={{ borderColor: error ? 'salmon' : undefined, width: '100%', paddingLeft: '2.5rem' }}
-                                />
-                                <Globe className="input-icon" size={20} style={{ left: '0.8rem' }} />
-                            </div>
-                            <button
-                                onClick={scanUrl}
-                                disabled={isScanning || !url}
-                                className="btn-secondary"
-                                style={{ height: '100%', padding: '0 1.25rem', borderColor: 'var(--accent-primary)', color: 'hsl(var(--accent-primary))', minWidth: '100px' }}
-                            >
-                                {isScanning ? <Loader2 className="spin" size={18} /> : (
-                                    <>
-                                        <Sparkles size={16} style={{ marginRight: '5px' }} /> Scan
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Industry (if no URL)</label>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                placeholder="e.g. Legal, Manufacturing, Dental..."
-                                value={industry}
-                                onChange={e => setIndustry(e.target.value)}
-                            />
-                            <Briefcase className="input-icon" size={20} />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)', letterSpacing: '0.02em' }}>
-                            Perspective <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>Whose problems are we solving?</span>
+                    {/* IDENTITY SECTION */}
+                    <div style={{ paddingBottom: '2rem', borderBottom: '1px solid var(--border-glass)' }}>
+                        <label className="section-label" style={{
+                            display: 'block', fontSize: '0.75rem', fontWeight: 800,
+                            color: 'hsl(var(--accent-primary))', marginBottom: '1.5rem',
+                            textTransform: 'uppercase', letterSpacing: '0.1em'
+                        }}>
+                            Who do you serve?
                         </label>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            {/* Option 1: Business Owner */}
                             <button
                                 type="button"
                                 onClick={() => setScrapedContext({ ...scrapedContext, icpType: 'dewpoint' })}
                                 style={{
-                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-                                    padding: '1.25rem',
-                                    background: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType // Default
-                                        ? 'hsla(var(--accent-gold)/0.15)'
-                                        : 'rgba(255,255,255,0.03)',
+                                    display: 'flex', flexDirection: 'column',
+                                    padding: '1.5rem',
+                                    background: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType
+                                        ? 'hsla(var(--accent-gold)/0.1)'
+                                        : 'var(--bg-card)',
                                     border: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType
                                         ? '2px solid hsl(var(--accent-gold))'
                                         : '1px solid var(--border-glass)',
@@ -334,38 +284,29 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     textAlign: 'left',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s ease',
-                                    position: 'relative',
-                                    boxShadow: (scrapedContext as any)?.icpType === 'dewpoint' ? '0 4px 20px hsla(var(--accent-gold)/0.2)' : 'none'
+                                    position: 'relative'
                                 }}
                             >
-                                <div style={{
-                                    background: 'hsla(var(--accent-gold)/0.2)',
-                                    padding: '0.5rem', borderRadius: '8px', marginBottom: '0.75rem',
-                                    color: 'hsl(var(--accent-gold))'
-                                }}>
-                                    <Briefcase size={20} />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.5rem' }}>
+                                    <span style={{
+                                        fontWeight: 800, fontSize: '1.25rem',
+                                        color: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType ? 'hsl(var(--accent-gold))' : 'var(--text-main)'
+                                    }}>B2B</span>
+                                    <Briefcase size={20} style={{ opacity: 0.5 }} />
                                 </div>
-                                <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--text-main)' }}>Business Owner</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                                    Optimize internal operations, cut costs, and improve efficiency.
-                                </div>
-                                {((scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType) && (
-                                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'hsl(var(--accent-gold))' }}>
-                                        <Sparkles size={16} fill="currentColor" />
-                                    </div>
-                                )}
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.25rem' }}>Business to Business</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Selling services or products to other companies.</div>
                             </button>
 
-                            {/* Option 2: End Customer */}
                             <button
                                 type="button"
                                 onClick={() => setScrapedContext({ ...scrapedContext, icpType: 'internal' })}
                                 style={{
-                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-                                    padding: '1.25rem',
+                                    display: 'flex', flexDirection: 'column',
+                                    padding: '1.5rem',
                                     background: (scrapedContext as any)?.icpType === 'internal'
-                                        ? 'hsla(var(--accent-primary)/0.15)'
-                                        : 'rgba(255,255,255,0.03)',
+                                        ? 'hsla(var(--accent-primary)/0.1)'
+                                        : 'var(--bg-card)',
                                     border: (scrapedContext as any)?.icpType === 'internal'
                                         ? '2px solid hsl(var(--accent-primary))'
                                         : '1px solid var(--border-glass)',
@@ -373,92 +314,119 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     textAlign: 'left',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s ease',
-                                    position: 'relative',
-                                    boxShadow: (scrapedContext as any)?.icpType === 'internal' ? '0 4px 20px hsla(var(--accent-primary)/0.2)' : 'none'
+                                    position: 'relative'
                                 }}
                             >
-                                <div style={{
-                                    background: 'hsla(var(--accent-primary)/0.2)',
-                                    padding: '0.5rem', borderRadius: '8px', marginBottom: '0.75rem',
-                                    color: 'hsl(var(--accent-primary))'
-                                }}>
-                                    <Globe size={20} />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.5rem' }}>
+                                    <span style={{
+                                        fontWeight: 800, fontSize: '1.25rem',
+                                        color: (scrapedContext as any)?.icpType === 'internal' ? 'hsl(var(--accent-primary))' : 'var(--text-main)'
+                                    }}>B2C</span>
+                                    <Globe size={20} style={{ opacity: 0.5 }} />
                                 </div>
-                                <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--text-main)' }}>End Customer</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                                    Drive sales, improve customer experience, and grow revenue.
-                                </div>
-                                {(scrapedContext as any)?.icpType === 'internal' && (
-                                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'hsl(var(--accent-primary))' }}>
-                                        <Sparkles size={16} fill="currentColor" />
-                                    </div>
-                                )}
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.25rem' }}>Business to Consumer</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Selling directly to individual customers.</div>
                             </button>
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                    {/* COMPANY DETAILS SECTION */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem', alignItems: 'start' }}>
                         <div>
-                            <label className="input-label">Your Role</label>
-                            <div className="input-group">
-                                <select
-                                    value={role}
-                                    onChange={e => setRole(e.target.value)}
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Where can we find you online?</label>
+                            <div className="input-group" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem', padding: 0, background: 'none', border: 'none' }}>
+                                <div style={{ position: 'relative', width: '100%' }}>
+                                    <input
+                                        type="text" placeholder="company.com"
+                                        value={url} onChange={e => { setUrl(e.target.value); setError(false); }}
+                                        style={{ width: '100%', paddingLeft: '2.5rem', background: 'var(--bg-card)' }}
+                                    />
+                                    <Globe className="input-icon" size={18} style={{ left: '1rem' }} />
+                                </div>
+                                <button
+                                    onClick={scanUrl}
+                                    disabled={isScanning || !url}
+                                    className="btn-secondary"
+                                    style={{ padding: '0 1.5rem', height: '100%', borderColor: 'var(--accent-primary)', color: 'hsl(var(--accent-primary))' }}
                                 >
-                                    <option value="" disabled>Select Role...</option>
-                                    <option value="Founder">Founder / CEO</option>
-                                    <option value="CTO">CTO / Technical Lead</option>
-                                    <option value="Ops Manager">Operations Manager</option>
-                                    <option value="marketing">Marketing Director</option>
-                                    <option value="sales">Sales Leader</option>
-                                    <option value="other">Other</option>
-                                </select>
+                                    {isScanning ? <Loader2 className="spin" size={18} /> : "Scan"}
+                                </button>
+                            </div>
+                            <div style={{ marginTop: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Or what's your industry?</label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Legal, Manufacturing, Dental..."
+                                        value={industry}
+                                        onChange={e => setIndustry(e.target.value)}
+                                        style={{ background: 'var(--bg-card)' }}
+                                    />
+                                    <Briefcase className="input-icon" size={18} />
+                                </div>
                             </div>
                         </div>
 
                         <div>
-                            <label className="input-label">Company Size</label>
-                            <div className="input-group">
-                                <select
-                                    value={size}
-                                    onChange={e => setSize(e.target.value)}
-                                >
-                                    <option value="Solopreneur">Solopreneur (1)</option>
-                                    <option value="1-10">Micro (1-10)</option>
-                                    <option value="11-50">Small (11-50)</option>
-                                    <option value="50+">Mid-Sized (50+)</option>
-                                </select>
+                            <label style={{ display: 'block', marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 600 }}>Company Size</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {['Solopreneur (1)', 'Micro (1-10)', 'Small (11-50)', 'Mid-Sized (50+)'].map(opt => {
+                                    const val = opt.split(' ')[0] === 'Solopreneur' ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || opt;
+                                    const rawVal = opt.split(' ')[0] === 'Solopreneur' ? opt : opt; // Match logic in state
+                                    // Actually state uses: Solopreneur, 1-10, 11-50, 50+
+                                    // Let's normalize visually vs value
+                                    const stateVal = opt.includes('Solopreneur') ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || '1-10';
+
+                                    return (
+                                        <button
+                                            key={opt}
+                                            onClick={() => setSize(stateVal)}
+                                            style={{
+                                                padding: '0.75rem 1rem',
+                                                borderRadius: '8px',
+                                                border: size === stateVal ? '1px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
+                                                background: size === stateVal ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                                color: size === stateVal ? 'white' : 'var(--text-muted)',
+                                                fontSize: '0.9rem',
+                                                fontWeight: size === stateVal ? 600 : 400,
+                                                cursor: 'pointer',
+                                                textAlign: 'left',
+                                                transition: 'all 0.1s'
+                                            }}
+                                        >
+                                            {opt}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <label className="input-label" style={{ marginBottom: '1rem' }}>Tech Stack</label>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '2rem' }}>
-                            {Object.entries(techCategories).map(([category, tools]) => (
+                    {/* TECH STACK SECTION */}
+                    <div style={{ marginTop: '1rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
+                        <label className="section-label" style={{
+                            display: 'block', fontSize: '0.75rem', fontWeight: 800,
+                            color: 'hsl(var(--accent-primary))', marginBottom: '1.5rem',
+                            textTransform: 'uppercase', letterSpacing: '0.1em'
+                        }}>
+                            What tools do you use?
+                        </label>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
+                            {Object.entries({
+                                ...techCategories,
+                                "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect']
+                            }).map(([category, tools]) => (
                                 <div key={category}>
-                                    <label style={{
-                                        display: 'block',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 800,
-                                        color: 'hsl(var(--accent-primary))',
-                                        marginBottom: '0.75rem',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.1em',
-                                        borderBottom: '1px solid var(--border-glass)',
-                                        paddingBottom: '0.25rem',
-                                        width: 'fit-content'
-                                    }}>
-                                        {category}
-                                    </label>
-                                    <div className="chips-grid">
+                                    <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>{category}</h4>
+                                    <div className="chips-grid" style={{ gap: '0.5rem' }}>
                                         {tools.map(t => (
                                             <button
                                                 key={t}
                                                 className={`chip ${stack.includes(t) ? 'active' : ''}`}
                                                 onClick={() => toggleTech(t)}
-                                                style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}
+                                                style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
                                             >
                                                 {t}
                                             </button>
@@ -468,12 +436,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             ))}
                         </div>
 
-                        {/* Custom Tech Input moved to bottom */}
-                        <div className="input-group" style={{ marginBottom: '1rem' }}>
+                        {/* Custom Tech Input */}
+                        <div style={{ marginTop: '2rem' }}>
                             <input
                                 type="text"
-                                placeholder="Add custom tech (Press Enter)..."
-                                style={{ paddingLeft: '1rem' }} // Override the default padding-left 3rem if using icon, but here we aren't
+                                placeholder="Add any other tools... (Press Enter)"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         const val = e.currentTarget.value.trim();
@@ -483,33 +450,24 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                         }
                                     }
                                 }}
+                                style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'white' }}
                             />
-                        </div>
-                        {/* Render Custom Chips */}
-                        {stack.filter(s => !allTechOptions.includes(s)).length > 0 && (
-                            <div style={{ marginTop: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                                    Custom / Other
-                                </label>
-                                <div className="chips-grid">
-                                    {stack.filter(s => !allTechOptions.includes(s)).map(s => (
-                                        <button
-                                            key={s}
-                                            className="chip active"
-                                            onClick={() => toggleTech(s)}
-                                        >
-                                            {s}
-                                        </button>
+                            {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).length > 0 && (
+                                <div className="chips-grid" style={{ marginTop: '1rem' }}>
+                                    {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).map(s => (
+                                        <button key={s} className="chip active" onClick={() => toggleTech(s)}>{s}</button>
                                     ))}
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                <button onClick={handleSubmit} className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
-                    <Sparkles size={18} /> Generate Opportunity Matrix
-                </button>
+                <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button onClick={handleSubmit} className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
+                        Generate Roadmap <Sparkles size={18} style={{ marginLeft: '8px' }} />
+                    </button>
+                </div>
             </div>
         </div>
     );

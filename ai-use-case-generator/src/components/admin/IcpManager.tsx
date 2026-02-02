@@ -4,13 +4,25 @@ import { Plus, Trash, Edit, Save, X, Search } from 'lucide-react';
 interface Icp {
     id: number;
     industry: string;
-    perspective?: string;
+    icpType: 'dewpoint' | 'internal';
     naicsCode?: string;
     icpPersona: string;
     promptInstructions: string;
+
+    // Extended Fields
     negativeIcps?: string;
     discoveryGuidance?: string;
     economicDrivers?: string;
+
+    // Scoring (1-5)
+    profitScore?: number;
+    ltvScore?: number;
+    speedToCloseScore?: number;
+    satisfactionScore?: number;
+
+    // GTM
+    gtmPrimary?: string;
+    primaryPainCategory?: string;
 }
 
 export function IcpManager() {
@@ -85,7 +97,7 @@ export function IcpManager() {
                     <p style={{ color: 'var(--text-muted)' }}>Manage Ideal Customer Profiles and prompt injection rules.</p>
                 </div>
                 <button
-                    onClick={() => { setCurrentIcp({}); setIsEditing(true); }}
+                    onClick={() => { setCurrentIcp({ icpType: 'dewpoint' }); setIsEditing(true); }}
                     className="btn-primary"
                     style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
@@ -112,7 +124,7 @@ export function IcpManager() {
                         <thead style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid var(--border-glass)' }}>
                             <tr>
                                 <th style={{ padding: '1rem', textAlign: 'left' }}>Industry</th>
-                                <th style={{ padding: '1rem', textAlign: 'left' }}>Perspective</th>
+                                <th style={{ padding: '1rem', textAlign: 'left' }}>Type</th>
                                 <th style={{ padding: '1rem', textAlign: 'left' }}>Persona</th>
                                 <th style={{ padding: '1rem', textAlign: 'left' }}>Prompt Instructions</th>
                                 <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
@@ -127,10 +139,10 @@ export function IcpManager() {
                                             padding: '0.2rem 0.5rem',
                                             borderRadius: '4px',
                                             fontSize: '0.8rem',
-                                            background: icp.perspective === 'Sales Target' ? 'rgba(100,200,255,0.2)' : 'rgba(255,200,100,0.2)',
-                                            color: icp.perspective === 'Sales Target' ? '#8cf' : '#fc8'
+                                            background: icp.icpType === 'internal' ? 'rgba(100,200,255,0.2)' : 'rgba(255,200,100,0.2)',
+                                            color: icp.icpType === 'internal' ? '#8cf' : '#fc8'
                                         }}>
-                                            {icp.perspective || 'Business Owner'}
+                                            {icp.icpType === 'internal' ? 'End Customer' : 'Business Owner'}
                                         </span>
                                     </td>
                                     <td style={{ padding: '1rem' }}>{icp.icpPersona}</td>
@@ -185,39 +197,75 @@ export function IcpManager() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Industry Name</label>
-                                <input
-                                    type="text"
-                                    className="input-field"
-                                    value={currentIcp.industry || ''}
-                                    onChange={e => setCurrentIcp({ ...currentIcp, industry: e.target.value })}
-                                    placeholder="e.g. Manufacturing"
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Perspective (Variant)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>ICP Type</label>
                                 <select
                                     className="input-field"
-                                    value={currentIcp.perspective || 'Business Owner'}
-                                    onChange={e => setCurrentIcp({ ...currentIcp, perspective: e.target.value })}
+                                    value={currentIcp.icpType || 'dewpoint'}
+                                    onChange={e => setCurrentIcp({ ...currentIcp, icpType: e.target.value as any })}
                                 >
-                                    <option value="Business Owner">Business Owner (Operational/B2C)</option>
-                                    <option value="Sales Target">Sales Target (B2B Prospect)</option>
-                                    <option value="Employee">Employee / Staff</option>
+                                    <option value="dewpoint">Business Owner (Target for DewPoint)</option>
+                                    <option value="internal">End Customer (Target for Industry)</option>
                                 </select>
                             </div>
 
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>NAICS Code (Optional)</label>
-                                <input
-                                    type="text"
-                                    className="input-field"
-                                    value={currentIcp.naicsCode || ''}
-                                    onChange={e => setCurrentIcp({ ...currentIcp, naicsCode: e.target.value })}
-                                    placeholder="e.g. 31-33"
-                                />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Industry Name</label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        value={currentIcp.industry || ''}
+                                        onChange={e => setCurrentIcp({ ...currentIcp, industry: e.target.value })}
+                                        placeholder="e.g. Manufacturing"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>NAICS Code</label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        value={currentIcp.naicsCode || ''}
+                                        onChange={e => setCurrentIcp({ ...currentIcp, naicsCode: e.target.value })}
+                                        placeholder="e.g. 31-33"
+                                    />
+                                </div>
                             </div>
+
+                            {/* DewPoint Scoring Section */}
+                            <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>DewPoint Intelligence Score (1-5)</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Profit</label>
+                                        <input type="number" min="1" max="5" className="input-field"
+                                            value={currentIcp.profitScore || ''}
+                                            onChange={e => setCurrentIcp({ ...currentIcp, profitScore: parseInt(e.target.value) })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>LTV</label>
+                                        <input type="number" min="1" max="5" className="input-field"
+                                            value={currentIcp.ltvScore || ''}
+                                            onChange={e => setCurrentIcp({ ...currentIcp, ltvScore: parseInt(e.target.value) })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Speed</label>
+                                        <input type="number" min="1" max="5" className="input-field"
+                                            value={currentIcp.speedToCloseScore || ''}
+                                            onChange={e => setCurrentIcp({ ...currentIcp, speedToCloseScore: parseInt(e.target.value) })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Satisfaction</label>
+                                        <input type="number" min="1" max="5" className="input-field"
+                                            value={currentIcp.satisfactionScore || ''}
+                                            onChange={e => setCurrentIcp({ ...currentIcp, satisfactionScore: parseInt(e.target.value) })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>ICP Persona</label>
@@ -244,37 +292,48 @@ export function IcpManager() {
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Negative ICPs (Who to avoid)</label>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Negative ICPs</label>
                                     <textarea
                                         className="input-field"
                                         rows={3}
                                         value={currentIcp.negativeIcps || ''}
                                         onChange={e => setCurrentIcp({ ...currentIcp, negativeIcps: e.target.value })}
-                                        placeholder="e.g. Startups with < $1M revenue, no dedicated maintenance team..."
                                         style={{ fontSize: '0.9rem' }}
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Discovery Guidance</label>
-                                    <textarea
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>GTM Strategy</label>
+                                    <select
                                         className="input-field"
-                                        rows={3}
-                                        value={currentIcp.discoveryGuidance || ''}
-                                        onChange={e => setCurrentIcp({ ...currentIcp, discoveryGuidance: e.target.value })}
-                                        placeholder="e.g. Look for job postings for 'Plant Manager' on LinkedIn..."
-                                        style={{ fontSize: '0.9rem' }}
+                                        value={currentIcp.gtmPrimary || ''}
+                                        onChange={e => setCurrentIcp({ ...currentIcp, gtmPrimary: e.target.value })}
+                                        style={{ marginBottom: '0.5rem' }}
+                                    >
+                                        <option value="">Select Primary Motion...</option>
+                                        <option value="outbound">Outbound</option>
+                                        <option value="content">Content</option>
+                                        <option value="community">Community</option>
+                                        <option value="partner">Partner</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="Pain Category (e.g. revenue_leakage)"
+                                        value={currentIcp.primaryPainCategory || ''}
+                                        onChange={e => setCurrentIcp({ ...currentIcp, primaryPainCategory: e.target.value })}
                                     />
                                 </div>
                             </div>
 
+                            {/* Legacy Textarea for drivers - maybe keep for notes */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Economic Drivers</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Economic Drivers / Notes</label>
                                 <textarea
                                     className="input-field"
                                     rows={2}
                                     value={currentIcp.economicDrivers || ''}
                                     onChange={e => setCurrentIcp({ ...currentIcp, economicDrivers: e.target.value })}
-                                    placeholder="e.g. High asset turnover, high cost of downtime..."
+                                    placeholder="Additional context on value drivers..."
                                     style={{ fontSize: '0.9rem' }}
                                 />
                             </div>

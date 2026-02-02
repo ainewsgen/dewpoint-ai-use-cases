@@ -220,6 +220,68 @@ export function IcpManager() {
                         />
                     </div>
 
+                    {/* Schema v2: B2B Specifics */}
+                    {currentIcp.icpType === 'dewpoint' && (
+                        <div style={{ padding: '1rem', background: '#f0f7ff', borderRadius: '8px', border: '1px solid #cce5ff', marginBottom: '1rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#004488', textTransform: 'uppercase' }}>B2B Intelligence (DewPoint Target)</h4>
+
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>Buyer Titles (Comma Separated)</label>
+                            <input
+                                type="text"
+                                value={Array.isArray(currentIcp.buyerTitles) ? currentIcp.buyerTitles.join(', ') : (currentIcp.buyerTitles || '')}
+                                onChange={e => setCurrentIcp({ ...currentIcp, buyerTitles: e.target.value.split(',').map(s => s.trim()) })}
+                                placeholder="CEO, Founder, VP Operations"
+                                style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}
+                            />
+
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>Regulatory Requirements</label>
+                            <input
+                                type="text"
+                                value={currentIcp.regulatoryRequirements || ''}
+                                onChange={e => setCurrentIcp({ ...currentIcp, regulatoryRequirements: e.target.value })}
+                                placeholder="e.g. HIPAA, OSHA, SOC2"
+                                style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}
+                            />
+
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>Communities (JSON)</label>
+                            <textarea
+                                rows={3}
+                                value={typeof currentIcp.communities === 'string' ? currentIcp.communities : JSON.stringify(currentIcp.communities, null, 2)}
+                                onChange={e => {
+                                    try {
+                                        const val = JSON.parse(e.target.value);
+                                        setCurrentIcp({ ...currentIcp, communities: val });
+                                    } catch (err) {
+                                        // Allow editing string until valid
+                                    }
+                                }}
+                                placeholder='[{"name": "Reddit", "type": "virtual"}]'
+                                style={{ fontFamily: 'monospace', fontSize: '0.85rem', width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}
+                            />
+                        </div>
+                    )}
+
+                    {/* Schema v2: B2C Specifics */}
+                    {currentIcp.icpType === 'internal' && (
+                        <div style={{ padding: '1rem', background: '#fff9e6', borderRadius: '8px', border: '1px solid #ffeeba', marginBottom: '1rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#996600', textTransform: 'uppercase' }}>End Customer Intelligence</h4>
+
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>Search Queries (JSON)</label>
+                            <textarea
+                                rows={3}
+                                value={typeof currentIcp.searchQueries === 'string' ? currentIcp.searchQueries : JSON.stringify(currentIcp.searchQueries, null, 2)}
+                                onChange={e => {
+                                    try {
+                                        const val = JSON.parse(e.target.value);
+                                        setCurrentIcp({ ...currentIcp, searchQueries: val });
+                                    } catch (err) { }
+                                }}
+                                placeholder='[{"channel": "Google", "query": "best plumber near me"}]'
+                                style={{ fontFamily: 'monospace', fontSize: '0.85rem', width: '100%', padding: '0.5rem', marginBottom: '1rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}
+                            />
+                        </div>
+                    )}
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 'bold', color: '#555', textTransform: 'uppercase' }}>Negative ICPs</label>

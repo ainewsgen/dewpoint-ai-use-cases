@@ -67,16 +67,16 @@ router.post('/scan-url', async (req, res) => {
         const heuristics: Record<string, string[]> = {
             'Legal': ['law', 'legal', 'attorney', 'lawyer', 'firm', 'litigation', 'counsel', 'juridical'],
             'Medical': ['medical', 'clinic', 'health', 'doctor', 'patient', 'surgery', 'care', 'dental', 'pharmacy', 'hospital'],
-            'Real Estate': ['real estate', 'realty', 'property', 'properties', 'listings', 'home', 'housing', 'broker', 'agent'],
-            'Construction': ['construction', 'build', 'contractor', 'renovation', 'roofing', 'hvac', 'plumbing', 'electric', 'engineering'],
-            'Finance': ['finance', 'financial', 'invest', 'capital', 'wealth', 'bank', 'fund', 'asset', 'tax', 'accounting', 'cpa'],
-            'Marketing': ['marketing', 'agency', 'brand', 'digital', 'social media', 'creative', 'advertising', 'pr', 'media', 'seo'],
-            'Consulting': ['consulting', 'consultancy', 'advisory', 'advisor', 'strategy', 'management', 'solutions', 'partner'],
-            'Technology': ['software', 'technology', 'tech', 'saas', 'app', 'platform', 'cloud', 'cyber', 'data', 'ai', 'automation'],
-            'Manufacturing': ['manufacturing', 'industrial', 'factory', 'production', 'machinery', 'automation', 'supply chain'],
-            'Retail': ['shop', 'store', 'retail', 'fashion', 'clothing', 'apparel', 'boutique', 'ecommerce', 'cart'],
-            'Education': ['education', 'school', 'university', 'academy', 'learning', 'training', 'course', 'student'],
-            'Hospitality': ['hotel', 'resort', 'travel', 'booking', 'restaurant', 'cafe', 'food', 'dining', 'hospitality']
+            'Real Estate': ['real estate', 'realty', 'property', 'properties', 'listings', 'home', 'housing', 'broker', 'agent', 'leasing'],
+            'Construction': ['construction', 'build', 'contractor', 'renovation', 'roofing', 'hvac', 'plumbing', 'electric', 'engineering', 'drafting', 'blueprint', 'cad', 'architecture', 'architect', 'design build'],
+            'Finance': ['finance', 'financial', 'invest', 'capital', 'wealth', 'bank', 'fund', 'asset', 'tax', 'accounting', 'cpa', 'bookkeeping'],
+            'Marketing': ['marketing', 'agency', 'brand', 'digital', 'social media', 'creative', 'advertising', 'pr', 'media', 'seo', 'content'],
+            'Consulting': ['consulting', 'consultancy', 'advisory', 'advisor', 'strategy', 'management', 'partner', 'coaching'],
+            'Technology': ['software', 'technology', 'tech', 'saas', 'app', 'platform', 'cloud', 'cyber', 'data', 'ai', 'automation', 'it services'],
+            'Manufacturing': ['manufacturing', 'industrial', 'factory', 'production', 'machinery', 'automation', 'supply chain', '3d modeling', 'prototyping', 'fabrication'],
+            'Retail': ['shop', 'store', 'retail', 'fashion', 'clothing', 'apparel', 'boutique', 'ecommerce', 'cart', 'consumer goods'],
+            'Education': ['education', 'school', 'university', 'academy', 'learning', 'training', 'course', 'student', 'tutor'],
+            'Hospitality': ['hotel', 'resort', 'travel', 'booking', 'restaurant', 'cafe', 'food', 'dining', 'hospitality', 'event']
         };
 
         // Score Matches

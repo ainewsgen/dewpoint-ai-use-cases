@@ -318,7 +318,7 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                                 <Server size={14} style={{ color: 'salmon' }} /> <strong style={{ color: 'salmon' }}>Admin Stack View</strong>
                             </div>
                             <div className="chips-grid" style={{ gap: '0.25rem' }}>
-                                {opp.admin_view.tech_stack.map(t => (
+                                {(Array.isArray(opp.admin_view?.tech_stack) ? opp.admin_view.tech_stack : []).map((t: string) => (
                                     <span key={t} style={{ background: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
                                 ))}
                             </div>

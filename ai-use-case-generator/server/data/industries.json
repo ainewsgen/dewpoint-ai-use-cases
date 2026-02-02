@@ -1,0 +1,602 @@
+[
+    {
+        "rank": 1,
+        "industry": "Commercial Banking",
+        "naics": "522110",
+        "category": "Finance & Capital"
+    },
+    {
+        "rank": 2,
+        "industry": "Cloud, Data Hosting & Processing",
+        "naics": "518210",
+        "category": "High-Tech Infrastructure"
+    },
+    {
+        "rank": 3,
+        "industry": "AI & Machine Learning Services",
+        "naics": "541512",
+        "category": "Tech & Innovation"
+    },
+    {
+        "rank": 4,
+        "industry": "Pharmaceutical Preparation Mfg",
+        "naics": "325412",
+        "category": "Healthcare/Pharma"
+    },
+    {
+        "rank": 5,
+        "industry": "General Medical & Surgical Hospitals",
+        "naics": "622110",
+        "category": "Healthcare Services"
+    },
+    {
+        "rank": 6,
+        "industry": "Renewable Energy Generation",
+        "naics": "221114",
+        "category": "Green Infrastructure"
+    },
+    {
+        "rank": 7,
+        "industry": "Semiconductor & Circuit Mfg",
+        "naics": "334413",
+        "category": "Supply Chain/Manufacturing"
+    },
+    {
+        "rank": 8,
+        "industry": "Software Publishers (SaaS/Enterprise)",
+        "naics": "513210",
+        "category": "Tech & Innovation"
+    },
+    {
+        "rank": 9,
+        "industry": "Electric Vehicle (EV) Manufacturing",
+        "naics": "336111",
+        "category": "Advanced Manufacturing"
+    },
+    {
+        "rank": 10,
+        "industry": "Cybersecurity Consulting",
+        "naics": "541519",
+        "category": "Tech Services"
+    },
+    {
+        "rank": 11,
+        "industry": "Management Consulting Services",
+        "naics": "541611",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 12,
+        "industry": "Petroleum Refining",
+        "naics": "324110",
+        "category": "Energy & Commodities"
+    },
+    {
+        "rank": 13,
+        "industry": "E-commerce & Nonstore Retail",
+        "naics": "454110",
+        "category": "Digital Consumer"
+    },
+    {
+        "rank": 14,
+        "industry": "Aerospace & Defense Manufacturing",
+        "naics": "336411",
+        "category": "Government/Defense"
+    },
+    {
+        "rank": 15,
+        "industry": "Biotechnology R&D",
+        "naics": "541714",
+        "category": "Life Sciences"
+    },
+    {
+        "rank": 16,
+        "industry": "Health & Medical Insurance Carriers",
+        "naics": "524114",
+        "category": "Finance/Insurance"
+    },
+    {
+        "rank": 17,
+        "industry": "Wireless Telecommunications (5G/6G)",
+        "naics": "517112",
+        "category": "Infrastructure"
+    },
+    {
+        "rank": 18,
+        "industry": "Logistics & Freight Transportation",
+        "naics": "484121",
+        "category": "Supply Chain"
+    },
+    {
+        "rank": 19,
+        "industry": "Data Analytics & Science Services",
+        "naics": "541511",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 20,
+        "industry": "Warehousing & Storage",
+        "naics": "493110",
+        "category": "Supply Chain"
+    },
+    {
+        "rank": 21,
+        "industry": "Fintech & Digital Payment Services",
+        "naics": "522320",
+        "category": "Finance & Capital"
+    },
+    {
+        "rank": 22,
+        "industry": "Home Healthcare Services",
+        "naics": "621610",
+        "category": "Healthcare Services"
+    },
+    {
+        "rank": 23,
+        "industry": "Medical Device Manufacturing",
+        "naics": "339112",
+        "category": "Healthcare/MedTech"
+    },
+    {
+        "rank": 24,
+        "industry": "Robotics & Automation Mfg",
+        "naics": "333999",
+        "category": "Advanced Manufacturing"
+    },
+    {
+        "rank": 25,
+        "industry": "Commercial Building Construction",
+        "naics": "236220",
+        "category": "Infrastructure"
+    },
+    {
+        "rank": 26,
+        "industry": "Engineering Services",
+        "naics": "541330",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 27,
+        "industry": "Smart Grid & Power Line Construction",
+        "naics": "237130",
+        "category": "Green Infrastructure"
+    },
+    {
+        "rank": 28,
+        "industry": "Drug & Cosmetic Wholesaling",
+        "naics": "424210",
+        "category": "Supply Chain"
+    },
+    {
+        "rank": 29,
+        "industry": "Natural Gas Extraction",
+        "naics": "211130",
+        "category": "Energy & Commodities"
+    },
+    {
+        "rank": 30,
+        "industry": "Advertising & AdTech Agencies",
+        "naics": "541810",
+        "category": "Marketing Services"
+    },
+    {
+        "rank": 31,
+        "industry": "Automotive Parts Manufacturing",
+        "naics": "336390",
+        "category": "Manufacturing"
+    },
+    {
+        "rank": 32,
+        "industry": "Computer Systems Design",
+        "naics": "541512",
+        "category": "Tech Services"
+    },
+    {
+        "rank": 33,
+        "industry": "Autonomous Vehicle Software/Mfg",
+        "naics": "336111",
+        "category": "Tech & Innovation"
+    },
+    {
+        "rank": 34,
+        "industry": "HVAC Equipment Manufacturing",
+        "naics": "333415",
+        "category": "Industrial"
+    },
+    {
+        "rank": 35,
+        "industry": "Legal Services (Corporate/IP)",
+        "naics": "541110",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 36,
+        "industry": "Poultry & Egg Production",
+        "naics": "112310",
+        "category": "Food & Agriculture"
+    },
+    {
+        "rank": 37,
+        "industry": "Educational Technology (EdTech)",
+        "naics": "611430",
+        "category": "Tech & Education"
+    },
+    {
+        "rank": 38,
+        "industry": "Space Research & Satellite Tech",
+        "naics": "336414",
+        "category": "Aerospace"
+    },
+    {
+        "rank": 39,
+        "industry": "Specialty Chemical Manufacturing",
+        "naics": "325199",
+        "category": "Chemicals"
+    },
+    {
+        "rank": 40,
+        "industry": "Direct-to-Consumer (DTC) Brands",
+        "naics": "454111",
+        "category": "Digital Consumer"
+    },
+    {
+        "rank": 41,
+        "industry": "Metal Fabrication Services",
+        "naics": "332312",
+        "category": "Industrial"
+    },
+    {
+        "rank": 42,
+        "industry": "Mental Health & Wellness Centers",
+        "naics": "621420",
+        "category": "Healthcare Services"
+    },
+    {
+        "rank": 43,
+        "industry": "Ship Building & Repairing",
+        "naics": "336611",
+        "category": "Industrial/Defense"
+    },
+    {
+        "rank": 44,
+        "industry": "Human Resources & PEO Services",
+        "naics": "561330",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 45,
+        "industry": "Agricultural Tech (AgTech)",
+        "naics": "115112",
+        "category": "Food & Agriculture"
+    },
+    {
+        "rank": 46,
+        "industry": "Food & Beverage Manufacturing",
+        "naics": "311999",
+        "category": "Food & Agriculture"
+    },
+    {
+        "rank": 47,
+        "industry": "Investment Banking & Securities",
+        "naics": "523110",
+        "category": "Finance & Capital"
+    },
+    {
+        "rank": 48,
+        "industry": "Water & Sewer Line Construction",
+        "naics": "237110",
+        "category": "Infrastructure"
+    },
+    {
+        "rank": 49,
+        "industry": "Clean-Tech Upcycling & Waste",
+        "naics": "562920",
+        "category": "Environmental"
+    },
+    {
+        "rank": 50,
+        "industry": "Custom Computer Programming",
+        "naics": "541511",
+        "category": "Tech Services"
+    },
+    {
+        "rank": 51,
+        "industry": "Digital Media & Streaming Services",
+        "naics": "516210",
+        "category": "Media/Content"
+    },
+    {
+        "rank": 52,
+        "industry": "Property & Casualty Insurance",
+        "naics": "524126",
+        "category": "Finance/Insurance"
+    },
+    {
+        "rank": 53,
+        "industry": "Plastics & Rubber Product Mfg",
+        "naics": "326199",
+        "category": "Manufacturing"
+    },
+    {
+        "rank": 54,
+        "industry": "Offices of Certified Public Accountants",
+        "naics": "541211",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 55,
+        "industry": "Industrial Machinery Rental",
+        "naics": "532412",
+        "category": "Industrial"
+    },
+    {
+        "rank": 56,
+        "industry": "Veterinary Services",
+        "naics": "541940",
+        "category": "Consumer Services"
+    },
+    {
+        "rank": 57,
+        "industry": "Corporate Security & Risk Mgmt",
+        "naics": "561612",
+        "category": "Business Services"
+    },
+    {
+        "rank": 58,
+        "industry": "Staffing & Recruiting Agencies",
+        "naics": "561311",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 59,
+        "industry": "Environmental Consulting Services",
+        "naics": "541620",
+        "category": "Environmental"
+    },
+    {
+        "rank": 60,
+        "industry": "Battery & Energy Storage Mfg",
+        "naics": "335911",
+        "category": "Green Infrastructure"
+    },
+    {
+        "rank": 61,
+        "industry": "Architecture Services",
+        "naics": "541310",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 62,
+        "industry": "Courier & Express Delivery Services",
+        "naics": "492110",
+        "category": "Supply Chain"
+    },
+    {
+        "rank": 63,
+        "industry": "Furniture Manufacturing",
+        "naics": "337122",
+        "category": "Consumer Goods"
+    },
+    {
+        "rank": 64,
+        "industry": "Electronic Equipment Repair",
+        "naics": "811211",
+        "category": "Tech Services"
+    },
+    {
+        "rank": 65,
+        "industry": "Pet Food Manufacturing",
+        "naics": "311111",
+        "category": "Consumer Goods"
+    },
+    {
+        "rank": 66,
+        "industry": "Specialty Trade Contractors",
+        "naics": "238990",
+        "category": "Construction"
+    },
+    {
+        "rank": 67,
+        "industry": "Marketing Research & Polling",
+        "naics": "541910",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 68,
+        "industry": "Iron & Steel Mills",
+        "naics": "331110",
+        "category": "Industrial"
+    },
+    {
+        "rank": 69,
+        "industry": "Printing & Related Support",
+        "naics": "323111",
+        "category": "Business Services"
+    },
+    {
+        "rank": 70,
+        "industry": "Nonprofit Organization Mgmt",
+        "naics": "813319",
+        "category": "Social Services"
+    },
+    {
+        "rank": 71,
+        "industry": "Diagnostic & Medical Laboratories",
+        "naics": "621511",
+        "category": "Healthcare Services"
+    },
+    {
+        "rank": 72,
+        "industry": "Paper & Pulp Manufacturing",
+        "naics": "322121",
+        "category": "Manufacturing"
+    },
+    {
+        "rank": 73,
+        "industry": "Commercial Real Estate Brokerage",
+        "naics": "531210",
+        "category": "Real Estate"
+    },
+    {
+        "rank": 74,
+        "industry": "Managed Print & Document Services",
+        "naics": "561410",
+        "category": "Business Services"
+    },
+    {
+        "rank": 75,
+        "industry": "Cosmetic & Beauty Supply Mfg",
+        "naics": "325620",
+        "category": "Consumer Goods"
+    },
+    {
+        "rank": 76,
+        "industry": "Heavy Machinery Manufacturing",
+        "naics": "333120",
+        "category": "Industrial"
+    },
+    {
+        "rank": 77,
+        "industry": "Facilities Support Services",
+        "naics": "561210",
+        "category": "Business Services"
+    },
+    {
+        "rank": 78,
+        "industry": "Wholesale Electronic Markets",
+        "naics": "425110",
+        "category": "Supply Chain"
+    },
+    {
+        "rank": 79,
+        "industry": "Oil & Gas Field Services",
+        "naics": "213112",
+        "category": "Energy & Commodities"
+    },
+    {
+        "rank": 80,
+        "industry": "Testing & Calibration Labs",
+        "naics": "541380",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 81,
+        "industry": "Industrial Design Services",
+        "naics": "541420",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 82,
+        "industry": "Translation & Interpretation",
+        "naics": "541930",
+        "category": "Business Services"
+    },
+    {
+        "rank": 83,
+        "industry": "Fitness & Recreational Centers",
+        "naics": "713940",
+        "category": "Consumer Services"
+    },
+    {
+        "rank": 84,
+        "industry": "Scientific R&D Services (Physical)",
+        "naics": "541715",
+        "category": "Life Sciences"
+    },
+    {
+        "rank": 85,
+        "industry": "Textile Mills (Smart Fabrics)",
+        "naics": "313210",
+        "category": "Manufacturing"
+    },
+    {
+        "rank": 86,
+        "industry": "Hotels & Motels",
+        "naics": "721110",
+        "category": "Hospitality"
+    },
+    {
+        "rank": 87,
+        "industry": "Continuing Care Retirement Comm.",
+        "naics": "623311",
+        "category": "Healthcare Services"
+    },
+    {
+        "rank": 88,
+        "industry": "Electronic Connector Mfg",
+        "naics": "334417",
+        "category": "Manufacturing"
+    },
+    {
+        "rank": 89,
+        "industry": "Packaging & Labeling Services",
+        "naics": "561910",
+        "category": "Business Services"
+    },
+    {
+        "rank": 90,
+        "industry": "Direct Mail Advertising",
+        "naics": "541860",
+        "category": "Marketing Services"
+    },
+    {
+        "rank": 91,
+        "industry": "Janitorial Services (Commercial)",
+        "naics": "561720",
+        "category": "Business Services"
+    },
+    {
+        "rank": 92,
+        "industry": "Credit Bureaus & Rating Agencies",
+        "naics": "561450",
+        "category": "Finance & Capital"
+    },
+    {
+        "rank": 93,
+        "industry": "Book Publishing",
+        "naics": "513130",
+        "category": "Media/Content"
+    },
+    {
+        "rank": 94,
+        "industry": "Public Relations Agencies",
+        "naics": "541820",
+        "category": "Marketing Services"
+    },
+    {
+        "rank": 95,
+        "industry": "Search Engine & Internet Portals",
+        "naics": "519290",
+        "category": "Media/Content"
+    },
+    {
+        "rank": 96,
+        "industry": "Landscape Architectural Services",
+        "naics": "541320",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 97,
+        "industry": "Truck Trailer Manufacturing",
+        "naics": "336212",
+        "category": "Manufacturing"
+    },
+    {
+        "rank": 98,
+        "industry": "All Other Professional Services",
+        "naics": "541990",
+        "category": "Professional Services"
+    },
+    {
+        "rank": 99,
+        "industry": "Drycleaning & Laundry Services",
+        "naics": "812320",
+        "category": "Consumer Services"
+    },
+    {
+        "rank": 100,
+        "industry": "Apparel Manufacturing",
+        "naics": "315220",
+        "category": "Consumer Goods"
+    }
+]

@@ -15,6 +15,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/db/migrate-cli.ts",
     "db:reset": "tsx server/scripts/reset-db.ts",
+    "seed:icps": "tsx server/scripts/seed-icps.ts",
     "preview": "vite preview"
   },
   "dependencies": {

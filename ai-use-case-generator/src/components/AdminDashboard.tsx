@@ -21,6 +21,7 @@ interface Integration {
     apiKey?: string; // Only present if we handle it carefully, mostly for checking existence
     enabled: boolean;
     status?: 'active' | 'error' | 'testing' | 'success';
+    priority?: number; // 0=Unassigned, 1=Primary, 2=Secondary
     metadata?: Record<string, any>;
 }
 
@@ -1732,6 +1733,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     const [baseUrl, setBaseUrl] = useState(integration?.baseUrl || '');
     const [apiKey, setApiKey] = useState('');
     const [status, setStatus] = useState(integration?.enabled ?? true);
+    const [priority, setPriority] = useState(integration?.priority || 0);
 
     // Metadata fields
     const metadata = (integration?.metadata as any) || {};
@@ -1748,6 +1750,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
             baseUrl,
             apiKey: apiKey || undefined,
             enabled: status,
+            priority,
             metadata: {
                 ...metadata,
                 provider,
@@ -1835,6 +1838,19 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             >
                                 <option value="api_key">API Key</option>
                                 <option value="oauth">OAuth 2.0</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Failover Priority</label>
+                            <select
+                                value={priority}
+                                onChange={e => setPriority(Number(e.target.value))}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
+                            >
+                                <option value={0}>No Priority (Pool)</option>
+                                <option value={1}>Primary (1st)</option>
+                                <option value={2}>Secondary (Backup)</option>
+                                <option value={9}>Last Resort</option>
                             </select>
                         </div>
                         <div>

@@ -8,6 +8,7 @@ import { UsageService } from '../services/usage';
 import { GeminiService } from '../services/gemini'; // Static import
 import { AuthRequest, requireAuth } from '../middleware/auth';
 import { buildIcpContext } from '../lib/prompts';
+import { SystemCapabilityService } from '../services/system';
 
 
 const router = express.Router();
@@ -23,24 +24,6 @@ router.post('/generate', async (req, res) => {
         const authReq = req as AuthRequest;
         const userId = authReq.user?.id || null; // null for anonymous users
 
-        // Check for ANY active AI integration (Global Scope)
-        const integrationsList = await db.select().from(integrations)
-            .where(eq(integrations.enabled, true));
-
-        // Find Enabled Integration with keys
-        // Priority: Metadata 'provider' set -> First found
-        const activeInt = integrationsList.find(i => i.enabled && (i.apiKey || i.apiSecret));
-
-        if (!activeInt || (!activeInt.apiKey && !activeInt.apiSecret)) {
-            console.warn("No Active AI Integration found.");
-            return res.status(503).json({
-                error: 'No active AI Provider found. Configure OpenAI or Gemini in Admin > Integrations.'
-            });
-        }
-
-        const apiKey = activeInt?.apiKey
-            ? decrypt(activeInt.apiKey)
-            : process.env.OPENAI_API_KEY!;
 
         if (!companyData || !companyData.painPoint) {
             return res.status(400).json({ error: 'Missing required company data (painPoint is required)' });
@@ -59,8 +42,6 @@ router.post('/generate', async (req, res) => {
                     eq(industryIcps.icpType, targetType)
                 ))
                 .limit(1);
-
-            // ... inside route ...
 
             if (icpMatch.length > 0) {
                 const icp = icpMatch[0];
@@ -112,104 +93,147 @@ CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "do
             systemPrompt = systemPrompt.replace(new RegExp(key, 'g'), value);
         });
 
-        // 2. Budget Check & Call OpenAI
+        // 2. Integration Selection & Failover Loop
+        // Fetch all enabled integrations, sorted by priority (1 = Primary, 2 = Backup, 0 = Last)
+        // We filter out those without keys.
+        const integrationsList = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true))
+            .orderBy(integrations.priority); // Ascending: 0, 1, 2... 
+        // Actually we want 1 to be first. 0 default usually means unprioritized.
+        // Let's sort manually to handle 0 as "lowest"? 
+        // Or just assume user sets 1 and 2. 
+        // If we use standard sort: 1, 2, 3... 0 (if 0 is default).
+        // Wait, SQL order by: 0, 1, 2.
+        // So default (0) comes FIRST. That might be wrong if 1 is "Primary".
+        // Let's handle sorting in JS to be safe: 1, 2, ..., then 0.
+
+        const sortedIntegrations = integrationsList
+            .filter(i => (i.apiKey || i.apiSecret))
+            .sort((a, b) => {
+                const pA = a.priority || 999; // Treat 0 or null as low priority (high number)
+                const pB = b.priority || 999;
+                const valA = pA === 0 ? 999 : pA;
+                const valB = pB === 0 ? 999 : pB;
+                return valA - valB;
+            });
+
+        // Loop through integrations
+        let successResult = null;
+        let usedModelId = '';
+        let usedProvider = '';
+
+        // Check Daily Budget ONCE before trying loop (Approximate)
         try {
-            // Check Daily Budget
             await UsageService.checkBudgetExceeded();
+        } catch (e: any) {
+            console.warn("Budget Limit Hit Pre-Check:", e.message);
+            // Budget exceeded -> Use System Fallback immediately
+            const fallback = SystemCapabilityService.generateFallback(companyData.industry, companyData.role);
+            return res.json({ blueprints: fallback });
+        }
 
-            // Determine Provider & Model
-            const metadata = activeInt.metadata as any || {};
-            const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
-            const modelId = metadata.model; // e.g. 'gemini-1.5-pro' or 'gpt-4-turbo'
+        for (const activeInt of sortedIntegrations) {
+            try {
+                const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
+                if (!apiKey && !process.env.OPENAI_API_KEY) continue; // Skip if no key available
 
-            const aiParams = {
-                systemPrompt,
-                userContext: JSON.stringify(companyData),
-                model: modelId, // OpenAIService defaults to gpt-4o if undefined, GeminiService defaults to 1.5-pro
-                apiKey
-            };
+                const realKey = apiKey || process.env.OPENAI_API_KEY!;
 
-            let result;
-            if (provider === 'gemini') {
-                result = await GeminiService.generateJSON(aiParams);
-            } else {
-                result = await OpenAIService.generateJSON(aiParams);
-            }
+                const metadata = activeInt.metadata as any || {};
+                const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
+                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-4o');
 
-            // Log Usage (Async, non-blocking)
-            // Note: OpenAI API doesn't always return token counts in the streamlined 'json_object' mode unless requested.
-            // For now, we'll estimate or if OpenAIService returns full response object we use that.
-            // Since OpenAIService returns just the parsed content, we'll estimate based on lengths.
-            // Accurate estimation: 1 token ~= 4 chars
-            const promptTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(JSON.stringify(companyData).length / 4);
-            const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
+                console.log(`[Failover] Trying Priority ${activeInt.priority || 0} - ${activeInt.name} (${provider}:${modelId})...`);
 
-            // Log usage for all requests (authenticated and anonymous)
-            // Use userId if available, otherwise use null for anonymous tracking
-            const userIdForLogging = userId || null;
-            const shadowId = (req as any).shadowId;
-            UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, 'gpt-4o', shadowId).catch(err => console.error("Usage Log Error:", err));
+                const aiParams = {
+                    systemPrompt,
+                    userContext: JSON.stringify(companyData),
+                    model: modelId,
+                    apiKey: realKey
+                };
 
-            // 3. Return Blueprints with Metadata
-            const finalBlueprints = Array.isArray(result.blueprints || result.opportunities)
-                ? (result.blueprints || result.opportunities)
-                : (Array.isArray(result) ? result : []);
-
-            const enrichedBlueprints = finalBlueprints.map((b: any) => {
-                // Heuristic: If AI returns flat keys, map them to our Schema
-                // Check if it already has the structure
-                if (b.public_view && b.admin_view) {
-                    return {
-                        ...b,
-                        industry: b.industry || companyData.industry || 'General',
-                        generation_metadata: {
-                            source: 'AI',
-                            model: modelId,
-                            timestamp: new Date().toISOString()
-                        }
-                    };
+                let result;
+                if (provider === 'gemini') {
+                    result = await GeminiService.generateJSON(aiParams);
+                } else {
+                    result = await OpenAIService.generateJSON(aiParams);
                 }
 
-                // Map Flat Keys to Nested Schema
+                // If we get here, success!
+                successResult = result;
+                usedModelId = modelId;
+                usedProvider = provider;
+
+                // Log Usage
+                const promptTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(JSON.stringify(companyData).length / 4);
+                const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
+                const userIdForLogging = (req as AuthRequest).user?.id || null;
+                const shadowId = (req as any).shadowId;
+                UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, usedModelId, shadowId).catch(err => console.error("Usage Log Error:", err));
+
+                break; // Exit loop on success
+            } catch (err: any) {
+                console.warn(`[Failover] Integration ${activeInt.name} Failed:`, err.message);
+                // Continue to next integration
+            }
+        }
+
+        // 3. Fallback if All Integrations Fail
+        if (!successResult) {
+            console.warn("[Failover] All AI Integrations failed. Switching to SYSTEM FALLBACK.");
+            const fallback = SystemCapabilityService.generateFallback(companyData.industry, companyData.role);
+            return res.json({ blueprints: fallback });
+        }
+
+        // 4. Return Blueprints with Metadata (AI Success)
+        const finalBlueprints = Array.isArray(successResult.blueprints || successResult.opportunities)
+            ? (successResult.blueprints || successResult.opportunities)
+            : (Array.isArray(successResult) ? successResult : []);
+
+        const enrichedBlueprints = finalBlueprints.map((b: any) => {
+            // Heuristic: If AI returns flat keys, map them to our Schema
+            // Check if it already has the structure
+            if (b.public_view && b.admin_view) {
                 return {
-                    title: b.Title || b.title || "Untitled Blueprint",
-                    department: b.Department || b.department || "General",
-                    industry: b.Industry || b.industry || companyData.industry || "General",
-                    public_view: {
-                        problem: b.Problem || b.problem || "No problem defined.",
-                        solution_narrative: b['Solution Narrative'] || b.solution_narrative || b.Solution || "No solution defined.",
-                        value_proposition: b['Value Proposition'] || b.value_proposition || "No value prop defined.",
-                        roi_estimate: b['ROI Estimate'] || b.roi_estimate || b.ROI || "N/A",
-                        detailed_explanation: b['Deep Dive'] || b.deep_dive || b.DeepDive || "",
-                        example_scenario: b['Example Scenario'] || b.example_scenario || "",
-                        walkthrough_steps: b['Walkthrough Steps'] || b.walkthrough_steps || []
-                    },
-                    admin_view: {
-                        tech_stack: b['Tech Stack Details'] || b.tech_stack || [],
-                        implementation_difficulty: (b.Difficulty || b.difficulty || "Med") as "High" | "Med" | "Low",
-                        workflow_steps: typeof b.Walkthrough === 'string' ? b.Walkthrough : (b['Workflow Steps'] || ""),
-                        upsell_opportunity: b.Upsell || b['Upsell Opportunity'] || b.upsell_opportunity || "Consultation"
-                    },
+                    ...b,
+                    industry: b.industry || companyData.industry || 'General',
                     generation_metadata: {
                         source: 'AI',
-                        model: modelId,
+                        model: usedModelId,
                         timestamp: new Date().toISOString()
                     }
                 };
-            });
-
-            res.json({ blueprints: enrichedBlueprints });
-        } catch (err: any) {
-            if (err.message && err.message.includes('budget exceeded')) {
-                console.warn("Budget Limit Hit:", err.message);
-                return res.status(429).json({ error: 'Daily AI Budget Exceeded. Falling back to static templates.' });
             }
-            // Propagate specific API errors (like 400 Bad Request from OpenAI)
-            console.error('AI Provider Error:', err);
-            const status = err.status || 500;
-            const message = err.message || 'Unknown AI Error';
-            return res.status(status).json({ error: `AI Generation Failed: ${message}`, details: err.error || err });
-        }
+
+            // Map Flat Keys to Nested Schema
+            return {
+                title: b.Title || b.title || "Untitled Blueprint",
+                department: b.Department || b.department || "General",
+                industry: b.Industry || b.industry || companyData.industry || "General",
+                public_view: {
+                    problem: b.Problem || b.problem || "No problem defined.",
+                    solution_narrative: b['Solution Narrative'] || b.solution_narrative || b.Solution || "No solution defined.",
+                    value_proposition: b['Value Proposition'] || b.value_proposition || "No value prop defined.",
+                    roi_estimate: b['ROI Estimate'] || b.roi_estimate || b.ROI || "N/A",
+                    detailed_explanation: b['Deep Dive'] || b.deep_dive || b.DeepDive || "",
+                    example_scenario: b['Example Scenario'] || b.example_scenario || "",
+                    walkthrough_steps: b['Walkthrough Steps'] || b.walkthrough_steps || []
+                },
+                admin_view: {
+                    tech_stack: b['Tech Stack Details'] || b.tech_stack || [],
+                    implementation_difficulty: (b.Difficulty || b.difficulty || "Med") as "High" | "Med" | "Low",
+                    workflow_steps: typeof b.Walkthrough === 'string' ? b.Walkthrough : (b['Workflow Steps'] || ""),
+                    upsell_opportunity: b.Upsell || b['Upsell Opportunity'] || b.upsell_opportunity || "Consultation"
+                },
+                generation_metadata: {
+                    source: 'AI',
+                    model: usedModelId,
+                    timestamp: new Date().toISOString()
+                }
+            };
+        });
+
+        res.json({ blueprints: enrichedBlueprints });
 
     } catch (error: any) {
         console.error('Generation Handler Error:', error);

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db';
 import { leads, companies, users } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, or, isNull } from 'drizzle-orm';
 
 const router = Router();
 
@@ -308,9 +308,12 @@ router.get('/admin/leads', async (req, res) => {
             company: companies,
         })
             .from(leads)
-            .innerJoin(users, eq(leads.userId, users.id))
+            .leftJoin(users, eq(leads.userId, users.id)) // Allow null users
             .leftJoin(companies, eq(leads.companyId, companies.id))
-            .where(eq(users.isActive, true));
+            .where(or(
+                eq(users.isActive, true),
+                isNull(leads.userId)
+            ));
 
         // Format for frontend (optional, or do it there);
         res.json({ leads: allLeads });

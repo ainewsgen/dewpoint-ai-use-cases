@@ -1,7 +1,7 @@
 import express from 'express';
 import { db } from '../db';
 import { integrations, industryIcps } from '../db/schema';
-import { eq, ilike } from 'drizzle-orm';
+import { eq, ilike, and } from 'drizzle-orm';
 import { decrypt } from '../utils/encryption';
 import { OpenAIService } from '../services/openai';
 import { UsageService } from '../services/usage';
@@ -47,25 +47,37 @@ router.post('/generate', async (req, res) => {
 
         // 0. Industry ICP Lookup & Context Injection
         let icpContext = "";
-        let strategyDirective = "";
 
         if (companyData.industry) {
+            // Default to 'dewpoint' (Business Owner) if not specified
+            const targetType = companyData.icpType || 'dewpoint';
+
             const icpMatch = await db.select().from(industryIcps)
-                .where(ilike(industryIcps.industry, companyData.industry))
+                .where(and(
+                    ilike(industryIcps.industry, companyData.industry),
+                    eq(industryIcps.icpType, targetType)
+                ))
                 .limit(1);
 
             if (icpMatch.length > 0) {
                 const icp = icpMatch[0];
-                console.log(`[Generate] Applied Industry ICP: ${icp.industry}`);
+                console.log(`[Generate] Applied ICP: ${icp.industry} (${targetType})`);
 
                 icpContext = `\n\n*** INDUSTRY INTELLIGENCE ACTIVE ***
 Target Persona: ${icp.icpPersona}
+Perspective: ${targetType === 'dewpoint' ? 'Business Owner (Operational Efficiency)' : 'End Customer (Growth/Sales)'}
 Strategic Focus: ${icp.promptInstructions}
+Primary Pain Category: ${icp.primaryPainCategory || "General"}
+GTM Motion: ${icp.gtmPrimary || "Standard"}
+DewPoint Scores (1-5): Profit=${icp.profitScore || "N/A"}, Speed=${icp.speedToCloseScore || "N/A"}, LTV=${icp.ltvScore || "N/A"}
+
 Economic Drivers: ${icp.economicDrivers || "N/A"}
 Negative Constraints (Avoid): ${icp.negativeIcps || "None"}
+
+Discovery Guidance: ${icp.discoveryGuidance || "N/A"}
 `;
-                // We could also pass discoveryGuidance if the AI was doing lead finding, but here it's solution design.
-                // We'll keep it focused on the SOLUTION design.
+            } else {
+                console.log(`[Generate] No specific ICP found for ${companyData.industry} (${targetType}), using generic fallback.`);
             }
         }
 

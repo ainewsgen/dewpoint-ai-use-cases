@@ -56,7 +56,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             // Shake effect placeholder
             return;
         }
-        onComplete({ painPoint, url, industry, role, size, stack, description, context: scrapedContext });
+        onComplete({
+            painPoint, url, industry, role, size, stack, description,
+            context: scrapedContext,
+            icpType: (scrapedContext as any)?.icpType || 'dewpoint'
+        });
     };
 
     const toggleTech = (tech: string) => {
@@ -305,6 +309,25 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             />
                             <Briefcase className="input-icon" size={20} />
                         </div>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Perspective</label>
+                        <div className="input-group">
+                            <select
+                                value={(scrapedContext as any)?.icpType || 'dewpoint'}
+                                onChange={e => {
+                                    setScrapedContext({ ...scrapedContext, icpType: e.target.value });
+                                }}
+                                style={{ width: '100%', background: 'transparent', border: 'none', color: 'white', outline: 'none' }}
+                            >
+                                <option value="dewpoint">Business Owner (Operational Efficiency)</option>
+                                <option value="internal">End Customer (Sales & Growth)</option>
+                            </select>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            Are you looking to optimize operations (Owner) or sell more to your customers (End Customer)?
+                        </p>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>

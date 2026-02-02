@@ -3,6 +3,7 @@ import { TrackingService } from './tracking';
 export interface CompanyData {
     url: string;
     industry?: string;
+    icpType?: 'dewpoint' | 'internal'; // dewpoint = Business Owner, internal = End Customer
     naicsCode?: string;
     role: string;
     size: string;

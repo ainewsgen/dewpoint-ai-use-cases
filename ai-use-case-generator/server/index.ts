@@ -66,6 +66,7 @@ app.get('/ping', (req, res) => {
 
 import icpsRoutes from './routes/icps';
 import libraryRoutes from './routes/library';
+import syncLibraryRoutes from './routes/sync-library';
 
 // API Routes
 app.use('/api/auth', authEnhancedRoutes); // Enhanced auth with JWT
@@ -79,6 +80,7 @@ app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 app.use('/api', icpsRoutes); // Industry ICPs
 app.use('/api', libraryRoutes); // Use Case Library
+app.use('/api', syncLibraryRoutes); // Sync Logic
 
 
 

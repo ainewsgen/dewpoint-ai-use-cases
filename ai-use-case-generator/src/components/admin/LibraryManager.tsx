@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash, Edit, Save, X, Search, Tags } from 'lucide-react';
+import { Plus, Trash, Edit, Save, X, Search, Tags, RefreshCw, Zap } from 'lucide-react';
 
 interface UseCase {
     id: number;
@@ -14,6 +14,7 @@ interface UseCase {
 export function LibraryManager() {
     const [useCases, setUseCases] = useState<UseCase[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSyncing, setIsSyncing] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentCase, setCurrentCase] = useState<Partial<UseCase>>({});
     const [searchTerm, setSearchTerm] = useState('');
@@ -35,6 +36,25 @@ export function LibraryManager() {
             console.error("Failed to fetch library", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleSync = async () => {
+        if (!confirm("This will scan all generated leads and import new use cases into the library. Continue?")) return;
+        setIsSyncing(true);
+        try {
+            const res = await fetch('/api/admin/library/sync', { method: 'POST' });
+            if (res.ok) {
+                const data = await res.json();
+                alert(data.message || "Sync Complete!");
+                fetchUseCases();
+            } else {
+                alert("Sync failed (Server Error)");
+            }
+        } catch (e) {
+            alert("Sync failed (Network Error)");
+        } finally {
+            setIsSyncing(false);
         }
     };
 
@@ -99,13 +119,24 @@ export function LibraryManager() {
                     <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Use Case Library</h3>
                     <p style={{ color: 'var(--text-muted)' }}>Manage static examples for the public library.</p>
                 </div>
-                <button
-                    onClick={() => openEditor()}
-                    className="btn-primary"
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                    <Plus size={18} /> Add Use Case
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="btn-secondary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <Zap size={16} className={isSyncing ? "spin" : ""} />
+                        {isSyncing ? "Syncing..." : "Sync from Leads"}
+                    </button>
+                    <button
+                        onClick={() => openEditor()}
+                        className="btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <Plus size={18} /> Add Use Case
+                    </button>
+                </div>
             </div>
 
             <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

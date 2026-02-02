@@ -290,7 +290,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.5rem' }}>
                                     <span style={{
                                         fontWeight: 800, fontSize: '1.25rem',
-                                        color: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType ? 'hsl(var(--accent-gold))' : 'var(--text-main)'
+                                        // Use accent-primary (Blue) for text even if gold border, or text-main. Gold text is too light.
+                                        color: (scrapedContext as any)?.icpType === 'dewpoint' || !(scrapedContext as any)?.icpType ? 'hsl(var(--accent-primary))' : 'var(--text-main)'
                                     }}>B2B</span>
                                     <Briefcase size={20} style={{ opacity: 0.5 }} />
                                 </div>
@@ -320,6 +321,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.5rem' }}>
                                     <span style={{
                                         fontWeight: 800, fontSize: '1.25rem',
+                                        // Blue text on light blue bg is okay (5.7:1), but keep consistent
                                         color: (scrapedContext as any)?.icpType === 'internal' ? 'hsl(var(--accent-primary))' : 'var(--text-main)'
                                     }}>B2C</span>
                                     <Globe size={20} style={{ opacity: 0.5 }} />
@@ -385,10 +387,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                                 padding: '0.75rem 1rem',
                                                 borderRadius: '8px',
                                                 border: size === stateVal ? '1px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
+                                                // Change to SOLID blue background for White text, OR Light BG with Blue Text.
+                                                // Going with Light BG + Dark Text for "Soft" feel but accessible
                                                 background: size === stateVal ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                                color: size === stateVal ? 'white' : 'var(--text-muted)',
+                                                color: size === stateVal ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
                                                 fontSize: '0.9rem',
-                                                fontWeight: size === stateVal ? 600 : 400,
+                                                fontWeight: size === stateVal ? 700 : 400,
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 transition: 'all 0.1s'

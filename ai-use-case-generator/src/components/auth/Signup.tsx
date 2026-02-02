@@ -46,7 +46,7 @@ export const Signup: React.FC<SignupProps> = ({ onClose, onSuccess, switchToLogi
 
                 <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Save Your Roadmap</h2>
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-                    Create a free account to save your generated use cases and unlock the full strategy matrix.
+                    Create a free account to <strong>save your recipes for future reference</strong>, access implementation guides, and unlock the full strategy matrix.
                 </p>
 
                 {error && (

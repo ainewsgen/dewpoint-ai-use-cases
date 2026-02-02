@@ -187,7 +187,7 @@ function App() {
             });
         } else {
             setPendingSave(recipe);
-            setAuthModal('LOGIN');
+            setAuthModal('SIGNUP');
         }
     };
 

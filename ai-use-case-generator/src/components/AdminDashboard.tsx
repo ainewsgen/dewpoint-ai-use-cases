@@ -1019,7 +1019,8 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             key = row.user.email || row.company?.url || 'unknown_user';
                         } else {
                             // Anonymous: Use unique lead ID to prevent grouping
-                            key = `anon_${row.lead.id}`;
+                            // GUARD: Ensure row.lead exists before accessing ID
+                            key = row.lead?.id ? `anon_${row.lead.id}` : `anon_unknown_${Math.random()}`;
                         }
 
                         if (!acc[key]) {

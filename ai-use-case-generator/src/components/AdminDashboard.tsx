@@ -2140,13 +2140,13 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     };
 
     return (
-        <div className="admin-modal-overlay" onClick={onClose} style={{ zIndex: 10010, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)' }}>
+        <div className="admin-modal-overlay" onClick={onClose}>
             <div
                 className="admin-modal-content animate-scale-in"
                 onClick={e => e.stopPropagation()}
-                style={{ maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+                style={{ maxWidth: '600px' }}
             >
-                <div className="admin-modal-header" style={{ flexShrink: 0 }}>
+                <div className="admin-modal-header">
                     <div>
                         <h3>{integration ? 'Edit Integration' : 'Connect New Tool'}</h3>
                         <p style={{ color: 'var(--admin-accent)', fontSize: '0.875rem', fontWeight: 600, marginTop: '0.25rem' }}>
@@ -2162,8 +2162,8 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, minHeight: 0 }}>
-                    <div className="admin-modal-body" style={{ overflowY: 'auto', flex: 1 }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                    <div className="admin-modal-body">
                         <div className="admin-form-divider" data-label="Base Configuration"></div>
                         <div className="admin-form-group">
                             <label htmlFor="int-name" className="admin-label">Integration Name</label>
@@ -2281,7 +2281,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                         </div>
                     </div>
 
-                    <div className="admin-modal-footer" style={{ flexShrink: 0, position: 'relative', background: 'white', borderTop: '1px solid #e2e8f0', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', zIndex: 10 }}>
+                    <div className="admin-modal-footer">
                         {integration && (
                             <button
                                 type="button"

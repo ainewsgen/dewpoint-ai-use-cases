@@ -3,15 +3,16 @@ import fs from 'fs';
 
 // Global Error Handlers (Must be first)
 process.on('uncaughtException', (err) => {
-    console.error('CRITICAL: Uncaught Exception:', err);
+    logger.error('CRITICAL: Uncaught Exception', err);
 });
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('CRITICAL: Unhandled Rejection:', reason);
+    logger.error('CRITICAL: Unhandled Rejection', reason);
 });
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import { logger } from './utils/logger';
 import { requireAuth, requireAdmin, AuthRequest } from './middleware/auth'; // Import Auth Middleware
 import authRoutes from './routes/auth';
 import authEnhancedRoutes from './routes/auth-enhanced';
@@ -22,7 +23,6 @@ import integrationsRoutes from './routes/integrations';
 import scanRoutes from './routes/scan';
 import generateRoutes from './routes/generate';
 import usageRoutes from './routes/usage';
-import debugUsersRoutes from './routes/debug-users';
 import { runMigrations } from './db/migrate';
 import { sql } from 'drizzle-orm';
 import { db } from './db';
@@ -44,9 +44,17 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 
-// Debug Routes
-app.use('/api/debug', debugUsersRoutes);
 
+
+
+// Secure Headers (Audit Remediation)
+app.use((req, res, next) => {
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"); // Adjusted for React/Vite
+    next();
+});
 
 // Custom Middleware
 import { shadowTracking } from './middleware/shadow';
@@ -83,7 +91,6 @@ app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 app.use('/api/admin/icps', adminIcpsRouter); // Register ICP Manager
 app.use('/api', icpsRoutes); // Industry ICPs
 app.use('/api', libraryRoutes); // Use Case Library
-app.use('/api', libraryRoutes); // Use Case Library
 app.use('/api', syncLibraryRoutes); // Sync Logic
 
 import systemPromptRoutes from './routes/system-prompt';
@@ -96,7 +103,7 @@ app.use('/api/admin', systemPromptRoutes); // Persistent Config
 // EMERGENCY REPAIR ROUTE (Bypassing Router complexities)
 app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res) => {
     try {
-        console.log("Attempting to repair schema (Emergency Route)...");
+        logger.warn("Attempting to repair schema (Emergency Route)...");
         await db.execute(sql`
             CREATE TABLE IF NOT EXISTS api_usage (
                 id SERIAL PRIMARY KEY,
@@ -111,11 +118,12 @@ app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res)
             -- LIBRARY SCHEMA UPDATE (Auto-Fix)
             ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS data JSONB;
             ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
+            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
         `);
-        console.log("Fixed Schema: Created api_usage table and updated library.");
+        logger.info("Fixed Schema: Created api_usage table and updated library.");
         res.json({ success: true, message: "Created api_usage table (Emergency Fix)" });
     } catch (error: any) {
-        console.error("Fix Schema Error:", error);
+        logger.error("Fix Schema Error", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -135,7 +143,7 @@ import { UsageService } from './services/usage';
 app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
     const trace: string[] = [];
     const log = (msg: string) => {
-        console.log(`[DryRun] ${msg}`);
+        logger.info(`[DryRun] ${msg} `);
         trace.push(msg);
     };
 
@@ -143,7 +151,7 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
         log("Starting Dry Run...");
         const authReq = req as AuthRequest;
         const userId = authReq.user?.id || 1;
-        log(`User Context: ID ${userId}`);
+        log(`User Context: ID ${userId} `);
 
         // 1. Dummy Data
         const companyData = {
@@ -160,7 +168,7 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
         const activeInt = integrationsList.find(i => i.enabled && (i.apiKey || i.apiSecret));
 
         if (!activeInt) throw new Error("No active integration found");
-        log(`Step 2: Integration Found (${activeInt.name})`);
+        log(`Step 2: Integration Found(${activeInt.name})`);
 
         const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
         if (!apiKey) throw new Error("API Key missing or invalid");
@@ -194,7 +202,7 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
             await UsageService.logUsage(userId, 50, 50, modelId);
             log("Step 5: DB Write Successful ✅");
         } catch (dbErr: any) {
-            log(`Step 5 FAILED: DB Write Error - ${dbErr.message}`);
+            log(`Step 5 FAILED: DB Write Error - ${dbErr.message} `);
             // Don't throw, we want to return the trace
         }
 
@@ -209,7 +217,7 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
         res.json({ success: true, trace });
 
     } catch (error: any) {
-        log(`FATAL ERROR: ${error.message}`);
+        log(`FATAL ERROR: ${error.message} `);
         res.status(500).json({ success: false, trace, error: error.message });
     }
 });
@@ -241,7 +249,7 @@ const staticPath = process.cwd();
 const distPath = path.join(staticPath, 'dist');
 
 if (fs.existsSync(distPath)) {
-    console.log(`Serving static files from ${distPath}`);
+    logger.info(`Serving static files from ${distPath}`);
     app.use(express.static(distPath));
 
     // Catch-all for SPA
@@ -253,111 +261,17 @@ if (fs.existsSync(distPath)) {
         }
     });
 } else {
-    console.warn(`Static files not found at ${distPath}`);
+    logger.warn(`Static files not found at ${distPath}`);
     app.get('/', (req, res) => res.send('API Server Running (Static files not found)'));
 }
 
 // Start server immediately
 const server = app.listen(Number(PORT), '0.0.0.0', async () => {
-    console.log(`📊 API available at http://0.0.0.0:${PORT}/api`);
+    logger.info(`API Server Started on port ${PORT}`);
 
-    // AUTO-MIGRATE ON START
-    try {
-        await db.execute(sql`
-            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS data JSONB;
-            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
-        `);
-        console.log("✅ Library Schema Auto-Migrated");
-    } catch (e) {
-        console.error("Schema Migration Warning:", e);
-    }
 
-    // Self-healing: Ensure Schema is correct (SQL Injection for migration reliability)
-    // Run this async without blocking, or await if critical. We'll fire-and-forget but log errors.
-    (async () => {
-        try {
-            console.log("🛠️ Checking Database Schema...");
-
-            // 0. Create API Usage Table (Missing in auto-heal)
-            await db.execute(sql`
-                CREATE TABLE IF NOT EXISTS api_usage (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id),
-                    shadow_id TEXT,
-                    model TEXT,
-                    prompt_tokens INTEGER,
-                    completion_tokens INTEGER,
-                    total_cost DECIMAL(10, 6),
-                    timestamp TIMESTAMP DEFAULT NOW()
-                );
-            `);
-
-            // 1. Create Companies Table (Missing in Prod)
-            await db.execute(sql`
-                CREATE TABLE IF NOT EXISTS companies (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id),
-                    url TEXT,
-                    industry TEXT,
-                    naics_code TEXT,
-                    role TEXT,
-                    size TEXT,
-                    pain_point TEXT,
-                    stack JSONB,
-                    created_at TIMESTAMP DEFAULT NOW()
-                );
-            `);
-
-            // FORCE PATCH: Add naics_code if missing (likely culprit for failing inserts)
-            await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT;`);
-            await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS scanner_source TEXT;`);
-            await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS description TEXT;`);
-            await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS stack JSONB;`);
-
-            // 2. Create Use Case Library Table (Was missing)
-            await db.execute(sql`
-                CREATE TABLE IF NOT EXISTS use_case_library (
-                    id SERIAL PRIMARY KEY,
-                    industry TEXT NOT NULL,
-                    title TEXT NOT NULL,
-                    description TEXT NOT NULL,
-                    roi_estimate TEXT,
-                    difficulty TEXT,
-                    tags JSONB,
-                    created_at TIMESTAMP DEFAULT NOW()
-                );
-            `);
-
-            // 2. Fix Leads Table (Schema Mismatch)
-            // Add reference to companies
-            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id);`);
-            // Add recipes (JSONB)
-            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS recipes JSONB DEFAULT '[]'::jsonb;`);
-            // Add shadow_id
-            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS shadow_id TEXT;`);
-            // Add fingerprint
-            await db.execute(sql`ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT;`);
-
-            // Force add 'metadata' column if missing
-            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS metadata JSONB;`);
-
-            // Force add 'name' column (critical fix)
-            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS name TEXT;`);
-
-            // Force add 'provider' column matching schema (was missing in prod DB likely)
-            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS provider TEXT;`);
-
-            // Force add 'priority' column
-            await db.execute(sql`ALTER TABLE integrations ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0;`);
-
-            // Make 'provider' nullable (backward compat)
-            await db.execute(sql`ALTER TABLE integrations ALTER COLUMN provider DROP NOT NULL;`);
-            console.log("✅ Database Schema Verified/Patched.");
-        } catch (err) {
-            console.error("⚠️ Schema Patch Warning:", err);
-        }
-    })();
+    // Self-healing schema checks removed per Audit Remediation (Use migrations instead)
 });
 
 // Run migrations in background
-runMigrations().catch(console.error);
+runMigrations().catch(err => logger.error('Migration failed', err));

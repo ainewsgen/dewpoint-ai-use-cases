@@ -16,6 +16,9 @@ router.get('/library', async (req, res) => {
             query = query.where(ilike(useCaseLibrary.industry, `%${industry}%`)) as any;
         }
 
+        // Only show published use cases in the public library
+        query = query.where(eq(useCaseLibrary.isPublished, true)) as any;
+
         const cases = await query.orderBy(useCaseLibrary.industry);
         res.json({ useCases: cases });
     } catch (error: any) {

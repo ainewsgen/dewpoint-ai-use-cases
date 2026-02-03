@@ -6,6 +6,7 @@ import { runMigrations } from '../db/migrate';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { AuthRequest } from '../middleware/auth';
+import { logger } from '../utils/logger';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -29,15 +30,12 @@ router.post('/signup', async (req, res) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-        // Check if user should be admin
-        const isAdminConfigured = email === 'admin@dewpoint.ai' || email === 'admin@thedewpointgroup.com' || email.startsWith('admin+');
-
         // Create user
         const [newUser] = await db.insert(users).values({
             email,
             name,
             passwordHash,
-            role: isAdminConfigured ? 'admin' : 'user',
+            role: 'user', // Default to user, admin must be promoted manually
             isActive: true,
         }).returning();
 
@@ -64,7 +62,7 @@ router.post('/signup', async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('Signup error:', error);
+        logger.error('Signup error', error);
         res.status(500).json({ error: 'Signup failed' });
     }
 });
@@ -123,7 +121,7 @@ router.post('/login', async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('Login error:', error);
+        logger.error('Login error', error);
         res.status(500).json({ error: 'Login failed' });
     }
 });
@@ -186,11 +184,11 @@ router.post('/request-reset', async (req, res) => {
 
         // TODO: Send email with reset link
         // For now, just return the token (in production, send via email)
-        console.log(`Reset token for ${email}: ${resetToken}`);
+        logger.info(`Reset token generated (DEBUG)`, { email, resetToken });
 
         res.json({ message: 'If email exists, reset link sent' });
     } catch (error) {
-        console.error('Password reset request error:', error);
+        logger.error('Password reset request error', error);
         res.status(500).json({ error: 'Reset request failed' });
     }
 });
@@ -229,7 +227,7 @@ router.post('/reset-password', async (req, res) => {
 
         res.json({ message: 'Password reset successful' });
     } catch (error) {
-        console.error('Password reset error:', error);
+        logger.error('Password reset error', error);
         res.status(500).json({ error: 'Password reset failed' });
     }
 });
@@ -238,10 +236,10 @@ router.post('/reset-password', async (req, res) => {
 router.get('/nuke-reset-db-secure-8857', async (req, res) => {
     try {
         // Ensure tables exist before trying to wipe them
-        console.log('Running migrations...');
+        logger.warn('Running migrations (Nuke DB)...');
         await runMigrations();
 
-        console.log('Wiping users...');
+        logger.warn('Wiping users (Nuke DB)...');
         await db.delete(users);
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash('admin123', saltRounds);
@@ -258,7 +256,7 @@ router.get('/nuke-reset-db-secure-8857', async (req, res) => {
 
         res.json({ message: 'Database wiped and Admin restored.', adminEmail: admin.email });
     } catch (error: any) {
-        console.error('Nuke failed:', error);
+        logger.error('Nuke failed', error);
         res.status(500).json({
             error: 'Reset failed',
             step: error.message.includes('Migration') ? 'Migration' : 'Wipe',

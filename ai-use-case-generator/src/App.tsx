@@ -179,11 +179,10 @@ function App() {
             if (action === 'REMOVED') alert("Removed from Roadmap.");
         });
 
-        // Optional: Nudge for signup if anonymous, but don't block
+        // Prompt for signup if anonymous to ensure data persistence
         if (!user) {
-            // maybe set a flag to show a toast instead of modal?
-            // For now, silent save is better UX than blocking modal.
-            // setAuthModal('SIGNUP'); 
+            setPendingSave(recipe);
+            setAuthModal('SIGNUP');
         }
     };
 

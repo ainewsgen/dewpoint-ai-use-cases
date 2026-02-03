@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+    throw new Error("FATAL: JWT_SECRET environment variable is missing. Authentication cannot function securely.");
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export type AuthRequest = Request & {
     user?: {

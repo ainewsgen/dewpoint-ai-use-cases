@@ -291,7 +291,7 @@ function App() {
                                 // Allow anonymous access but nudge for login
                                 setView('ROADMAP');
                                 if (!user) {
-                                    setAuthModal('LOGIN');
+                                    setAuthModal('SIGNUP');
                                 }
                             }}
                             style={{

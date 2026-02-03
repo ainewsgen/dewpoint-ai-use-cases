@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const API_URL = 'https://dewpoint-strategy-app.onrender.com/api';
+const API_URL = '/api';
 
 interface User {
     id: number;

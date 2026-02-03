@@ -47,7 +47,7 @@ export function LibraryManager() {
     const fetchUseCases = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/library');
+            const res = await fetch('/api/admin/library/all');
             if (res.ok) {
                 const data = await res.json();
                 setUseCases(data.useCases || []);

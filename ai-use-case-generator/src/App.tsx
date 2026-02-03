@@ -60,7 +60,7 @@ function App() {
         if (user?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads/sync`, {
+                await fetch(`/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ function App() {
         if (onboardingData && loggedInUser?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads/sync`, {
+                await fetch(`/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

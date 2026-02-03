@@ -27,6 +27,17 @@ router.get('/library', async (req, res) => {
     }
 });
 
+// Admin: Get All Library Items (Publish status agnostic)
+router.get('/admin/library/all', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const cases = await db.select().from(useCaseLibrary).orderBy(useCaseLibrary.industry);
+        res.json({ useCases: cases });
+    } catch (error: any) {
+        console.error('Get all library items error:', error);
+        res.status(500).json({ error: 'Failed to fetch all library items', details: error.message });
+    }
+});
+
 // Admin: Create Use Case
 router.post('/admin/library', requireAuth, requireAdmin, async (req, res) => {
     try {

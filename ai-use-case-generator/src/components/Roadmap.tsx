@@ -30,7 +30,7 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                 // Logged in: Unlock and sync
                 setIsLocked(false);
                 try {
-                    const res = await fetch(`https://dewpoint-strategy-app.onrender.com/api/roadmap/${user.email}`);
+                    const res = await fetch(`/api/roadmap/${user.email}`);
 
                     if (res.ok) {
                         const data = await res.json();
@@ -80,7 +80,7 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
         if (user?.email) {
             try {
                 const token = localStorage.getItem('dpg_auth_token');
-                await fetch(`https://dewpoint-strategy-app.onrender.com/api/leads/sync`, {
+                await fetch(`/api/leads/sync`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

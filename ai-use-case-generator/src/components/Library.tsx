@@ -87,7 +87,7 @@ interface LibraryProps {
 
 export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
     const [filter, setFilter] = useState('All');
-    const departments = ['All', 'Finance', 'Sales', 'Operations', 'Marketing'];
+    const departments = ['All', 'General', 'Finance', 'Sales', 'Operations', 'Marketing'];
 
     // Save/Load Logic
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
@@ -97,7 +97,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
         // Fetch from Backend
         const fetchLibrary = async () => {
             try {
-                const apiBase = 'https://dewpoint-strategy-app.onrender.com/api';
+                const apiBase = '/api';
 
                 // 1. Fetch Static Library
                 const staticRes = await fetch(`${apiBase}/library`);
@@ -195,7 +195,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
         if (!confirm("Are you sure you want to delete this use case? This cannot be undone.")) return;
         try {
             const token = localStorage.getItem('dpg_auth_token');
-            const res = await fetch(`https://dewpoint-strategy-app.onrender.com/api/admin/library/${id}`, {
+            const res = await fetch(`/api/admin/library/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

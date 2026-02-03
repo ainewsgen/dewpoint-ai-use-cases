@@ -66,6 +66,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     // Blueprint Edit State
     const [editingBlueprint, setEditingBlueprint] = useState<Opportunity | null>(null);
     const [activeUser, setActiveUser] = useState<any | null>(null);
+    const [systemPrompt, setSystemPrompt] = useState<string>(''); // System Prompt State
 
     // Lead Edit State (Mock/Simulation for Leads View)
     const [editingUser, setEditingUser] = useState<string | null>(null); // This is "Lead ID"
@@ -81,6 +82,16 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             fetchUsers();
         } else if (activeTab === 'leads') {
             fetchLeads();
+        } else if (activeTab === 'blueprints') {
+            // Fetch System Prompt
+            fetch('/api/admin/config/system-prompt', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.prompt) setSystemPrompt(data.prompt);
+                })
+                .catch(err => console.error("Failed to load prompt config", err));
         }
     }, [activeTab]);
 
@@ -602,6 +613,20 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             >
                                 <BookOpen size={18} /> Library
                             </button>
+                            <button
+                                onClick={() => setActiveTab('blueprints')}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    background: activeTab === 'blueprints' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                    border: 'none',
+                                    borderBottom: activeTab === 'blueprints' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                    color: activeTab === 'blueprints' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                    cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                }}
+                            >
+                                <Sparkles size={18} /> Config
+                            </button>
                         </nav>
                     </div>
                 </div>
@@ -853,7 +878,20 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>System Prompt Template</label>
                                 <textarea
-                                    defaultValue={`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+                                    value={systemPrompt}
+                                    onChange={(e) => setSystemPrompt(e.target.value)}
+                                    placeholder="Loading system prompt..."
+                                    style={{
+                                        width: '100%', minHeight: '400px',
+                                        background: '#111', color: '#eee',
+                                        border: '1px solid #333', borderRadius: '6px',
+                                        fontFamily: 'monospace', padding: '1rem', lineHeight: '1.5'
+                                    }}
+                                />
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', gap: '1rem' }}>
+                                    <button className="btn-secondary" onClick={() => {
+                                        if (confirm("Reset to default prompt?")) {
+                                            setSystemPrompt(`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
 
 User Profile:
 - Company URL: {{url}}
@@ -878,16 +916,30 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 9.  **Walkthrough Steps**: A chronologically ordered list of 5-7 execution steps.
 10. **Tech Stack Details**: List of specific tools used + their role (e.g., "OpenAI: Reasoning").
 11. **Difficulty**: Implementation effort (Low, Med, High).
-12. **Upsell**: A potential service retainer or expansion opportunity.`}
-                                    style={{
-                                        width: '100%', minHeight: '400px',
-                                        background: '#111', color: '#eee',
-                                        border: '1px solid #333', borderRadius: '6px',
-                                        fontFamily: 'monospace', padding: '1rem', lineHeight: '1.5'
-                                    }}
-                                />
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                    <button className="btn-primary" onClick={() => alert("System Prompt Updated (Configuration Saved)")}>
+12. **Upsell**: A potential service retainer or expansion opportunity.`);
+                                        }
+                                    }}>
+                                        <RefreshCw size={16} /> Reset Default
+                                    </button>
+                                    <button className="btn-primary" onClick={async () => {
+                                        try {
+                                            const res = await fetch('/api/admin/config/system-prompt', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                                },
+                                                body: JSON.stringify({ prompt: systemPrompt })
+                                            });
+                                            if (res.ok) {
+                                                alert("System Prompt Saved Successfully!");
+                                            } else {
+                                                alert("Failed to save prompt");
+                                            }
+                                        } catch (e) {
+                                            alert("Error saving prompt: " + e);
+                                        }
+                                    }}>
                                         <Save size={16} /> Save Configuration
                                     </button>
                                 </div>

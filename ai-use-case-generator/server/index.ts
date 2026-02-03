@@ -80,7 +80,11 @@ app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats
 app.use('/api', icpsRoutes); // Industry ICPs
 app.use('/api', libraryRoutes); // Use Case Library
+app.use('/api', libraryRoutes); // Use Case Library
 app.use('/api', syncLibraryRoutes); // Sync Logic
+
+import systemPromptRoutes from './routes/system-prompt';
+app.use('/api/admin', systemPromptRoutes); // Persistent Config
 
 
 

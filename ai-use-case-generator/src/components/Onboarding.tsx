@@ -537,5 +537,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     </div>
                 </div>
             </div>
-            );
+        </div>
+    );
 }

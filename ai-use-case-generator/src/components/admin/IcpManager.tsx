@@ -147,7 +147,17 @@ export function IcpManager() {
                             <tr key={icp.id} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.2s' }} className="hover-row">
                                 <td style={{ padding: '1rem' }}>
                                     <div style={{ fontWeight: 600 }}>{icp.industry}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Type: {icp.icpType}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                        {icp.icpType === 'dewpoint' ? (
+                                            <span style={{ background: 'hsla(var(--accent-primary)/0.2)', color: 'hsl(var(--accent-primary))', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                                                B2B (Business Owner)
+                                            </span>
+                                        ) : (
+                                            <span style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-muted)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                                                B2C (End Customer)
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td style={{ padding: '1rem', maxWidth: '300px' }}>
                                     <div className="truncate-2">{icp.icpPersona}</div>

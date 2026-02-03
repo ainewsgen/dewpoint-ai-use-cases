@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash, Search, RefreshCw, Zap, Sparkles } from 'lucide-react';
+import { Plus, Trash, Search, RefreshCw, Zap, Sparkles, X } from 'lucide-react';
 import { Opportunity } from '../../lib/engine';
 import { RoadmapCard } from '../RoadmapCard';
 

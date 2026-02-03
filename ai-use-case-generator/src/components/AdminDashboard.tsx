@@ -1222,21 +1222,25 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         className="admin-user-row"
                                     >
                                         <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>
-                                            {user.company.name !== 'Anonymous' ? user.company.name : (
-                                                <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                                    {user.groupingMethod === 'shadow' ? 'Actively Tracking' : 'Ghost User'}
-                                                </span>
+                                            {/* Fix: Prioritize Registered User Name, then Company Name/URL, then fallback */}
+                                            {user.user?.name ? user.user.name : (
+                                                user.company?.url ? user.company.url : (
+                                                    <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                                        {user.groupingMethod === 'shadow' ? 'Actively Tracking' : 'Ghost User'}
+                                                    </span>
+                                                )
                                             )}
                                         </h4>
                                         <p style={{ fontSize: '0.85rem', color: 'hsl(var(--accent-primary))' }}>
-                                            {user.company.email !== 'unknown' ? user.company.email : (
+                                            {/* Fix: Use USER email, not company email (which doesn't exist) */}
+                                            {user.user?.email ? user.user.email : (
                                                 user.groupingMethod === 'shadow'
                                                     ? <span title={user.lead?.shadowId}>ID: {user.lead?.shadowId?.slice(0, 8)}...</span>
-                                                    : user.company.url || 'No Contact Info'
+                                                    : user.company?.url || 'No Contact Info'
                                             )}
                                         </p>
                                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                                            {user.company.role || 'Visitor'} • {user.allRecipes.length} Blueprints
+                                            {user.company?.role || 'Visitor'} • {user.allRecipes.length} Blueprints
                                         </p>
 
                                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
@@ -1271,11 +1275,21 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         <div style={{ borderBottom: '1px solid var(--border-glass)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                 <div>
-                                                    <h1 style={{ marginBottom: '0.5rem' }}>{activeUser.company.name || "Anonymous User"}</h1>
-                                                    <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem' }}>{activeUser.company.email}</p>
-                                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        {activeUser.company.url}
-                                                        {activeUser.company.scannerSource === 'AI' ? (
+                                                    <h1 style={{ marginBottom: '0.5rem' }}>
+                                                        {activeUser.user?.name || activeUser.company?.url || "Anonymous User"}
+                                                    </h1>
+                                                    {activeUser.user?.email && (
+                                                        <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem' }}>{activeUser.user.email}</p>
+                                                    )}
+
+                                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                                        {activeUser.company?.url && (
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <Globe size={12} /> {activeUser.company.url}
+                                                            </span>
+                                                        )}
+
+                                                        {activeUser.company?.scannerSource === 'AI' ? (
                                                             <span style={{ fontSize: '0.7rem', background: 'hsl(var(--accent-primary))', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                                 <Sparkles size={10} /> AI Enhanced
                                                             </span>
@@ -1284,77 +1298,73 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                                 ⚡ System
                                                             </span>
                                                         )}
-                                                        {activeUser.company.naicsCode && (
+
+                                                        {activeUser.company?.naicsCode && (
                                                             <span style={{ fontSize: '0.7rem', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px' }}>
                                                                 NAICS: {activeUser.company.naicsCode}
                                                             </span>
                                                         )}
-                                                    </p>
+
+                                                        {activeUser.lead?.id && (
+                                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>Lead #{activeUser.lead.id}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                                     <button onClick={(e) => openEditUser(activeUser, e)} className="btn-secondary">
                                                         <Edit size={16} /> Edit Profile
                                                     </button>
-                                                    <button onClick={(e) => handleResetPassword(activeUser.id, e)} className="btn-secondary">
-                                                        <Key size={16} /> Reset PWD
-                                                    </button>
+                                                    {activeUser.user && (
+                                                        <button onClick={(e) => handleResetPassword(activeUser.user.id, e)} className="btn-secondary">
+                                                            <Key size={16} /> Reset PWD
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Role</label>
-                                                    <p>{activeUser.company.role}</p>
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Company Size</label>
-                                                    <p>{activeUser.company.size}</p>
-                                                </div>
-                                                <div style={{ gridColumn: 'span 2' }}>
-                                                    <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Primary Pain Point</label>
-                                                    <p>"{activeUser.company.painPoint}"</p>
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Industry</label>
-                                                    <p>{activeUser.company.industry || 'Not specified'}</p>
-                                                </div>
-                                                {activeUser.company.description && (
-                                                    <div style={{ gridColumn: 'span 2' }}>
-                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Analyzed Summary</label>
-                                                        <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: 'var(--text-main)' }}>{activeUser.company.description}</p>
+
+                                            {/* Company Details Grid */}
+                                            {activeUser.company && (
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px' }}>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Role</label>
+                                                        <p>{activeUser.company.role || 'N/A'}</p>
                                                     </div>
-                                                )}
-                                                {activeUser.company.stack && Array.isArray(activeUser.company.stack) && activeUser.company.stack.length > 0 && (
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Company Size</label>
+                                                        <p>{activeUser.company.size || 'N/A'}</p>
+                                                    </div>
                                                     <div style={{ gridColumn: 'span 2' }}>
-                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Detected Tech Stack</label>
-                                                        <div className="chips-grid" style={{ gap: '0.25rem', marginTop: '0.25rem' }}>
-                                                            {activeUser.company.stack.map((t: string) => (
-                                                                <span key={t} style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
-                                                            ))}
+                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Primary Pain Point</label>
+                                                        <p>"{activeUser.company.painPoint || 'N/A'}"</p>
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Industry</label>
+                                                        <p>{activeUser.company.industry || 'Not specified'}</p>
+                                                    </div>
+
+                                                    {activeUser.company.description && (
+                                                        <div style={{ gridColumn: 'span 2' }}>
+                                                            <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Analyzed Summary</label>
+                                                            <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: 'var(--text-main)' }}>{activeUser.company.description}</p>
                                                         </div>
-                                                    </div>
-                                                )}
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Tech Stack</label>
-                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                        {(activeUser.company.stack || []).map((tech: string, i: number) => (
-                                                            <span key={i} style={{
-                                                                background: 'hsl(var(--accent-secondary))',
-                                                                color: 'white',
-                                                                padding: '0.25rem 0.75rem',
-                                                                borderRadius: '4px',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: 600
-                                                            }}>
-                                                                {tech}
-                                                            </span>
-                                                        ))}
-                                                    </div>
+                                                    )}
+
+                                                    {activeUser.company.stack && Array.isArray(activeUser.company.stack) && activeUser.company.stack.length > 0 && (
+                                                        <div style={{ gridColumn: 'span 2' }}>
+                                                            <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Detected Tech Stack</label>
+                                                            <div className="chips-grid" style={{ gap: '0.25rem', marginTop: '0.25rem', display: 'flex', flexWrap: 'wrap' }}>
+                                                                {activeUser.company.stack.map((t: string) => (
+                                                                    <span key={t} style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
 
                                         <h3 style={{ marginBottom: '1rem', color: 'hsl(var(--accent-primary))' }}>
-                                            Unlocked Blueprints ({activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes.length})
+                                            Unlocked Blueprints ({activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes?.length || 0})
                                         </h3>
                                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                                             {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (

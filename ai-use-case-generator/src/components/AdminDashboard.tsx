@@ -2140,7 +2140,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     };
 
     return (
-        <div className="admin-modal-overlay" onClick={onClose}>
+        <div className="admin-modal-overlay" onClick={onClose} style={{ zIndex: 10010, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)' }}>
             <div
                 className="admin-modal-content animate-scale-in"
                 onClick={e => e.stopPropagation()}
@@ -2281,7 +2281,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                         </div>
                     </div>
 
-                    <div className="admin-modal-footer" style={{ flexShrink: 0 }}>
+                    <div className="admin-modal-footer" style={{ flexShrink: 0, position: 'relative', background: 'white', borderTop: '1px solid #e2e8f0', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', zIndex: 10 }}>
                         {integration && (
                             <button
                                 type="button"

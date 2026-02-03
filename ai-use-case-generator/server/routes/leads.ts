@@ -345,13 +345,6 @@ router.get('/admin/leads', async (req, res) => {
             details: dbError.message
         });
     }
-} catch (error: any) {
-    console.error('Get all leads error:', error);
-    res.status(500).json({
-        error: 'Failed to get leads',
-        details: error.message
-    });
-}
 });
 
 // Get Public Library (All Generated Recipes)

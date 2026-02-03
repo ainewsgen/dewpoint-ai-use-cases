@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users } from 'lucide-react';
 import { IcpManager } from './admin/IcpManager';
 import { LibraryManager } from './admin/LibraryManager';
-
-interface AdminDashboardProps {
-    leads: Array<{
-        id: string;
-        timestamp: string;
-        company: CompanyData;
-        recipes: Opportunity[];
-    }>;
-}
 
 interface Integration {
     id: number;
@@ -32,7 +23,7 @@ interface IntegrationModalProps {
     onSave: (data: any) => Promise<void>;
 }
 
-export function AdminDashboard({ leads }: AdminDashboardProps) {
+export function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     // Local state for fetched leads (ignoring props now)
@@ -65,7 +56,6 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     // Blueprint Edit State
     const [editingBlueprint, setEditingBlueprint] = useState<Opportunity | null>(null);
-    const [activeUser, setActiveUser] = useState<any | null>(null);
     const [systemPrompt, setSystemPrompt] = useState<string>(''); // System Prompt State
 
     // Lead Edit State (Mock/Simulation for Leads View)
@@ -404,27 +394,6 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
         setEditingBlueprint(null);
     };
 
-    // ... User Management handlers ... 
-    // (Note: Skipping re-implementation of user mgmt handlers as they are outside the chunk, 
-    // wait, I need to make sure I don't delete them. The chunk end line is 272, which is before user mgmt.
-    // Actually the chunk I selected covers lines 26 to 272.
-    // I need to be careful. I will include the user mgmt handlers in the replacement to be safe 
-    // or just target the specific blocks.
-    // Let's constrain the chunk to just the CMS and Integration logic replacement.
-
-    // RE-EVALUATING CHUNK STRATEGY
-    // I will use replace_file_content for lines 26-86 (State + Logic) and 193-272 (Render)
-    // Actually, I can do it in one go if I include everything in between or use multi_replace.
-    // I will use multi_replace_file_content.
-
-    // ERROR: I cannot change tool inside decision.
-    // I will proceed with replace_file_content but I need to be careful about boundaries.
-
-    // Let's do multi_replace.
-
-    // WAIT, I am generating `replace_file_content`. I should use `multi_replace_file_content` instead.
-
-
 
     const handleScan = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -448,12 +417,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                     // Maybe prompt user? For now just overwrite if empty?
                     // Let's just overwrite for now as it's an explicit action.
                     description: data.data.description || prev.description,
-
+                    naicsCode: data.data.context?.naics || prev.naicsCode,
                     // Also stack?
                     stack: Array.from(new Set([...(prev.stack || []), ...(data.data.stack || [])])),
 
                     // Store internal metadata if useful
-                    scannerSource: data.data.context?.source
+                    scannerSource: data.data.context?.source || 'System'
                 }));
             } else {
                 alert('Scan failed to find relevant data.');
@@ -585,15 +554,19 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
     return (
         <div className="container animate-fade-in" style={{ paddingTop: '8rem', position: 'relative' }}>
-            <header className="library-header" style={{ marginBottom: '3rem', textAlign: 'center' }}>
-                <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-secondary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-                    <Shield size={48} className="text-secondary" />
+
+            <div className="glass-panel" style={{ padding: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ padding: '0.75rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '12px' }}>
+                        <Shield size={24} className="text-accent" />
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>Admin Console</h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>System Management & Oversight</p>
+                    </div>
                 </div>
-                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-                    Admin Console <span style={{ fontSize: '1rem', opacity: 0.6, border: '1px solid currentColor', padding: '2px 6px', borderRadius: '4px', verticalAlign: 'middle' }}>v3.22</span>
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', margin: 0 }}>System Management & Overview</p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button
                         onClick={() => {
                             fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
@@ -601,142 +574,127 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             });
                         }}
                         className="btn-secondary"
-                        style={{ padding: '0.2rem 0.6rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid var(--border-glass)' }}
                     >
                         <MonitorStop size={14} /> Log Out
                     </button>
+                    <nav style={{ background: 'hsla(var(--bg-card)/0.5)', padding: '0.25rem', borderRadius: '50px', border: '1px solid var(--border-glass)', display: 'flex' }}>
+                        <button
+                            onClick={() => setActiveTab('leads')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'leads' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'leads' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'leads' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Zap size={18} /> Leads
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('icps')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'icps' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'icps' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'icps' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Layers size={18} /> ICPs
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('cms')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'cms' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'cms' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'cms' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <FileText size={18} /> CMS
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('users')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'users' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'users' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'users' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <CheckCircle size={18} /> Users
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('integrations')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'integrations' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'integrations' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'integrations' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Database size={18} /> Integrations
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('observability')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'observability' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'observability' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'observability' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Activity size={18} /> Observability
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('library')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'library' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'library' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'library' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <BookOpen size={18} /> Library
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('blueprints')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'blueprints' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'blueprints' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'blueprints' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Sparkles size={18} /> Config
+                        </button>
+                    </nav>
                 </div>
-
-                <div className="glass-panel" style={{ padding: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ padding: '0.75rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '12px' }}>
-                            <Shield size={24} className="text-accent" />
-                        </div>
-                        <div>
-                            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>Admin Console</h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>System Management & Oversight</p>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <nav style={{ background: 'hsla(var(--bg-card)/0.5)', padding: '0.25rem', borderRadius: '50px', border: '1px solid var(--border-glass)', display: 'flex' }}>
-                            <button
-                                onClick={() => setActiveTab('leads')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'leads' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'leads' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'leads' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <Zap size={18} /> Leads
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('icps')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'icps' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'icps' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'icps' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <Layers size={18} /> ICPs
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('cms')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'cms' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'cms' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'cms' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <FileText size={18} /> CMS
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('users')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'users' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'users' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'users' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <CheckCircle size={18} /> Users
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('integrations')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'integrations' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'integrations' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'integrations' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <Database size={18} /> Integrations
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('observability')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'observability' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'observability' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'observability' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <Activity size={18} /> Observability
-                            </button>
-
-                            <button
-                                onClick={() => setActiveTab('library')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'library' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'library' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'library' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <BookOpen size={18} /> Library
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('blueprints')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'blueprints' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'blueprints' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'blueprints' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <Sparkles size={18} /> Config
-                            </button>
-                        </nav>
-                    </div>
-                </div>
-            </header>
+            </div>
 
             {/* Observability Tab */}
             {
@@ -1103,8 +1061,6 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
             {/* Integrations Tab */}
 
-            {/* Integrations Tab */}
-
             {
                 activeTab === 'cms' && (
                     <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
@@ -1200,7 +1156,6 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             }
 
             {/* Logic for Grouping Leads */}
-            {/* Logic for Grouping Leads */}
             {
                 activeTab === 'leads' && (() => {
                     if (isLoadingLeads) {
@@ -1275,7 +1230,9 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     {userList.map((user: any) => (
                                         <div
                                             key={user.id}
-                                            onClick={() => setSelectedLead(user.id)}
+                                            onClick={() => {
+                                                setSelectedLead(user.id);
+                                            }}
                                             className={`admin-list-item ${selectedLead === user.id ? 'active' : ''}`}
                                             style={{
                                                 padding: '1rem',
@@ -1544,76 +1501,129 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Blueprint Editor Modal */}
             {
                 editingBlueprint && (
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                        background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        zIndex: 1100
-                    }}>
-                        <div className="glass-panel animate-fade-in" style={{ padding: '2rem', width: '95%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
-                                <div>
-                                    <h3 style={{ fontSize: '1.5rem' }}>Editing Blueprint Template</h3>
-                                    <p style={{ color: 'hsl(var(--accent-gold))', fontSize: '1rem' }}>{editingBlueprint.title}</p>
-                                </div>
-                                <button onClick={() => setEditingBlueprint(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
+                    <div className="admin-modal-overlay" onClick={() => setEditingBlueprint(null)}>
+                        <div
+                            className="admin-modal-content animate-scale-in"
+                            style={{ maxWidth: '850px' }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="admin-modal-header">
+                                <h3>
+                                    <Sparkles size={24} style={{ marginRight: '0.75rem', verticalAlign: 'middle', color: 'hsl(var(--accent-primary))' }} />
+                                    Refine Logic Blueprint
+                                </h3>
+                                <button
+                                    onClick={() => setEditingBlueprint(null)}
+                                    className="admin-btn-close"
+                                    aria-label="Close modal"
+                                >
+                                    <X size={24} />
+                                </button>
                             </div>
 
-                            <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                {/* Narrative Section */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Problem Statement Template</label>
-                                        <textarea
-                                            value={editingBlueprint.public_view.problem}
-                                            onChange={e => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, problem: e.target.value } })}
-                                            style={{ width: '100%', minHeight: '100px', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: '#eee' }}
+                            <div className="admin-modal-body">
+                                <div className="admin-form-grid">
+                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label htmlFor="bp-title" className="admin-label">Blueprint Title</label>
+                                        <input
+                                            id="bp-title"
+                                            className="admin-input"
+                                            value={editingBlueprint.title}
+                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, title: e.target.value })}
                                         />
                                     </div>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Solution Narrative</label>
-                                        <textarea
-                                            value={editingBlueprint.public_view.solution_narrative}
-                                            onChange={e => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, solution_narrative: e.target.value } })}
-                                            style={{ width: '100%', minHeight: '100px', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: '#eee' }}
+
+                                    <div className="admin-form-group">
+                                        <label htmlFor="bp-department" className="admin-label">Target Department</label>
+                                        <input
+                                            id="bp-department"
+                                            className="admin-input"
+                                            value={editingBlueprint.department}
+                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, department: e.target.value })}
                                         />
                                     </div>
-                                </div>
 
-                                {/* Implementation Steps */}
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Implementation Steps (One per line)</label>
-                                    <textarea
-                                        value={editingBlueprint.public_view.walkthrough_steps?.join('\n') || ''}
-                                        onChange={e => {
-                                            const steps = e.target.value.split('\n');
-                                            setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, walkthrough_steps: steps } })
-                                        }}
-                                        style={{ width: '100%', minHeight: '150px', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: '#eee', fontFamily: 'monospace' }}
-                                    />
-                                </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="bp-roi" className="admin-label">Estimated ROI / Savings</label>
+                                        <input
+                                            id="bp-roi"
+                                            className="admin-input"
+                                            value={editingBlueprint.public_view?.roi_estimate || ''}
+                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, roi_estimate: e.target.value } })}
+                                        />
+                                    </div>
 
-                                {/* Stack Details */}
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Tech Stack Logic</label>
-                                    <div style={{ padding: '1rem', background: '#222', borderRadius: '6px' }}>
-                                        {editingBlueprint.admin_view.stack_details?.map((detail, idx) => (
-                                            <div key={idx} style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
-                                                <input value={detail.tool} readOnly style={{ background: '#333', border: 'none', padding: '0.5rem', color: '#aaa', flex: 1, borderRadius: '4px' }} />
-                                                <input value={detail.role} onChange={(e) => {
-                                                    const newDetails = [...(editingBlueprint.admin_view.stack_details || [])];
-                                                    newDetails[idx].role = e.target.value;
-                                                    setEditingBlueprint({ ...editingBlueprint, admin_view: { ...editingBlueprint.admin_view, stack_details: newDetails } });
-                                                }} style={{ background: '#111', border: '1px solid #444', padding: '0.5rem', color: 'white', flex: 2, borderRadius: '4px' }} />
-                                            </div>
-                                        ))}
+                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label htmlFor="bp-problem" className="admin-label">Problem Statement</label>
+                                        <textarea
+                                            id="bp-problem"
+                                            className="admin-textarea"
+                                            rows={2}
+                                            value={editingBlueprint.public_view?.problem || ''}
+                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, problem: e.target.value } })}
+                                        />
+                                    </div>
+
+                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label htmlFor="bp-solution" className="admin-label">Solution Narrative</label>
+                                        <textarea
+                                            id="bp-solution"
+                                            className="admin-textarea"
+                                            rows={3}
+                                            value={editingBlueprint.public_view?.solution_narrative || ''}
+                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, solution_narrative: e.target.value } })}
+                                        />
+                                    </div>
+
+                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label htmlFor="bp-walkthrough" className="admin-label">Implementation Steps (One per line)</label>
+                                        <textarea
+                                            id="bp-walkthrough"
+                                            className="admin-textarea"
+                                            rows={5}
+                                            value={editingBlueprint.public_view?.walkthrough_steps?.join('\n') || ''}
+                                            onChange={e => {
+                                                const steps = e.target.value.split('\n');
+                                                setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, walkthrough_steps: steps } })
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                                        <label className="admin-label">Integration Stack Mapping</label>
+                                        <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                                            {editingBlueprint.admin_view?.stack_details?.map((detail, idx) => (
+                                                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                                                    <div>
+                                                        <label className="admin-label" style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.6 }}>Logic Tool</label>
+                                                        <input value={detail.tool} readOnly className="admin-input" style={{ background: '#f1f5f9', color: '#64748b' }} />
+                                                    </div>
+                                                    <div>
+                                                        <label className="admin-label" style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.6 }}>Agentic Role / Workflow</label>
+                                                        <input
+                                                            className="admin-input"
+                                                            value={detail.role}
+                                                            onChange={(e) => {
+                                                                const newDetails = [...(editingBlueprint.admin_view.stack_details || [])];
+                                                                newDetails[idx].role = e.target.value;
+                                                                setEditingBlueprint({ ...editingBlueprint, admin_view: { ...editingBlueprint.admin_view, stack_details: newDetails } });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {(!editingBlueprint.admin_view?.stack_details || editingBlueprint.admin_view.stack_details.length === 0) && (
+                                                <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>No stack mapping available.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
-                                <button onClick={() => setEditingBlueprint(null)} className="btn-secondary">Cancel</button>
-                                <button onClick={handleSaveBlueprint} className="btn-primary">
-                                    <Save size={16} /> Save Changes
+                            <div className="admin-modal-footer">
+                                <button onClick={() => setEditingBlueprint(null)} className="admin-btn-secondary">Discard changes</button>
+                                <button onClick={handleSaveBlueprint} className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
+                                    <Save size={18} style={{ marginRight: '0.5rem' }} /> Update Blueprint
                                 </button>
                             </div>
                         </div>
@@ -1622,164 +1632,196 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             }
 
             {/* Edit Lead/User Modal */}
-            {/* Edit Lead/User Modal */}
             {
                 editingUser && (
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                        background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        zIndex: 2000
-                    }} onClick={() => setEditingUser(null)}>
+                    <div className="admin-modal-overlay" onClick={() => setEditingUser(null)}>
                         <div
-                            className="glass-panel animate-scale-in"
-                            style={{ width: '800px', maxHeight: '90vh', overflowY: 'auto' }}
+                            className="admin-modal-content animate-scale-in"
                             onClick={e => e.stopPropagation()}
                         >
-                            <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
-                                Edit Profile
-                            </h3>
+                            <div className="admin-modal-header">
+                                <div>
+                                    <h3>Lead Intelligence Profile</h3>
+                                    <p style={{ color: 'var(--admin-accent)', fontSize: '0.875rem', fontWeight: 600, marginTop: '0.25rem' }}>
+                                        {editForm.name || 'Anonymous Prospect'} • {editForm.url || 'No URL'}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setEditingUser(null)}
+                                    className="admin-btn-close"
+                                    aria-label="Close modal"
+                                >
+                                    <X size={24} />
+                                </button>
+                            </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-
-                                {/* Left Column */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>User Name</label>
+                            <div className="admin-modal-body">
+                                <div className="admin-form-divider" data-label="Identity & Contact"></div>
+                                <div className="admin-form-grid">
+                                    <div className="admin-form-group">
+                                        <label htmlFor="user-name" className="admin-label">Full Name</label>
                                         <div className="input-with-icon">
-                                            <User size={16} />
+                                            <User size={18} />
                                             <input
+                                                id="user-name"
                                                 type="text"
+                                                className="admin-input"
                                                 value={editForm.name || ''}
                                                 onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                                placeholder="e.g. John Doe"
                                             />
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Company URL</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="company-url" className="admin-label">Company URL</label>
+                                        <div style={{ display: 'flex', gap: '0.75rem' }}>
                                             <div className="input-with-icon" style={{ flex: 1 }}>
-                                                <Globe size={16} />
+                                                <Globe size={18} />
                                                 <input
+                                                    id="company-url"
                                                     type="text"
+                                                    className="admin-input"
                                                     value={editForm.url || ''}
                                                     onChange={e => setEditForm({ ...editForm, url: e.target.value })}
+                                                    placeholder="example.com"
                                                 />
                                             </div>
                                             <button
                                                 onClick={handleScan}
                                                 disabled={isScanning || !editForm.url}
-                                                className="btn-secondary"
-                                                style={{ padding: '0 0.75rem' }}
+                                                className="admin-btn-secondary"
+                                                style={{ height: '52px', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                 title="Scan website to auto-fill fields"
+                                                aria-label="Scan website"
                                             >
-                                                {isScanning ? <RefreshCw size={16} className="spin" /> : <Sparkles size={16} />}
+                                                {isScanning ? <RefreshCw size={18} className="spin" /> : <Sparkles size={18} />}
                                             </button>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Industry</label>
+                                <div className="admin-form-divider" data-label="Firmographic Intelligence"></div>
+                                <div className="admin-form-grid">
+                                    <div className="admin-form-group">
+                                        <label htmlFor="industry" className="admin-label">Primary Industry</label>
                                         <input
+                                            id="industry"
                                             type="text"
+                                            className="admin-input"
                                             value={editForm.industry || ''}
                                             onChange={e => setEditForm({ ...editForm, industry: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                            placeholder="e.g. Technology"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Role</label>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="user-role" className="admin-label">Stakeholder Role</label>
                                         <input
+                                            id="user-role"
                                             type="text"
+                                            className="admin-input"
                                             value={editForm.role || ''}
                                             onChange={e => setEditForm({ ...editForm, role: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                            placeholder="e.g. CTO / Decision Maker"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Company Size</label>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="company-size" className="admin-label">Operational Scale</label>
                                         <select
+                                            id="company-size"
+                                            className="admin-select"
                                             value={editForm.size || ''}
                                             onChange={e => setEditForm({ ...editForm, size: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
                                         >
-                                            <option value="">Select Size</option>
-                                            <option value="1-10">1-10</option>
-                                            <option value="11-50">11-50</option>
-                                            <option value="51-200">51-200</option>
-                                            <option value="201-500">201-500</option>
-                                            <option value="500+">500+</option>
+                                            <option value="">Select Scale</option>
+                                            <option value="1-10">Startup (1-10)</option>
+                                            <option value="11-50">Emerging (11-50)</option>
+                                            <option value="51-200">Scale-up (51-200)</option>
+                                            <option value="201-500">Mid-Market (201-500)</option>
+                                            <option value="501-1000">Enterprise (501-1000)</option>
+                                            <option value="1000+">Global (1000+)</option>
                                         </select>
                                     </div>
-                                </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>NAICS Code</label>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="naics-code" className="admin-label">NAICS Classification</label>
                                         <input
+                                            id="naics-code"
                                             type="text"
+                                            className="admin-input"
                                             value={editForm.naicsCode || ''}
                                             onChange={e => setEditForm({ ...editForm, naicsCode: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                            placeholder="e.g. 541511"
                                         />
                                     </div>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Data Source</label>
+                                </div>
+
+                                <div className="admin-form-divider" data-label="Strategic Context"></div>
+                                <div className="admin-form-grid">
+                                    <div className="admin-form-group">
+                                        <label htmlFor="scanner-source" className="admin-label">Intelligence Source</label>
                                         <select
+                                            id="scanner-source"
+                                            className="admin-select"
                                             value={editForm.scannerSource || 'System'}
                                             onChange={e => setEditForm({ ...editForm, scannerSource: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
                                         >
                                             <option value="System">System / Manual</option>
-                                            <option value="AI">AI Scanner</option>
+                                            <option value="AI">AI Scanner (GPT-4o Optimized)</option>
                                         </select>
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="tech-stack" className="admin-label">Tech Stack Inventory</label>
+                                        <input
+                                            id="tech-stack"
+                                            type="text"
+                                            className="admin-input"
+                                            value={Array.isArray(editForm.stack) ? editForm.stack.join(', ') : (editForm.stack || '')}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                setEditForm({ ...editForm, stack: val.split(',').map(s => s.trim()) });
+                                            }}
+                                            placeholder="e.g. AWS, React, Postgres..."
+                                        />
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Pain Point</label>
+                                <div className="admin-form-group">
+                                    <label htmlFor="pain-point" className="admin-label">Primary Friction Point (Pain Point)</label>
                                     <textarea
+                                        id="pain-point"
+                                        className="admin-textarea"
                                         value={editForm.painPoint || ''}
                                         onChange={e => setEditForm({ ...editForm, painPoint: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', minHeight: '60px', background: '#111', color: 'white' }}
+                                        placeholder="Detailed description of the business challenge..."
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Business Description / Summary</label>
+                                <div className="admin-form-group">
+                                    <label htmlFor="description" className="admin-label">Corporate Mission / Description</label>
                                     <textarea
+                                        id="description"
+                                        className="admin-textarea"
                                         value={editForm.description || ''}
                                         onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', minHeight: '80px', background: '#111', color: 'white' }}
+                                        placeholder="Summary of company activities and goals..."
                                     />
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Tech Stack (Comma Separated)</label>
-                                    <input
-                                        type="text"
-                                        value={Array.isArray(editForm.stack) ? editForm.stack.join(', ') : (editForm.stack || '')}
-                                        onChange={e => {
-                                            // Split by comma for simple editing
-                                            const val = e.target.value;
-                                            setEditForm({ ...editForm, stack: val.split(',').map(s => s.trim()) });
-                                        }}
-                                        placeholder="React, Node.js, AWS..."
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
-                                    />
-                                </div>
-
-                            </div >
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
-                                <button onClick={() => setEditingUser(null)} className="btn-secondary">Cancel</button>
-                                <button onClick={saveEditUser} className="btn-primary">
-                                    <Save size={16} /> Save Changes
+                            <div className="admin-modal-footer">
+                                <button type="button" onClick={() => setEditingUser(null)} className="admin-btn-secondary">Discard Changes</button>
+                                <button
+                                    onClick={saveEditUser}
+                                    className="admin-btn-primary"
+                                >
+                                    <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} /> Commit Profiles Updates
                                 </button>
                             </div>
-                        </div >
-                    </div >
+                        </div>
+                    </div>
                 )
             }
             {
@@ -1938,58 +1980,84 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Edit/Create User Modal */}
             {
                 isEditingRealUser && (
-                    <div className="modal-overlay">
-                        <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                <h3>{currentRealUser ? 'Edit User' : 'Add New User'}</h3>
-                                <button onClick={() => setIsEditingRealUser(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
+                    <div className="admin-modal-overlay" onClick={() => setIsEditingRealUser(false)}>
+                        <div
+                            className="admin-modal-content animate-scale-in"
+                            style={{ maxWidth: '600px' }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="admin-modal-header">
+                                <h3>{currentRealUser ? 'Edit User Record' : 'Create New User'}</h3>
+                                <button
+                                    onClick={() => setIsEditingRealUser(false)}
+                                    className="admin-btn-close"
+                                    aria-label="Close modal"
+                                >
+                                    <X size={24} />
+                                </button>
                             </div>
-                            <form onSubmit={handleSaveUser} style={{ display: 'grid', gap: '1rem' }}>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email</label>
-                                    <input
-                                        type="email"
-                                        required
-                                        value={userEditForm.email}
-                                        onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                                    />
+
+                            <form onSubmit={handleSaveUser}>
+                                <div className="admin-modal-body">
+                                    <div className="admin-form-group">
+                                        <label htmlFor="user-email" className="admin-label">Email Address</label>
+                                        <input
+                                            id="user-email"
+                                            type="email"
+                                            className="admin-input"
+                                            required
+                                            value={userEditForm.email}
+                                            onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
+                                            placeholder="user@example.com"
+                                        />
+                                    </div>
+
+                                    <div className="admin-form-group">
+                                        <label htmlFor="user-display-name" className="admin-label">Full Name</label>
+                                        <input
+                                            id="user-display-name"
+                                            type="text"
+                                            className="admin-input"
+                                            value={userEditForm.name}
+                                            onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
+                                            placeholder="Enter user's full name"
+                                        />
+                                    </div>
+
+                                    <div className="admin-form-group">
+                                        <label htmlFor="user-role-select" className="admin-label">System Role</label>
+                                        <select
+                                            id="user-role-select"
+                                            className="admin-select"
+                                            value={userEditForm.role}
+                                            onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
+                                        >
+                                            <option value="user">Standard User</option>
+                                            <option value="admin">Administrator</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="admin-form-group">
+                                        <label htmlFor="user-password" className="admin-label">
+                                            {currentRealUser ? 'Update Password (leave blank to keep)' : 'Initial Password'}
+                                        </label>
+                                        <input
+                                            id="user-password"
+                                            type="password"
+                                            className="admin-input"
+                                            required={!currentRealUser}
+                                            value={userEditForm.password}
+                                            onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
+                                            placeholder={currentRealUser ? "••••••••" : "Enter temporary password"}
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
-                                    <input
-                                        type="text"
-                                        value={userEditForm.name}
-                                        onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Role</label>
-                                    <select
-                                        value={userEditForm.role}
-                                        onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#222', color: 'white' }}
-                                    >
-                                        <option value="user">User</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                                        {currentRealUser ? 'New Password (leave blank to keep)' : 'Password'}
-                                    </label>
-                                    <input
-                                        type="password"
-                                        required={!currentRealUser}
-                                        value={userEditForm.password}
-                                        onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                                    <button type="button" onClick={() => setIsEditingRealUser(false)} className="btn-secondary">Cancel</button>
-                                    <button type="submit" className="btn-primary">{currentRealUser ? 'Save Changes' : 'Create User'}</button>
+
+                                <div className="admin-modal-footer">
+                                    <button type="button" onClick={() => setIsEditingRealUser(false)} className="admin-btn-secondary">Cancel</button>
+                                    <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
+                                        {currentRealUser ? 'Apply Changes' : 'Generate User'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -2010,9 +2078,9 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                     />
                 )
             }
-        </div >
+        </div>
     );
-}
+};
 
 function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProps) {
     const [name, setName] = useState(integration?.name || '');
@@ -2047,176 +2115,189 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     };
 
     const handleTest = async () => {
-        if (!integration?.id) return;
         setIsTesting(true);
         try {
-            const res = await fetch(`/api/integrations/${integration.id}/test`, { method: 'POST' });
-            if (res.ok) alert('Connection Successful! ✅');
-            else alert('Connection Failed ❌');
-        } catch (e) {
-            alert('Connection Error');
+            const res = await fetch('/api/admin/integrations/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: integration?.id,
+                    authType,
+                    baseUrl,
+                    apiKey
+                })
+            });
+            if (res.ok) {
+                alert('Connection successful!');
+            } else {
+                alert(`Connection failed: ${await res.text()}`);
+            }
+        } catch (error) {
+            alert(`Error testing connection: ${error}`);
         } finally {
             setIsTesting(false);
         }
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ maxWidth: '600px', width: '90%', padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Database size={20} className="text-accent" />
-                        {integration ? 'Edit Connection' : 'New Connection'}
-                    </h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+        <div className="admin-modal-overlay" onClick={onClose}>
+            <div
+                className="admin-modal-content animate-scale-in"
+                onClick={e => e.stopPropagation()}
+                style={{ maxWidth: '600px' }}
+            >
+                <div className="admin-modal-header">
+                    <div>
+                        <h3>{integration ? 'Edit Integration' : 'Connect New Tool'}</h3>
+                        <p style={{ color: 'var(--admin-accent)', fontSize: '0.875rem', fontWeight: 600, marginTop: '0.25rem' }}>
+                            {name || 'Configure connection parameters'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="admin-btn-close"
+                        aria-label="Close modal"
+                    >
                         <X size={24} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
-                    <div>
-                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Integration Name</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="e.g. My OpenAI, Google Gemini..."
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                        />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Provider</label>
-                            <select
-                                value={provider}
-                                onChange={e => {
-                                    setProvider(e.target.value);
-                                    if (e.target.value === 'gemini') setModel('gemini-1.5-pro');
-                                    else if (e.target.value === 'openai') setModel('gpt-4o');
-                                }}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                            >
-                                <option value="openai">OpenAI</option>
-                                <option value="gemini">Google Gemini</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Model ID</label>
+                <form onSubmit={handleSubmit}>
+                    <div className="admin-modal-body">
+                        <div className="admin-form-divider" data-label="Base Configuration"></div>
+                        <div className="admin-form-group">
+                            <label htmlFor="int-name" className="admin-label">Integration Name</label>
                             <input
+                                id="int-name"
                                 type="text"
-                                placeholder={provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-4o'}
-                                value={model}
-                                onChange={e => setModel(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
+                                className="admin-input"
+                                required
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                placeholder="e.g. OpenAI Primary, Slack Webhook..."
                             />
                         </div>
-                    </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Auth Type</label>
-                            <select
-                                value={authType}
-                                onChange={e => setAuthType(e.target.value as any)}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                            >
-                                <option value="api_key">API Key</option>
-                                <option value="oauth">OAuth 2.0</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Failover Priority</label>
-                            <select
-                                value={priority}
-                                onChange={e => setPriority(Number(e.target.value))}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                            >
-                                <option value={0}>No Priority (Pool)</option>
-                                <option value={1}>Primary (1st)</option>
-                                <option value={2}>Secondary (Backup)</option>
-                                <option value={9}>Last Resort</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Status</label>
-                            <div
-                                onClick={() => setStatus(!status)}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)',
-                                    cursor: 'pointer', background: status ? 'hsla(140, 70%, 50%, 0.1)' : 'var(--bg-card)'
-                                }}
-                            >
-                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: status ? 'hsl(140, 70%, 50%)' : '#666' }} />
-                                <span style={{ color: 'var(--text-main)' }}>{status ? 'Active' : 'Disabled'}</span>
+                        <div className="admin-form-grid">
+                            <div className="admin-form-group">
+                                <label htmlFor="int-auth" className="admin-label">Auth Method</label>
+                                <select
+                                    id="int-auth"
+                                    className="admin-select"
+                                    value={authType}
+                                    onChange={e => setAuthType(e.target.value as any)}
+                                >
+                                    <option value="api_key">API Key (Bearer)</option>
+                                    <option value="oauth">OAuth / Token</option>
+                                    <option value="basic">Basic Auth</option>
+                                </select>
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label htmlFor="int-priority" className="admin-label">Routing Priority</label>
+                                <select
+                                    id="int-priority"
+                                    className="admin-select"
+                                    value={priority}
+                                    onChange={e => setPriority(Number(e.target.value))}
+                                >
+                                    <option value={0}>Disabled / Manual Only</option>
+                                    <option value={1}>Primary (High)</option>
+                                    <option value={2}>Secondary (Medium)</option>
+                                    <option value={3}>Log / Archive (Low)</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Base URL (Optional)</label>
-                        <input
-                            type="text"
-                            placeholder="https://api.example.com/v1"
-                            value={baseUrl}
-                            onChange={e => setBaseUrl(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
-                            {integration ? 'Update API Key (Leave blank to keep)' : 'API Key / Token'}
-                        </label>
-                        <div style={{ position: 'relative' }}>
+                        <div className="admin-form-group">
+                            <label htmlFor="int-url" className="admin-label">Service URL / Endpoint</label>
                             <input
-                                type="password"
-                                placeholder="sk-..."
-                                value={apiKey}
-                                onChange={e => setApiKey(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'var(--bg-card)', color: 'var(--text-main)' }}
+                                id="int-url"
+                                type="text"
+                                className="admin-input"
+                                value={baseUrl}
+                                onChange={e => setBaseUrl(e.target.value)}
+                                placeholder="https://api.example.com/v1"
                             />
-                            <Lock size={16} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="int-key" className="admin-label">Secret API Key {integration && '(Optional to update)'}</label>
+                            <div className="input-with-icon">
+                                <Key size={18} />
+                                <input
+                                    id="int-key"
+                                    type="password"
+                                    className="admin-input"
+                                    value={apiKey}
+                                    onChange={e => setApiKey(e.target.value)}
+                                    placeholder={integration ? "••••••••••••••••" : "Paste your secure key here"}
+                                />
+                            </div>
+                        </div>
+
+                        {(name.toLowerCase().includes('openai') || name.toLowerCase().includes('anthropic') || name.toLowerCase().includes('llm')) && (
+                            <>
+                                <div className="admin-form-divider" data-label="Model Parameters"></div>
+                                <div className="admin-form-grid">
+                                    <div className="admin-form-group">
+                                        <label htmlFor="model-provider" className="admin-label">Provider</label>
+                                        <select
+                                            id="model-provider"
+                                            className="admin-select"
+                                            value={provider}
+                                            onChange={e => setProvider(e.target.value)}
+                                        >
+                                            <option value="openai">OpenAI</option>
+                                            <option value="anthropic">Anthropic</option>
+                                            <option value="google">Google Gemini</option>
+                                            <option value="azure">Azure Cognitive</option>
+                                        </select>
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="model-name" className="admin-label">Model Identifier</label>
+                                        <input
+                                            id="model-name"
+                                            type="text"
+                                            className="admin-input"
+                                            value={model}
+                                            onChange={e => setModel(e.target.value)}
+                                            placeholder="e.g. gpt-4o, claude-3-5-sonnet"
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        <div className="admin-form-group" style={{ marginTop: '1rem' }}>
+                            <label className="checkbox-container admin-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={status}
+                                    onChange={e => setStatus(e.target.checked)}
+                                />
+                                Enabled & Ready for Traffic
+                            </label>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                        {integration?.id && (
-                            <button type="button" onClick={handleTest} disabled={isTesting} className="btn-secondary" style={{ marginRight: 'auto' }}>
-                                {isTesting ? 'Testing...' : 'Test Connection'}
+                    <div className="admin-modal-footer">
+                        {integration && (
+                            <button
+                                type="button"
+                                className="admin-btn-secondary"
+                                onClick={() => handleTest()}
+                                disabled={isTesting}
+                                style={{ padding: '0.875rem 1.5rem' }}
+                            >
+                                {isTesting ? <RefreshCw size={18} className="spin" /> : <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} />}
+                                Test Connection
                             </button>
                         )}
-                        <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
-                        <button type="submit" className="btn-primary">
-                            <Save size={18} /> Save Connection
-                        </button>
-                    </div>
-
-                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', textAlign: 'center' }}>
-                        <button
-                            type="button"
-                            onClick={async () => {
-                                if (!confirm("This will attempt to repair the database schema. Continue?")) return;
-                                try {
-                                    // 1. Attempt Fix
-                                    const resFix = await fetch('/api/debug/fix-schema', { method: 'POST' });
-                                    const fixData = await resFix.json();
-
-                                    // 2. Report Status & Current Columns
-                                    const resSchema = await fetch('/api/debug/schema');
-                                    const schemaData = await resSchema.json();
-
-                                    const columns = schemaData.columns?.map((c: any) => `${c.column_name} (${c.data_type})`).join(', ');
-
-                                    alert(`Fix Result: ${JSON.stringify(fixData)}\n\nCurrent DB Columns:\n${columns || 'Error fetching columns'}`);
-                                } catch (e) { alert('Error: ' + e); }
-                            }}
-                            style={{ background: 'none', border: 'none', color: '#666', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
-                        >
-                            Troubleshoot: Fix Database Schema
+                        <div style={{ flex: 1 }} />
+                        <button type="button" onClick={onClose} className="admin-btn-secondary">Cancel</button>
+                        <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2rem' }}>
+                            <Zap size={18} style={{ marginRight: '0.5rem' }} /> {integration ? 'Update Tool' : 'Register Tool'}
                         </button>
                     </div>
                 </form>

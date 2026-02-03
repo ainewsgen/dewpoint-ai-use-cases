@@ -354,7 +354,7 @@ function App() {
                 {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
 
                 {/* Admin Dashboard restored as top-level view */}
-                {view === 'ADMIN' && <AdminDashboard leads={leads} />}
+                {view === 'ADMIN' && <AdminDashboard />}
 
                 {authModal === 'LOGIN' && (
                     <Login

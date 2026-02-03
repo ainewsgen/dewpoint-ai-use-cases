@@ -519,17 +519,20 @@ h5 {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.9);
-    /* Deep slate with high opacity for focus */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.95);
+    /* Extremely high opacity for maximum focus */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    /* Ensure it stays above all navigation elements */
     padding: 2rem;
     animation: fadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    width: 100vw;
+    /* Force viewport width */
+    height: 100vh;
+    /* Force viewport height */
 }
 
 .admin-modal-content {
@@ -596,11 +599,14 @@ h5 {
     justify-content: flex-end;
     gap: 1.25rem;
     flex-shrink: 0;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.03);
-    /* Subtle upward shadow to emphasize elevation above body */
-    z-index: 10;
+    box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.08);
+    /* Increased shadow for better separation */
+    z-index: 20;
+    /* Ensure it stays above body content scroll */
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+    position: sticky;
+    bottom: 0;
 }
 
 /* Status Badges - Refined */

@@ -7,7 +7,7 @@ import { OpenAIService } from '../services/openai';
 import { UsageService } from '../services/usage';
 import { GeminiService } from '../services/gemini'; // Static import
 import { AuthRequest, requireAuth } from '../middleware/auth';
-import { buildIcpContext } from '../lib/prompts';
+import { buildIcpContext, buildGenericContext } from '../lib/prompts';
 import { SystemCapabilityService } from '../services/system';
 
 
@@ -33,24 +33,35 @@ router.post('/generate', async (req, res) => {
         let icpContext = "";
 
         if (companyData.industry) {
-            // Default to 'dewpoint' (Business Owner) if not specified
-            const targetType = companyData.icpType || 'dewpoint';
-
-            const icpMatch = await db.select().from(industryIcps)
-                .where(and(
-                    ilike(industryIcps.industry, companyData.industry),
-                    eq(industryIcps.icpType, targetType)
-                ))
-                .limit(1);
-
-            if (icpMatch.length > 0) {
-                const icp = icpMatch[0];
-                console.log(`[Generate] Applied ICP: ${icp.industry} (${targetType})`);
-
-                icpContext = buildIcpContext(icp, targetType);
+            // Check for explicit "General" flag or string
+            if (companyData.industry.toLowerCase().includes('general') || companyData.industry === 'Cross-Industry') {
+                console.log(`[Generate] Using Generic Context`);
+                icpContext = buildGenericContext();
             } else {
-                console.log(`[Generate] No specific ICP found for ${companyData.industry} (${targetType}), using generic fallback.`);
+                // Default to 'dewpoint' (Business Owner) if not specified
+                const targetType = companyData.icpType || 'dewpoint';
+
+                const icpMatch = await db.select().from(industryIcps)
+                    .where(and(
+                        ilike(industryIcps.industry, companyData.industry),
+                        eq(industryIcps.icpType, targetType)
+                    ))
+                    .limit(1);
+
+                if (icpMatch.length > 0) {
+                    const icp = icpMatch[0];
+                    console.log(`[Generate] Applied ICP: ${icp.industry} (${targetType})`);
+
+                    icpContext = buildIcpContext(icp, targetType);
+                } else {
+                    console.log(`[Generate] No specific ICP found for ${companyData.industry} (${targetType}), using generic fallback.`);
+                    // Also use generic context here as a better fallback than empty string?
+                    icpContext = buildGenericContext();
+                }
             }
+        } else {
+            // No industry provided at all -> Use Generic
+            icpContext = buildGenericContext();
         }
 
         // Default Prompt (Fallback until DB persistence in Phase 2)

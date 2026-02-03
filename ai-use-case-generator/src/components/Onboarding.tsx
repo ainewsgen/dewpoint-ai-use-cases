@@ -365,22 +365,51 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </div>
 
                         {/* Row 2: Industry & Role */}
-                        {/* Row 2: Industry */}
                         <div style={{ marginBottom: '2rem' }}>
-                            <label className="section-label" style={{
-                                display: 'block', fontSize: '0.75rem', fontWeight: 800,
-                                color: 'hsl(var(--accent-primary))', marginBottom: '0.75rem',
-                                textTransform: 'uppercase', letterSpacing: '0.1em'
-                            }}>
-                                Industry
-                            </label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <label className="section-label" style={{
+                                    fontSize: '0.75rem', fontWeight: 800,
+                                    color: 'hsl(var(--accent-primary))',
+                                    textTransform: 'uppercase', letterSpacing: '0.1em',
+                                    marginBottom: 0
+                                }}>
+                                    Industry
+                                </label>
+
+                                {/* General Toggle */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <input
+                                        type="checkbox"
+                                        id="general-toggle"
+                                        checked={industry === 'General Business'}
+                                        onChange={(e) => {
+                                            if (e.target.checked) setIndustry('General Business');
+                                            else setIndustry('');
+                                        }}
+                                        style={{ accentColor: 'hsl(var(--accent-gold))' }}
+                                    />
+                                    <label htmlFor="general-toggle" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
+                                        I don't fit a specific niche
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className="input-group" style={{ position: 'relative' }}>
                                 <input
                                     type="text"
                                     placeholder="e.g. Legal, Manufacturing..."
-                                    value={industry}
-                                    onChange={e => setIndustry(e.target.value)}
-                                    style={{ background: 'var(--bg-card)', width: '100%', paddingLeft: '2.5rem' }}
+                                    value={industry === 'General Business' ? 'General Business (Cross-Industry Efficiency)' : industry}
+                                    onChange={e => {
+                                        if (industry === 'General Business') return; // Locked
+                                        setIndustry(e.target.value);
+                                    }}
+                                    disabled={industry === 'General Business'}
+                                    style={{
+                                        background: industry === 'General Business' ? 'rgba(255,255,255,0.05)' : 'var(--bg-card)',
+                                        width: '100%', paddingLeft: '2.5rem',
+                                        color: industry === 'General Business' ? 'var(--text-muted)' : 'white',
+                                        fontStyle: industry === 'General Business' ? 'italic' : 'normal'
+                                    }}
                                 />
                                 <Briefcase className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             </div>

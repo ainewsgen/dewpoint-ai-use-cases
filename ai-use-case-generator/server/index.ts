@@ -295,6 +295,8 @@ const server = app.listen(Number(PORT), '0.0.0.0', async () => {
             // FORCE PATCH: Add naics_code if missing (likely culprit for failing inserts)
             await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS naics_code TEXT;`);
             await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS scanner_source TEXT;`);
+            await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS description TEXT;`);
+            await db.execute(sql`ALTER TABLE companies ADD COLUMN IF NOT EXISTS stack JSONB;`);
 
             // 2. Create Use Case Library Table (Was missing)
             await db.execute(sql`

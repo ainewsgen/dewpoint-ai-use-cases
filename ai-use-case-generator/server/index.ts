@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 
 // Global Error Handlers (Must be first)
 process.on('uncaughtException', (err) => {
@@ -236,9 +237,8 @@ app.get('/api/debug/db-check', async (req, res) => {
 });
 
 // Serve static frontend files (Robust check)
-const staticPath = path.join(__dirname, '../..');
+const staticPath = process.cwd();
 const distPath = path.join(staticPath, 'dist');
-const fs = require('fs');
 
 if (fs.existsSync(distPath)) {
     console.log(`Serving static files from ${distPath}`);

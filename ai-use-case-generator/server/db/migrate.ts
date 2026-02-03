@@ -9,11 +9,11 @@ export async function runMigrations() {
     });
 
     try {
-        const filePath = path.join(__dirname, 'migrations.sql');
+        const filePath = path.join(process.cwd(), 'server/db/migrations.sql');
         console.log('Looking for migrations at:', filePath);
 
         if (!fs.existsSync(filePath)) {
-            throw new Error(`Migration file NOT FOUND at: ${filePath}. Dir contents: ${fs.readdirSync(__dirname).join(', ')}`);
+            throw new Error(`Migration file NOT FOUND at: ${filePath}. Dir contents: ${fs.readdirSync(path.dirname(filePath)).join(', ')}`);
         }
 
         const migrationSQL = fs.readFileSync(filePath, 'utf-8');

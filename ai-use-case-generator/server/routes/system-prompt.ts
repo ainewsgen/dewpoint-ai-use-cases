@@ -1,14 +1,11 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { requireAuth, requireAdmin } from '../middleware/auth';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const router = Router();
-const PROMPT_FILE_PATH = path.join(__dirname, '../data/system_prompt.txt');
+// Use process.cwd() for robust path resolution across ESM/CJS and Local/Prod
+const PROMPT_FILE_PATH = path.join(process.cwd(), 'server/data/system_prompt.txt');
 
 // Ensure data directory exists
 const dataDir = path.dirname(PROMPT_FILE_PATH);

@@ -2144,9 +2144,9 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
             <div
                 className="admin-modal-content animate-scale-in"
                 onClick={e => e.stopPropagation()}
-                style={{ maxWidth: '600px' }}
+                style={{ maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
             >
-                <div className="admin-modal-header">
+                <div className="admin-modal-header" style={{ flexShrink: 0 }}>
                     <div>
                         <h3>{integration ? 'Edit Integration' : 'Connect New Tool'}</h3>
                         <p style={{ color: 'var(--admin-accent)', fontSize: '0.875rem', fontWeight: 600, marginTop: '0.25rem' }}>
@@ -2162,8 +2162,8 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="admin-modal-body">
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, minHeight: 0 }}>
+                    <div className="admin-modal-body" style={{ overflowY: 'auto', flex: 1 }}>
                         <div className="admin-form-divider" data-label="Base Configuration"></div>
                         <div className="admin-form-group">
                             <label htmlFor="int-name" className="admin-label">Integration Name</label>
@@ -2281,7 +2281,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                         </div>
                     </div>
 
-                    <div className="admin-modal-footer">
+                    <div className="admin-modal-footer" style={{ flexShrink: 0 }}>
                         {integration && (
                             <button
                                 type="button"

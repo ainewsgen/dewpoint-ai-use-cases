@@ -89,6 +89,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             const res = await fetch('/api/admin/leads');
             if (res.ok) {
                 const data = await res.json();
+                console.log("Admin Leads Raw Data:", data);
                 // Admin API returns { leads: [ { lead: {...}, company: {...}, user: {...} }, ... ] }
                 // Map to flat structure expected by the dashboard
                 const formattedLeads = (data.leads || []).map((row: any) => ({

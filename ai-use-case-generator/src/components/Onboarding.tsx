@@ -393,14 +393,32 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 }}>
                                     Your Role
                                 </label>
-                                <div className="input-group" style={{ position: 'relative' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Founder, Manager..."
-                                        value={role}
-                                        onChange={e => setRole(e.target.value)}
-                                        style={{ background: 'var(--bg-card)', width: '100%' }}
-                                    />
+                                {/* Role Selection Buttons */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                    {['Founder / Owner', 'Executive (CXO/VP)', 'Manager / Lead', 'Freelancer / Consultant'].map(r => (
+                                        <button
+                                            key={r}
+                                            onClick={() => setRole(r)}
+                                            style={{
+                                                padding: '0.6rem 0.5rem',
+                                                borderRadius: '8px',
+                                                border: role === r ? '2px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
+                                                background: role === r ? 'hsla(var(--accent-primary)/0.1)' : 'var(--bg-card)',
+                                                color: role === r ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                                fontSize: '0.8rem',
+                                                cursor: 'pointer',
+                                                fontWeight: role === r ? 700 : 500,
+                                                textAlign: 'center',
+                                                transition: 'all 0.2s ease',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis'
+                                            }}
+                                            title={r}
+                                        >
+                                            {r.split(' (')[0]}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -463,7 +481,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
                             {Object.entries({
                                 ...techCategories,
-                                "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect']
+                                "CRM & Sales": ['Salesforce', 'HubSpot', 'Zoho CRM', 'Pipedrive', 'Monday.com Sales', 'Google Sheets', 'Microsoft Excel'],
+                                "Productivity": ['Notion', 'Asana', 'Jira', 'Trello', 'ClickUp', 'Monday.com', 'Airtable', 'Google Sheets', 'Microsoft Excel'],
+                                "Finance & HR": ['QuickBooks', 'Xero', 'NetSuite', 'Gusto', 'Rippling', 'Expensify', 'Google Sheets', 'Microsoft Excel'],
+                                "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect', 'Personal Cellphone']
                             }).map(([category, tools]) => (
                                 <div key={category}>
                                     <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>{category}</h4>

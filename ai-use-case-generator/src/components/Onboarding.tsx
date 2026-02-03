@@ -365,61 +365,62 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </div>
 
                         {/* Row 2: Industry & Role */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
-                            <div>
-                                <label className="section-label" style={{
-                                    display: 'block', fontSize: '0.75rem', fontWeight: 800,
-                                    color: 'hsl(var(--accent-primary))', marginBottom: '0.75rem',
-                                    textTransform: 'uppercase', letterSpacing: '0.1em'
-                                }}>
-                                    Industry
-                                </label>
-                                <div className="input-group" style={{ position: 'relative' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Legal, Manufacturing..."
-                                        value={industry}
-                                        onChange={e => setIndustry(e.target.value)}
-                                        style={{ background: 'var(--bg-card)', width: '100%', paddingLeft: '2.5rem' }}
-                                    />
-                                    <Briefcase className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                </div>
+                        {/* Row 2: Industry */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <label className="section-label" style={{
+                                display: 'block', fontSize: '0.75rem', fontWeight: 800,
+                                color: 'hsl(var(--accent-primary))', marginBottom: '0.75rem',
+                                textTransform: 'uppercase', letterSpacing: '0.1em'
+                            }}>
+                                Industry
+                            </label>
+                            <div className="input-group" style={{ position: 'relative' }}>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Legal, Manufacturing..."
+                                    value={industry}
+                                    onChange={e => setIndustry(e.target.value)}
+                                    style={{ background: 'var(--bg-card)', width: '100%', paddingLeft: '2.5rem' }}
+                                />
+                                <Briefcase className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             </div>
-                            <div>
-                                <label className="section-label" style={{
-                                    display: 'block', fontSize: '0.75rem', fontWeight: 800,
-                                    color: 'hsl(var(--accent-primary))', marginBottom: '0.75rem',
-                                    textTransform: 'uppercase', letterSpacing: '0.1em'
-                                }}>
-                                    Your Role
-                                </label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                                    {['Founder / Owner', 'Executive (CXO/VP)', 'Manager / Lead', 'Freelancer / Consultant'].map(r => (
-                                        <button
-                                            key={r}
-                                            onClick={() => setRole(r)}
-                                            style={{
-                                                padding: '1rem 0.5rem',
-                                                borderRadius: '12px',
-                                                border: role === r ? '2px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
-                                                background: role === r ? 'hsla(var(--accent-primary)/0.05)' : 'var(--bg-card)',
-                                                color: role === r ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                                fontSize: '0.9rem',
-                                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                boxShadow: role === r ? '0 4px 12px hsla(var(--accent-primary)/0.15)' : 'none',
-                                                transform: role === r ? 'translateY(-2px)' : 'none',
-                                                minHeight: '80px' // Ensure uniform height
-                                            }}
-                                            title={r}
-                                        >
-                                            <span style={{ fontWeight: role === r ? 700 : 600, fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.2 }}>
-                                                {r.replace(' (', '\n(')}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
+                        </div>
+
+                        {/* Row 3: Your Role */}
+                        <div style={{ marginBottom: '2.5rem' }}>
+                            <label className="section-label" style={{
+                                display: 'block', fontSize: '0.75rem', fontWeight: 800,
+                                color: 'hsl(var(--accent-primary))', marginBottom: '0.75rem',
+                                textTransform: 'uppercase', letterSpacing: '0.1em'
+                            }}>
+                                Your Role
+                            </label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                                {['Founder / Owner', 'Executive (CXO/VP)', 'Manager / Lead', 'Freelancer / Consultant'].map(r => (
+                                    <button
+                                        key={r}
+                                        onClick={() => setRole(r)}
+                                        style={{
+                                            padding: '1rem 0.5rem',
+                                            borderRadius: '12px',
+                                            border: role === r ? '2px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
+                                            background: role === r ? 'hsla(var(--accent-primary)/0.1)' : 'var(--bg-card)',
+                                            color: role === r ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                            fontSize: '0.9rem',
+                                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            boxShadow: role === r ? '0 4px 12px hsla(var(--accent-primary)/0.2)' : 'none',
+                                            transform: role === r ? 'translateY(-2px)' : 'none',
+                                            minHeight: '80px'
+                                        }}
+                                        title={r}
+                                    >
+                                        <span style={{ fontWeight: role === r ? 800 : 500, fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.2 }}>
+                                            {r.replace(' (', '\n(')}
+                                        </span>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -434,8 +435,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             </label>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
                                 {['Solopreneur (1)', 'Micro (1-10)', 'Small (11-50)', 'Mid-Sized (50+)'].map(opt => {
-                                    const val = opt.split(' ')[0] === 'Solopreneur' ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || opt;
-                                    const rawVal = opt.split(' ')[0] === 'Solopreneur' ? opt : opt;
                                     const stateVal = opt.includes('Solopreneur') ? 'Solopreneur' : opt.match(/\((.*)\)/)?.[1] || '1-10';
 
                                     const mainLabel = opt.split(' (')[0];

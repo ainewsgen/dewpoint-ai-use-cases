@@ -297,6 +297,45 @@ router.delete('/admin/leads/:id', async (req, res) => {
     }
 });
 
+// Update Lead (Admin)
+router.put('/admin/leads/:id', async (req, res) => {
+    try {
+        const leadId = parseInt(req.params.id);
+        const { companyData, userName } = req.body;
+
+        const lead = await db.select().from(leads).where(eq(leads.id, leadId)).limit(1);
+        if (lead.length === 0) return res.status(404).json({ error: 'Lead not found' });
+
+        const companyId = lead[0].companyId;
+        const userId = lead[0].userId;
+
+        // 1. Update Company Data
+        if (companyId && companyData) {
+            await db.update(companies).set({
+                url: companyData.url,
+                industry: companyData.industry,
+                naicsCode: companyData.naicsCode,
+                role: companyData.role,
+                size: companyData.size,
+                painPoint: companyData.painPoint,
+                stack: companyData.stack, // Ensure frontend sends array or we parse it
+                description: companyData.description,
+                scannerSource: companyData.scannerSource
+            }).where(eq(companies.id, companyId));
+        }
+
+        // 2. Update User Name (if registered)
+        if (userId && userName) {
+            await db.update(users).set({ name: userName }).where(eq(users.id, userId));
+        }
+
+        res.json({ success: true });
+    } catch (error: any) {
+        console.error('Update lead error:', error);
+        res.status(500).json({ error: 'Failed to update lead', details: error.message });
+    }
+});
+
 // Delete a Lead (remove from list, keep user) - LEGACY / User Specific
 router.delete('/admin/leads/user/:userId', async (req, res) => {
     try {

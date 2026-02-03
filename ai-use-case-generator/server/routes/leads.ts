@@ -332,6 +332,14 @@ router.get('/admin/leads', async (req, res) => {
                 isNull(leads.userId)
             ));
 
+        console.log(`[DEBUG] GET /admin/leads matched ${allLeads.length} records.`);
+        const anonCount = allLeads.filter(l => !l.lead.userId).length;
+        const regCount = allLeads.filter(l => l.lead.userId).length;
+        console.log(`[DEBUG] Anonymous: ${anonCount}, Registered: ${regCount}`);
+        if (allLeads.length > 0) {
+            console.log(`[DEBUG] Sample Lead:`, allLeads[0]);
+        }
+
         // Format for frontend (optional, or do it there);
         res.json({ leads: allLeads });
     } catch (error: any) {

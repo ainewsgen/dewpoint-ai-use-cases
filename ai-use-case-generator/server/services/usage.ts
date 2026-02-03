@@ -109,8 +109,8 @@ export class UsageService {
         const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
 
         return {
-            spend: Number(result[0]?.totalSpend || 0),
-            requests: Number(result[0]?.requestCount || 0),
+            spend: parseFloat(String(result[0]?.totalSpend || 0)),
+            requests: parseInt(String(result[0]?.requestCount || 0), 10),
             limit,
             integrationId: openAIInt?.id,
             debugMeta: openAIInt?.metadata,

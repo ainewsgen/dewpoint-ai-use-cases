@@ -1595,7 +1595,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                 )
             }
 
-            {/* Edit User Modal */}
+            {/* Edit Lead/User Modal */}
             {
                 editingUser && (
                     <div style={{
@@ -1603,42 +1603,138 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         zIndex: 1000
                     }}>
-                        <div className="glass-panel animate-fade-in" style={{ padding: '2rem', width: '100%', maxWidth: '500px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                <h3>Edit User Profile</h3>
+                        <div className="glass-panel animate-fade-in" style={{ padding: '2rem', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
+                                <div>
+                                    <h3 style={{ fontSize: '1.25rem' }}>Edit Lead Profile</h3>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>ID: {editingUser}</p>
+                                </div>
                                 <button onClick={() => setEditingUser(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
                             </div>
                             <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
+
+                                {/* Name Input (Updates User Name if registered) */}
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Company URL</label>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Name (User / Lead)</label>
                                     <input
                                         type="text"
-                                        value={editForm.url || ''}
-                                        onChange={e => setEditForm({ ...editForm, url: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                        value={editForm.name || ''}
+                                        onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                        placeholder={editForm.name ? '' : 'Anonymous'}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Role</label>
-                                    <input
-                                        type="text"
-                                        value={editForm.role || ''}
-                                        onChange={e => setEditForm({ ...editForm, role: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                                    />
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Company URL</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.url || ''}
+                                            onChange={e => setEditForm({ ...editForm, url: e.target.value })}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Industry</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.industry || ''}
+                                            onChange={e => setEditForm({ ...editForm, industry: e.target.value })}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                        />
+                                    </div>
                                 </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Role</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.role || ''}
+                                            onChange={e => setEditForm({ ...editForm, role: e.target.value })}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Company Size</label>
+                                        <select
+                                            value={editForm.size || ''}
+                                            onChange={e => setEditForm({ ...editForm, size: e.target.value })}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                        >
+                                            <option value="">Select Size</option>
+                                            <option value="1-10">1-10</option>
+                                            <option value="11-50">11-50</option>
+                                            <option value="51-200">51-200</option>
+                                            <option value="201-500">201-500</option>
+                                            <option value="500+">500+</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>NAICS Code</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.naicsCode || ''}
+                                            onChange={e => setEditForm({ ...editForm, naicsCode: e.target.value })}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Data Source</label>
+                                        <select
+                                            value={editForm.scannerSource || 'System'}
+                                            onChange={e => setEditForm({ ...editForm, scannerSource: e.target.value })}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                        >
+                                            <option value="System">System / Manual</option>
+                                            <option value="AI">AI Scanner</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Pain Point</label>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Pain Point</label>
                                     <textarea
                                         value={editForm.painPoint || ''}
                                         onChange={e => setEditForm({ ...editForm, painPoint: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', minHeight: '80px' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', minHeight: '60px', background: '#111', color: 'white' }}
                                     />
                                 </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Business Description / Summary</label>
+                                    <textarea
+                                        value={editForm.description || ''}
+                                        onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', minHeight: '80px', background: '#111', color: 'white' }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Tech Stack (Comma Separated)</label>
+                                    <input
+                                        type="text"
+                                        value={Array.isArray(editForm.stack) ? editForm.stack.join(', ') : (editForm.stack || '')}
+                                        onChange={e => {
+                                            // Split by comma for simple editing
+                                            const val = e.target.value;
+                                            setEditForm({ ...editForm, stack: val.split(',').map(s => s.trim()) });
+                                        }}
+                                        placeholder="React, Node.js, AWS..."
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
+                                    />
+                                </div>
+
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
                                 <button onClick={() => setEditingUser(null)} className="btn-secondary">Cancel</button>
-                                <button onClick={saveEditUser} className="btn-primary">Save Changes</button>
+                                <button onClick={saveEditUser} className="btn-primary">
+                                    <Save size={16} /> Save Changes
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -1,8 +1,11 @@
-
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { requireAuth, requireAdmin } from '../middleware/auth';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 const PROMPT_FILE_PATH = path.join(__dirname, '../data/system_prompt.txt');

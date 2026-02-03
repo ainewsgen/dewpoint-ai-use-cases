@@ -13,7 +13,7 @@ interface MatrixProps {
     onLoaded?: (recipes: Opportunity[]) => void; // Optional callback for shadow save
 }
 
-export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user, onLoaded }: MatrixProps) {
+export function Matrix({ companyData, onUnlock: _onUnlock, isAdmin, onSaveRequest, user: _user, onLoaded }: MatrixProps) {
     // Fix: generateOpportunities is async, so we must handle it with state
     const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -66,14 +66,13 @@ export function Matrix({ companyData, onUnlock, isAdmin, onSaveRequest, user, on
         // Delegate to App
         onSaveRequest(opp);
         // Note: The App will update localStorage, which triggers our listener
-        // But for immediate feedback, we can optimistically update IF user is logged in
-        if (user) {
-            const exists = savedRecipes.find(r => r.title === opp.title);
-            if (exists) {
-                setSavedRecipes(savedRecipes.filter(r => r.title !== opp.title));
-            } else {
-                setSavedRecipes([...savedRecipes, opp]);
-            }
+        // Note: The App will update localStorage, which triggers our listener
+        // But for immediate feedback, we can optimistically update
+        const exists = savedRecipes.find(r => r.title === opp.title);
+        if (exists) {
+            setSavedRecipes(savedRecipes.filter(r => r.title !== opp.title));
+        } else {
+            setSavedRecipes([...savedRecipes, opp]);
         }
     };
 

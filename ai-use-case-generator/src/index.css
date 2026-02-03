@@ -369,3 +369,173 @@ h5 {
         opacity: 1;
     }
 }
+
+/* =========================================
+   ADMIN CONSOLE THEME (UI Polish)
+   ========================================= */
+
+/* Main Layout Containers */
+.admin-page-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 1rem;
+}
+
+.admin-page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: hsl(var(--text-main));
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.admin-panel {
+    background: white;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Softer shadow */
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* Data Tables */
+.admin-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: separate; /* Allows for rounded corners if needed */
+    border-spacing: 0;
+    font-size: 0.95rem;
+}
+
+.admin-table th {
+    background: #f8fafc; /* Light gray header */
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-glass);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 1.25rem 1.5rem; /* More breathing room */
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background: white;
+    color: hsl(var(--text-main));
+    vertical-align: middle;
+    transition: background 0.1s;
+}
+
+.admin-table tr:hover td {
+    background: #fcfcfc;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Form Controls */
+.admin-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.admin-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--border-glass);
+    border-radius: 6px;
+    background: white;
+    color: hsl(var(--text-main));
+    transition: all 0.2s;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+    outline: none;
+    border-color: hsl(var(--accent-primary));
+    box-shadow: 0 0 0 3px hsla(var(--accent-primary)/0.1);
+}
+
+.admin-textarea {
+    min-height: 100px;
+    line-height: 1.6;
+    font-family: inherit;
+}
+
+/* Modal Polish */
+.admin-modal-overlay {
+    background: rgba(15, 23, 42, 0.6); /* Darker, richer overlay */
+    backdrop-filter: blur(4px);
+}
+
+.admin-modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-glass);
+    overflow: hidden;
+}
+
+.admin-modal-header {
+    background: #f8fafc;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-modal-body {
+    padding: 2rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.admin-modal-footer {
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--border-glass);
+    background: #f8fafc;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Badges & Chips */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.success { background: hsla(142, 76%, 36%, 0.1); color: hsl(142, 76%, 36%); }
+.status-badge.warning { background: hsla(38, 92%, 50%, 0.1); color: hsl(38, 92%, 50%); }
+.status-badge.error   { background: hsla(0, 84%, 60%, 0.1); color: hsl(0, 84%, 60%); }
+.status-badge.info    { background: hsla(217, 91%, 60%, 0.1); color: hsl(217, 91%, 60%); }

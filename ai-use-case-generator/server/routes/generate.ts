@@ -78,7 +78,10 @@ User Profile:
 
 Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title, Department, Industry (specific to the use case or general), Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.
 
-CRITICAL: Use the "Deep Site Analysis" key signals and text to find specific "dormant data" opportunities or "competitor gaps" (e.g. if they lack online booking, suggest an AI scheduler).`;
+CRITICAL INSTRUCTIONS:
+1. "Problem": Describe the specific operational bottleneck or pain point in 1-2 sentences. Do NOT mention the solution here.
+2. "Solution Narrative": Describe the automation workflow and how it solves the problem. Do NOT repeat the problem statement. Focus on the 'How'.
+3. Use the "Deep Site Analysis" key signals and text to find specific "dormant data" opportunities or "competitor gaps" (e.g. if they lack online booking, suggest an AI scheduler).`;
 
         // 1. Prepare Prompt (Simple Injection for Phase 1)
         let systemPrompt = promptDetails?.systemPromptOverride || defaultSystemPrompt;

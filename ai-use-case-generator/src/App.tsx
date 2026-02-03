@@ -172,22 +172,18 @@ function App() {
     };
 
     const handleRequestSave = (recipe: Opportunity) => {
-        if (user) {
-            saveToBackend(recipe).then(() => {
-                // Determine if we added or removed for the alert text?
-                // For simplicity, just say "Roadmap updated"
-                // Or check our local state in Library? 
-                // Library calls this on toggle. If it was removed, we should probably support remove.
-                // Current flow is Add-Only via this function?
-                // Library.tsx: onToggle -> handleToggleSave -> onSaveRequest(opp) -> App.handleRequestSave
-                // But Library also runs its own setSavedRecipes logic.
-                // IF we want true sync, handleRequestSave should handle Toggle.
+        // Always save locally first (handled by saveToBackend logic for localStorage)
+        saveToBackend(recipe).then((action) => {
+            // Feedback
+            if (action === 'ADDED') alert(user ? "Added to Roadmap!" : "Added to temporary Roadmap. Sign up to save permanently.");
+            if (action === 'REMOVED') alert("Removed from Roadmap.");
+        });
 
-                alert("Roadmap updated!");
-            });
-        } else {
-            setPendingSave(recipe);
-            setAuthModal('SIGNUP');
+        // Optional: Nudge for signup if anonymous, but don't block
+        if (!user) {
+            // maybe set a flag to show a toast instead of modal?
+            // For now, silent save is better UX than blocking modal.
+            // setAuthModal('SIGNUP'); 
         }
     };
 
@@ -293,13 +289,8 @@ function App() {
                                     setView('DISCOVERY');
                                     return;
                                 }
-                                // Gating Logic
-                                if (!user) {
-                                    // Default to Signup to encourage conversion
-                                    setAuthModal('SIGNUP');
-                                } else {
-                                    setView('ROADMAP');
-                                }
+                                // Allow anonymous access - Roadmap component will handle empty overlap
+                                setView('ROADMAP');
                             }}
                             style={{
                                 background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',

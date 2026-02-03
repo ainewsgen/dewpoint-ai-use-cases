@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity, Eye, Sparkles, Zap, Key, BookOpen, Layers, User } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, Lock, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users } from 'lucide-react';
 import { IcpManager } from './admin/IcpManager';
 import { LibraryManager } from './admin/LibraryManager';
 
@@ -74,6 +74,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     // UI States
     const [isLoadingLeads, setIsLoadingLeads] = useState(false);
+    const [isScanning, setIsScanning] = useState(false); // Fix: Add missing state
     const [leadsError, setLeadsError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -387,7 +388,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             stack: ['Salesforce', 'Slack', 'Jira', 'QuickBooks'],
             painPoint: 'Manual Data Entry'
         };
-        const sampleOpps = generateOpportunities(dummyData);
+        const sampleOpps = await generateOpportunities(dummyData);
 
         // Find best match or default to first if name mismatch (since names are dynamic sometimes)
         // Actually names are relatively static in the generator.
@@ -424,6 +425,46 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     // WAIT, I am generating `replace_file_content`. I should use `multi_replace_file_content` instead.
 
 
+
+    const handleScan = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (!editForm.url) return;
+
+        setIsScanning(true);
+        try {
+            const res = await fetch('/api/scan-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: editForm.url })
+            });
+            const data = await res.json();
+
+            if (data.success && data.data) {
+                // Auto-fill form
+                setEditForm((prev: any) => ({
+                    ...prev,
+                    industry: data.data.industry || prev.industry,
+                    // If AI gives description, use it? Or keep existing?
+                    // Maybe prompt user? For now just overwrite if empty?
+                    // Let's just overwrite for now as it's an explicit action.
+                    description: data.data.description || prev.description,
+
+                    // Also stack?
+                    stack: Array.from(new Set([...(prev.stack || []), ...(data.data.stack || [])])),
+
+                    // Store internal metadata if useful
+                    scannerSource: data.data.context?.source
+                }));
+            } else {
+                alert('Scan failed to find relevant data.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Scan failed.');
+        } finally {
+            setIsScanning(false);
+        }
+    };
 
     const handleSaveUser = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -494,13 +535,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
         setIsEditingRealUser(true);
     };
 
-    // User Management (MOCK for Leads View)
-    const handleDeleteUser = (id: string, e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        if (confirm('Are you sure you want to ban/delete this user? This action cannot be undone.')) {
-            alert(`User ${id} has been removed (Simulated).`);
-        }
-    };
+
 
     const handleResetPassword = (id: string, e?: React.MouseEvent) => {
         e?.stopPropagation();
@@ -669,20 +704,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             >
                                 <Activity size={18} /> Observability
                             </button>
-                            <button
-                                onClick={() => setActiveTab('icps')}
-                                style={{
-                                    padding: '0.75rem 1rem',
-                                    background: activeTab === 'icps' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === 'icps' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
-                                    color: activeTab === 'icps' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}
-                            >
-                                <Layers size={18} /> ICPs
-                            </button>
+
                             <button
                                 onClick={() => setActiveTab('library')}
                                 style={{
@@ -719,31 +741,28 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Observability Tab */}
             {
                 activeTab === 'observability' && (
-                    <div className="glass-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'hsl(var(--accent-gold))' }}>
-                                <Activity size={20} /> AI Usage & Budget
+                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+                        <div className="admin-page-header">
+                            <h3 className="admin-page-title">
+                                <Activity size={24} className="text-accent" /> AI Usage & Budget
                             </h3>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <button
-                                    onClick={fetchUsageStats}
-                                    className="btn-secondary"
-                                    style={{ padding: '0.5rem' }}
-                                    title="Refresh"
-                                >
-                                    <RefreshCw size={16} />
-                                </button>
-                            </div>
+                            <button
+                                onClick={fetchUsageStats}
+                                className="btn-secondary"
+                                title="Refresh"
+                            >
+                                <RefreshCw size={16} /> Refresh
+                            </button>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                             {/* Budget Card */}
-                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-                                <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'block', marginBottom: '0.5rem' }}>Daily Budget Limit</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 600 }}>${usageStats?.limit?.toFixed(2) || '0.00'}</span>
+                            <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', background: 'linear-gradient(to bottom right, #ffffff, #f8fafc)' }}>
+                                <label className="admin-label">Daily Budget Limit</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <span style={{ fontSize: '2rem', fontWeight: 700, color: 'hsl(var(--text-main))' }}>${usageStats?.limit?.toFixed(2) || '0.00'}</span>
                                     {isUpdatingLimit ? (
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Updating...</span>
+                                        <span className="status-badge info">Updating...</span>
                                     ) : (
                                         <button
                                             onClick={() => {
@@ -752,14 +771,13 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                     handleUpdateLimit(parseFloat(newLimit));
                                                 }
                                             }}
-                                            className="btn-secondary"
-                                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                            className="btn-secondary btn-sm"
                                         >
                                             <Edit size={12} /> Edit
                                         </button>
                                     )}
                                 </div>
-                                <div style={{ marginTop: '1rem', height: '6px', background: '#333', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ marginTop: '0.5rem', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
                                     <div style={{
                                         height: '100%',
                                         width: `${Math.min(((usageStats?.spend || 0) / (usageStats?.limit || 1)) * 100, 100)}%`,
@@ -767,23 +785,26 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         transition: 'width 0.5s ease'
                                     }} />
                                 </div>
-                                <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: (usageStats?.spend || 0) > (usageStats?.limit || 0) ? 'salmon' : 'var(--text-muted)' }}>
+                                <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', fontWeight: 500, color: (usageStats?.spend || 0) > (usageStats?.limit || 0) ? 'salmon' : 'var(--text-muted)' }}>
                                     ${usageStats?.spend?.toFixed(4)} used today
                                 </p>
                             </div>
 
                             {/* Request Count Card */}
-                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-                                <label style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'block', marginBottom: '0.5rem' }}>Total Requests Today</label>
-                                <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'white' }}>
+                            <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', background: 'linear-gradient(to bottom right, #ffffff, #f8fafc)' }}>
+                                <label className="admin-label">Total Requests Today</label>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'hsl(var(--text-main))' }}>
                                     {usageStats?.requests || 0}
                                 </div>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                                    Across all users and endpoints
+                                </p>
                             </div>
                         </div>
 
                         {/* System Forecast / Diagnostic */}
-                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '1.5rem' }}>
-                            <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+                        <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '1.5rem' }}>
+                            <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 0 }}>
                                 <Activity size={18} /> System Forecast
                             </h4>
 
@@ -795,18 +816,22 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 let status = 'System (Fallback)';
                                 let color = 'salmon';
                                 let reason = 'Unknown Error';
+                                let bg = 'rgba(250, 128, 114, 0.1)';
 
                                 if (!hasActiveIntegration) {
                                     status = 'System (Fallback)';
                                     color = 'orange';
+                                    bg = 'rgba(255, 165, 0, 0.1)';
                                     reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
                                 } else if (budgetExceeded) {
                                     status = 'System (Fallback)';
                                     color = 'salmon';
+                                    bg = 'rgba(250, 128, 114, 0.1)';
                                     reason = `Daily budget limit ($${usageStats?.limit}) has been reached relative to current spend ($${usageStats?.spend}).`;
                                 } else {
                                     status = 'AI (Live Generation)';
-                                    color = 'hsl(140, 70%, 50%)';
+                                    color = 'hsl(140, 70%, 40%)';
+                                    bg = 'hsla(140, 70%, 40%, 0.1)';
                                     reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
                                 }
 
@@ -815,7 +840,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         <div style={{
                                             padding: '0.5rem 1rem',
                                             borderRadius: '6px',
-                                            background: color === 'salmon' ? 'rgba(250, 128, 114, 0.2)' : (color === 'orange' ? 'rgba(255, 165, 0, 0.2)' : 'rgba(0, 255, 127, 0.1)'),
+                                            background: bg,
                                             border: `1px solid ${color}`,
                                             color: color,
                                             fontWeight: 700,
@@ -824,11 +849,11 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                             {status}
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                            <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'white' }}>Current Operational Mode</strong>
-                                            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                            <strong style={{ display: 'block', marginBottom: '0.25rem', color: 'hsl(var(--text-main))' }}>Current Operational Mode</strong>
+                                            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.6' }}>
                                                 {reason}
                                             </p>
-                                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                                                 <button
                                                     onClick={async () => {
                                                         setIsDiagnosing(true);
@@ -852,11 +877,10 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                         }
                                                     }}
                                                     disabled={isDiagnosing}
-                                                    className="btn-secondary"
-                                                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                                    className="btn-secondary btn-sm"
                                                 >
-                                                    {isDiagnosing ? <RefreshCw className="spin" size={12} /> : <Zap size={12} />}
-                                                    {isDiagnosing ? 'Running Checks...' : 'Test AI Readiness'}
+                                                    {isDiagnosing ? <RefreshCw className="spin" size={14} /> : <Zap size={14} />}
+                                                    {isDiagnosing ? ' Checking...' : ' Test Readiness'}
                                                 </button>
 
                                                 <button
@@ -871,12 +895,10 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                             alert("Error fixing schema: " + e);
                                                         }
                                                     }}
-                                                    className="btn-secondary"
-                                                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'rgba(255,255,255,0.1)' }}
+                                                    className="btn-secondary btn-sm"
                                                     title="Use this if you see 'api_usage' table errors"
                                                 >
-                                                    <Database size={12} />
-                                                    Fix DB Schema
+                                                    <Database size={14} /> Fix Schema
                                                 </button>
                                                 <button
                                                     onClick={async () => {
@@ -895,12 +917,10 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                             setIsDiagnosing(false);
                                                         }
                                                     }}
-                                                    className="btn-secondary"
-                                                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'hsla(var(--accent-primary)/0.3)', color: 'hsl(var(--accent-primary))' }}
-                                                    title="Run a full pipeline test with dummy data"
+                                                    className="btn-secondary btn-sm"
+                                                    style={{ borderColor: 'hsl(var(--accent-primary))', color: 'hsl(var(--accent-primary))' }}
                                                 >
-                                                    <Sparkles size={12} />
-                                                    Run Full Simulation
+                                                    <Sparkles size={14} /> Run Simulation
                                                 </button>
                                             </div>
                                         </div>
@@ -909,19 +929,19 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             })()}
                         </div>
 
-                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                        <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
                             <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <Shield size={16} /> Budget Enforcement
                             </h4>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
                                 When the daily limit is reached, all AI Generation requests will automatically fall back to static templates to prevent overage charges.
                             </p>
-                            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.9rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <CheckCircle size={16} color="hsl(var(--accent-primary))" /> Hard Limit Active
+                                    <CheckCircle size={16} className="text-accent" /> Hard Limit Active
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <CheckCircle size={16} color="hsl(var(--accent-primary))" /> Admin Notifications (Coming Soon)
+                                    <CheckCircle size={16} className="text-accent" /> Admin Notifications (Coming Soon)
                                 </div>
                             </div>
                         </div>
@@ -951,31 +971,44 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Blueprints & AI Tab */}
             {
                 activeTab === 'blueprints' && (
-                    <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+                        <div className="admin-page-header">
+                            <div>
+                                <h3 className="admin-page-title">
+                                    <Sparkles size={24} className="text-accent" /> AI Generation Config
+                                </h3>
+                                <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                                    Manage the system prompt and blueprint templates.
+                                </p>
+                            </div>
+                        </div>
+
                         <div style={{ marginBottom: '3rem' }}>
-                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'hsl(var(--accent-gold))' }}>
-                                <Sparkles size={20} /> AI Generation Config
-                            </h3>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                                Manage the precanned prompt used by the engine to generate specific recipe details.
-                            </p>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>System Prompt Template</label>
-                                <textarea
-                                    value={systemPrompt}
-                                    onChange={(e) => setSystemPrompt(e.target.value)}
-                                    placeholder="Loading system prompt..."
-                                    style={{
-                                        width: '100%', minHeight: '400px',
-                                        background: '#111', color: '#eee',
-                                        border: '1px solid #333', borderRadius: '6px',
-                                        fontFamily: 'monospace', padding: '1rem', lineHeight: '1.5'
-                                    }}
-                                />
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', gap: '1rem' }}>
-                                    <button className="btn-secondary" onClick={() => {
-                                        if (confirm("Reset to default prompt?")) {
-                                            setSystemPrompt(`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <label className="admin-label" style={{ fontSize: '1rem' }}>System Prompt Template</label>
+                                <span className="status-badge" style={{ fontSize: '0.75rem' }}>Core Logic</span>
+                            </div>
+
+                            <textarea
+                                value={systemPrompt}
+                                onChange={(e) => setSystemPrompt(e.target.value)}
+                                placeholder="Loading system prompt..."
+                                className="admin-textarea"
+                                style={{
+                                    minHeight: '400px',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.9rem',
+                                    lineHeight: '1.6',
+                                    background: '#1e293b',
+                                    color: '#e2e8f0',
+                                    border: '1px solid #334155'
+                                }}
+                            />
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', gap: '1rem' }}>
+                                <button className="btn-secondary" onClick={() => {
+                                    if (confirm("Reset to default prompt?")) {
+                                        setSystemPrompt(`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
 
 User Profile:
 - Company URL: {{url}}
@@ -1001,48 +1034,64 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 10. **Tech Stack Details**: List of specific tools used + their role (e.g., "OpenAI: Reasoning").
 11. **Difficulty**: Implementation effort (Low, Med, High).
 12. **Upsell**: A potential service retainer or expansion opportunity.`);
+                                    }
+                                }}>
+                                    <RefreshCw size={16} /> Reset Default
+                                </button>
+                                <button className="btn-primary" onClick={async () => {
+                                    try {
+                                        const res = await fetch('/api/admin/config/system-prompt', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                            },
+                                            body: JSON.stringify({ prompt: systemPrompt })
+                                        });
+                                        if (res.ok) {
+                                            alert("System Prompt Saved Successfully!");
+                                        } else {
+                                            alert("Failed to save prompt");
                                         }
-                                    }}>
-                                        <RefreshCw size={16} /> Reset Default
-                                    </button>
-                                    <button className="btn-primary" onClick={async () => {
-                                        try {
-                                            const res = await fetch('/api/admin/config/system-prompt', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                                                },
-                                                body: JSON.stringify({ prompt: systemPrompt })
-                                            });
-                                            if (res.ok) {
-                                                alert("System Prompt Saved Successfully!");
-                                            } else {
-                                                alert("Failed to save prompt");
-                                            }
-                                        } catch (e) {
-                                            alert("Error saving prompt: " + e);
-                                        }
-                                    }}>
-                                        <Save size={16} /> Save Configuration
-                                    </button>
-                                </div>
+                                    } catch (e) {
+                                        alert("Error saving prompt: " + e);
+                                    }
+                                }}>
+                                    <Save size={16} /> Save Configuration
+                                </button>
                             </div>
                         </div>
 
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600 }}>
                             <Database size={20} /> Managed Blueprints
                         </h3>
 
                         {/* Mock List of Core Blueprints */}
                         <div style={{ display: 'grid', gap: '1rem' }}>
                             {['The Silent Assistant', 'The Invoice Watchdog', 'The Omni-Channel Nurture', 'The Project Pulse'].map((name, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
-                                    <span style={{ fontWeight: 600 }}>{name}</span>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <span className="badge" style={{ background: i % 2 === 0 ? '#222' : '#333' }}>{i % 2 === 0 ? 'Core' : 'Advanced'}</span>
-                                        <button className="btn-secondary" style={{ padding: '0.25rem 0.5rem' }} title="Edit Template" onClick={() => handleEditBlueprint(name)}>
-                                            <Edit size={14} />
+                                <div key={i} className="admin-list-item" style={{
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                    padding: '1rem 1.5rem',
+                                    background: 'white',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-glass)',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{
+                                            width: '32px', height: '32px', borderRadius: '50%',
+                                            background: i % 2 === 0 ? 'hsla(var(--accent-primary)/0.1)' : 'hsla(var(--accent-gold)/0.1)',
+                                            color: i % 2 === 0 ? 'hsl(var(--accent-primary))' : 'hsl(var(--accent-gold))',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+                                        }}>
+                                            {i + 1}
+                                        </div>
+                                        <span style={{ fontWeight: 600, fontSize: '1rem' }}>{name}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        <span className={`status-badge ${i % 2 === 0 ? 'info' : 'warning'}`}>{i % 2 === 0 ? 'Core' : 'Advanced'}</span>
+                                        <button className="btn-secondary btn-sm" title="Edit Template" onClick={() => handleEditBlueprint(name)}>
+                                            <Edit size={14} /> Edit
                                         </button>
                                     </div>
                                 </div>
@@ -1054,42 +1103,41 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
             {/* Integrations Tab */}
 
+            {/* Integrations Tab */}
+
             {
                 activeTab === 'cms' && (
-                    <div className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Megaphone size={20} /> Landing Page Announcement
-                            </h3>
-                            <div className="badge" style={{
-                                background: cmsStatus === 'published' ? 'hsl(140, 70%, 20%)' : 'hsl(0, 0%, 20%)',
-                                color: cmsStatus === 'published' ? 'hsl(140, 70%, 80%)' : 'var(--text-muted)',
-                                display: 'flex', alignItems: 'center', gap: '0.5rem'
-                            }}>
-                                {cmsStatus === 'published' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                        <div className="admin-page-header">
+                            <div>
+                                <h3 className="admin-page-title">
+                                    <Megaphone size={24} className="text-accent" /> Landing Page Announcement
+                                </h3>
+                                <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                                    Display a system-wide message on the onboarding page.
+                                </p>
+                            </div>
+                            <div className={`status-badge ${cmsStatus === 'published' ? 'success' : 'neutral'}`} style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                                {cmsStatus === 'published' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
                                 {cmsStatus === 'published' ? 'Live' : 'Draft'}
                             </div>
                         </div>
 
-                        <p style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
-                            This message will be displayed prominently on the landing (onboarding) page for all users.
-                        </p>
-
                         {isEditingCms ? (
-                            <div className="animate-fade-in">
+                            <div className="animate-fade-in" style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                                <label className="admin-label">Announcement Text</label>
                                 <textarea
                                     value={announcement}
                                     onChange={(e) => setAnnouncement(e.target.value)}
                                     placeholder="e.g., 'System Maintenance: Saturday 2am' or 'Welcome to the Beta!'"
+                                    className="admin-textarea"
                                     style={{
-                                        width: '100%', minHeight: '150px', padding: '1rem',
-                                        background: 'var(--bg-card)', border: '1px solid var(--border-glass)',
-                                        color: 'var(--text-main)', borderRadius: '8px', marginBottom: '1rem',
-                                        fontSize: '1rem', fontFamily: 'inherit'
+                                        minHeight: '150px',
+                                        marginBottom: '1.5rem'
                                     }}
                                 />
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
-                                    <button onClick={() => setIsEditingCms(false)} className="btn-secondary">
+                                    <button onClick={() => setIsEditingCms(false)} className="btn-ghost">
                                         Cancel
                                     </button>
                                     <button onClick={handleSaveDraft} className="btn-secondary">
@@ -1103,13 +1151,18 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         ) : (
                             <div className="animate-fade-in">
                                 <div style={{
-                                    padding: '1.5rem', background: 'rgba(255,255,255,0.05)',
-                                    borderRadius: '8px', marginBottom: '1.5rem', minHeight: '100px',
+                                    padding: '2rem',
+                                    background: 'linear-gradient(to bottom, #ffffff, #f8fafc)',
+                                    borderRadius: '12px',
+                                    marginBottom: '1.5rem',
+                                    minHeight: '120px',
+                                    border: '1px solid var(--border-glass)',
                                     display: 'flex', alignItems: announcement ? 'flex-start' : 'center',
-                                    justifyContent: announcement ? 'flex-start' : 'center'
+                                    justifyContent: announcement ? 'flex-start' : 'center',
+                                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                                 }}>
                                     {announcement ? (
-                                        <p style={{ whiteSpace: 'pre-wrap' }}>{announcement}</p>
+                                        <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', color: 'hsl(var(--text-main))' }}>{announcement}</p>
                                     ) : (
                                         <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No announcement set.</p>
                                     )}
@@ -1118,7 +1171,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <button
                                         onClick={handleDeleteMessage}
-                                        style={{ color: 'salmon', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                        style={{ color: 'salmon', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}
                                     >
                                         <Trash size={16} /> Delete Message
                                     </button>
@@ -1126,7 +1179,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     <div style={{ display: 'flex', gap: '1rem' }}>
                                         {cmsStatus === 'published' && (
                                             <button onClick={handleUnpublish} className="btn-secondary">
-                                                Unpublish (Hide)
+                                                Unpublish
                                             </button>
                                         )}
                                         {cmsStatus === 'draft' && announcement && (
@@ -1139,7 +1192,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         </button>
                                     </div>
                                 </div>
-                                {showSaveConfirm && <p style={{ textAlign: 'right', marginTop: '0.5rem', color: 'hsl(140, 70%, 50%)', fontSize: '0.9rem' }}>Changes saved!</p>}
+                                {showSaveConfirm && <p className="animate-fade-in" style={{ textAlign: 'right', marginTop: '0.5rem', color: 'hsl(140, 70%, 40%)', fontSize: '0.9rem', fontWeight: 500 }}>Changes saved!</p>}
                             </div>
                         )}
                     </div>
@@ -1147,11 +1200,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             }
 
             {/* Logic for Grouping Leads */}
+            {/* Logic for Grouping Leads */}
             {
                 activeTab === 'leads' && (() => {
                     if (isLoadingLeads) {
                         return (
-                            <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                            <div className="admin-panel" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                                 <div className="spinner" style={{ marginBottom: '1rem' }} />
                                 <p>Loading leads...</p>
                             </div>
@@ -1160,7 +1214,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
                     if (leadsError) {
                         return (
-                            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', borderColor: 'salmon' }}>
+                            <div className="admin-panel" style={{ padding: '2rem', textAlign: 'center', borderColor: 'salmon' }}>
                                 <h3 style={{ color: 'salmon', marginBottom: '1rem' }}>Error Loading Leads</h3>
                                 <p style={{ color: '#ccc' }}>{leadsError}</p>
                                 <button onClick={fetchLeads} className="btn-secondary" style={{ marginTop: '1rem' }}>Try Again</button>
@@ -1179,10 +1233,6 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         if (isRegistered) {
                             key = row.user.email || row.company?.url || 'unknown_user';
                         } else {
-                            // Anonymous Grouping Priority:
-                            // 1. Shadow ID (Cookie) - Strongest link for anonymous users
-                            // 2. URL - Weak link but better than nothing
-                            // 3. Lead ID - Fallback (No grouping)
                             if (leadShadowId) {
                                 key = `shadow_${leadShadowId}`;
                             } else if (row.company?.url) {
@@ -1195,14 +1245,11 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         if (!acc[key]) {
                             acc[key] = {
                                 ...row,
-                                // Use the row's specific recipe as the initial array
                                 allRecipes: row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [],
                                 interactionCount: 1,
-                                // Explicitly mark grouping method for UI
                                 groupingMethod: isRegistered ? 'user' : (leadShadowId ? 'shadow' : 'url')
                             };
                         } else {
-                            // Merge recipes
                             const newRecipes = row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [];
                             acc[key].allRecipes.push(...newRecipes);
                             acc[key].interactionCount += 1;
@@ -1211,120 +1258,117 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                     }, {} as Record<string, any>);
 
                     const userList = Object.values(uniqueUsers);
-                    // Fix: Only look in userList (which comes from adminLeads), DO NOT fallback to 'leads' prop which might be malformed
-                    const activeUser = userList.find((u: any) => u.id === selectedLead);
+                    // Use 'any' cast to avoid TS errors for now during UI polish
+                    const activeUser = userList.find((u: any) => u.id === selectedLead) as any;
 
                     return (
-                        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '2rem', height: 'calc(100vh - 140px)' }}>
                             {/* Sidebar List */}
-                            <div className="glass-panel" style={{ padding: '1rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-                                <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>Registered Users</h3>
-                                {userList.length === 0 && <p style={{ color: '#666', fontStyle: 'italic' }}>No users found.</p>}
-                                {userList.map((user: any) => (
-                                    <div
-                                        key={user.id}
-                                        onClick={() => setSelectedLead(user.id)} // Using first ID as the key for selection
-                                        style={{
-                                            padding: '1rem',
-                                            borderBottom: '1px solid var(--border-glass)',
-                                            cursor: 'pointer',
-                                            background: selectedLead === user.id ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
-                                            borderRadius: '8px',
-                                            marginBottom: '0.5rem',
-                                            position: 'relative'
-                                        }}
-                                        className="admin-user-row"
-                                    >
-                                        <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>
-                                            {/* Fix: Prioritize Registered User Name, then Company Name/URL, then fallback */}
-                                            {user.user?.name ? user.user.name : (
-                                                user.company?.url ? user.company.url : (
-                                                    <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                                        {user.groupingMethod === 'shadow' ? 'Actively Tracking' : 'Ghost User'}
-                                                    </span>
-                                                )
-                                            )}
-                                        </h4>
-                                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--accent-primary))' }}>
-                                            {/* Fix: Use USER email, not company email (which doesn't exist) */}
-                                            {user.user?.email ? user.user.email : (
-                                                user.groupingMethod === 'shadow'
-                                                    ? <span title={user.lead?.shadowId}>ID: {user.lead?.shadowId?.slice(0, 8)}...</span>
-                                                    : user.company?.url || 'No Contact Info'
-                                            )}
-                                        </p>
-                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                                            {user.company?.role || 'Visitor'} • {user.allRecipes.length} Blueprints
-                                        </p>
+                            <div className="admin-panel" style={{ padding: '0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-glass)', background: '#f8fafc' }}>
+                                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Registered Users ({userList.length})
+                                    </h3>
+                                </div>
+                                <div style={{ overflowY: 'auto', flex: 1, padding: '0.5rem' }}>
+                                    {userList.length === 0 && <p style={{ padding: '1rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>No users found.</p>}
+                                    {userList.map((user: any) => (
+                                        <div
+                                            key={user.id}
+                                            onClick={() => setSelectedLead(user.id)}
+                                            className={`admin-list-item ${selectedLead === user.id ? 'active' : ''}`}
+                                            style={{
+                                                padding: '1rem',
+                                                cursor: 'pointer',
+                                                borderRadius: '8px',
+                                                marginBottom: '0.25rem',
+                                                border: selectedLead === user.id ? '1px solid hsl(var(--accent-primary))' : '1px solid transparent',
+                                                background: selectedLead === user.id ? 'hsla(var(--accent-primary)/0.05)' : 'transparent'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: selectedLead === user.id ? 'hsl(var(--accent-primary))' : 'hsl(var(--text-main))' }}>
+                                                    {user.user?.name || user.company?.url || 'Anonymous'}
+                                                </h4>
+                                                {user.allRecipes.length > 0 && <span className="badge" style={{ fontSize: '0.7rem' }}>{user.allRecipes.length}</span>}
+                                            </div>
 
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                            <button
-                                                onClick={(e) => openEditUser(user, e)}
-                                                title="Edit Profile"
-                                                style={{ background: 'transparent', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', opacity: 0.8 }}
-                                            >
-                                                <Edit size={14} />
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    // Pass LEAD ID (row.id) not userId
-                                                    handleDeleteLead(user.id);
-                                                }}
-                                                title="Delete Lead"
-                                                className="btn-danger-icon"
-                                                style={{ padding: '0.25rem' }}
-                                            >
-                                                <Trash size={14} />
-                                            </button>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {user.user?.email || (user.groupingMethod === 'shadow' ? `ID: ${user.lead?.shadowId?.slice(0, 8)}...` : (user.company?.url || 'No Contact Info'))}
+                                            </p>
+
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{user.company?.role || 'Visitor'}</span>
+                                                <div style={{ display: 'flex', gap: '0.25rem', opacity: 0.6 }}>
+                                                    <button
+                                                        onClick={(e) => openEditUser(user, e)}
+                                                        className="btn-ghost"
+                                                        style={{ padding: '2px', height: '20px', width: '20px' }}
+                                                        title="Edit"
+                                                    >
+                                                        <Edit size={12} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteLead(user.id);
+                                                        }}
+                                                        className="btn-ghost user-delete-btn"
+                                                        style={{ padding: '2px', height: '20px', width: '20px', color: 'salmon' }}
+                                                        title="Delete"
+                                                    >
+                                                        <Trash size={12} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Main Detail View */}
-                            <div className="glass-panel" style={{ padding: '2rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                            <div className="admin-panel animate-fade-in" style={{ padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                                 {activeUser ? (
                                     <div className="animate-fade-in">
                                         <div style={{ borderBottom: '1px solid var(--border-glass)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                 <div>
-                                                    <h1 style={{ marginBottom: '0.5rem' }}>
+                                                    <h1 style={{ marginBottom: '0.5rem', fontSize: '1.75rem', color: 'hsl(var(--text-main))' }}>
                                                         {activeUser.user?.name || activeUser.company?.url || "Anonymous User"}
                                                     </h1>
                                                     {activeUser.user?.email && (
-                                                        <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem' }}>{activeUser.user.email}</p>
+                                                        <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem', fontWeight: 500 }}>{activeUser.user.email}</p>
                                                     )}
 
-                                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                                                         {activeUser.company?.url && (
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
                                                                 <Globe size={12} /> {activeUser.company.url}
                                                             </span>
                                                         )}
 
                                                         {activeUser.company?.scannerSource === 'AI' ? (
-                                                            <span style={{ fontSize: '0.7rem', background: 'hsl(var(--accent-primary))', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <span className="status-badge info" style={{ fontSize: '0.75rem' }}>
                                                                 <Sparkles size={10} /> AI Enhanced
                                                             </span>
                                                         ) : (
-                                                            <span style={{ fontSize: '0.7rem', background: 'var(--border-glass)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <span className="status-badge" style={{ fontSize: '0.75rem' }}>
                                                                 ⚡ System
                                                             </span>
                                                         )}
 
                                                         {activeUser.company?.naicsCode && (
-                                                            <span style={{ fontSize: '0.7rem', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px' }}>
+                                                            <span style={{ fontSize: '0.75rem', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '4px' }}>
                                                                 NAICS: {activeUser.company.naicsCode}
                                                             </span>
                                                         )}
 
                                                         {activeUser.lead?.id && (
-                                                            <span style={{ fontSize: '0.7rem', color: '#666' }}>Lead #{activeUser.lead.id}</span>
+                                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Lead #{activeUser.lead.id}</span>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <div style={{ display: 'flex', gap: '0.75rem' }}>
                                                     <button onClick={(e) => openEditUser(activeUser, e)} className="btn-secondary">
                                                         <Edit size={16} /> Edit Profile
                                                     </button>
@@ -1338,37 +1382,37 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
                                             {/* Company Details Grid */}
                                             {activeUser.company && (
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1.5rem', marginTop: '2rem', background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
                                                     <div>
-                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Role</label>
-                                                        <p>{activeUser.company.role || 'N/A'}</p>
+                                                        <label className="admin-label">Role</label>
+                                                        <p style={{ fontWeight: 500 }}>{activeUser.company.role || 'N/A'}</p>
                                                     </div>
                                                     <div>
-                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Company Size</label>
-                                                        <p>{activeUser.company.size || 'N/A'}</p>
-                                                    </div>
-                                                    <div style={{ gridColumn: 'span 2' }}>
-                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Primary Pain Point</label>
-                                                        <p>"{activeUser.company.painPoint || 'N/A'}"</p>
+                                                        <label className="admin-label">Company Size</label>
+                                                        <p style={{ fontWeight: 500 }}>{activeUser.company.size || 'N/A'}</p>
                                                     </div>
                                                     <div>
-                                                        <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Industry</label>
-                                                        <p>{activeUser.company.industry || 'Not specified'}</p>
+                                                        <label className="admin-label">Industry</label>
+                                                        <p style={{ fontWeight: 500 }}>{activeUser.company.industry || 'Not specified'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="admin-label">Pain Point</label>
+                                                        <p className="truncate-2" title={activeUser.company.painPoint || ''} style={{ fontSize: '0.9rem' }}>"{activeUser.company.painPoint || 'N/A'}"</p>
                                                     </div>
 
                                                     {activeUser.company.description && (
-                                                        <div style={{ gridColumn: 'span 2' }}>
-                                                            <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Analyzed Summary</label>
-                                                            <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: 'var(--text-main)' }}>{activeUser.company.description}</p>
+                                                        <div style={{ gridColumn: 'span 4' }}>
+                                                            <label className="admin-label">Analyzed Summary</label>
+                                                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-main)', marginTop: '0.25rem' }}>{activeUser.company.description}</p>
                                                         </div>
                                                     )}
 
                                                     {activeUser.company.stack && Array.isArray(activeUser.company.stack) && activeUser.company.stack.length > 0 && (
-                                                        <div style={{ gridColumn: 'span 2' }}>
-                                                            <label style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase' }}>Detected Tech Stack</label>
-                                                            <div className="chips-grid" style={{ gap: '0.25rem', marginTop: '0.25rem', display: 'flex', flexWrap: 'wrap' }}>
+                                                        <div style={{ gridColumn: 'span 4' }}>
+                                                            <label className="admin-label">Detected Tech Stack</label>
+                                                            <div className="chips-grid" style={{ gap: '0.5rem', marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap' }}>
                                                                 {activeUser.company.stack.map((t: string) => (
-                                                                    <span key={t} style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-glass)' }}>{t}</span>
+                                                                    <span key={t} style={{ background: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid var(--border-glass)', fontWeight: 500, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{t}</span>
                                                                 ))}
                                                             </div>
                                                         </div>
@@ -1377,176 +1421,104 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                             )}
                                         </div>
 
-                                        <h3 style={{ marginBottom: '1rem', color: 'hsl(var(--accent-primary))' }}>
-                                            Unlocked Blueprints ({activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes?.length || 0})
+                                        <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem' }}>
+                                            <Database size={20} className="text-accent" /> Unlocked Blueprints <span className="badge" style={{ fontSize: '0.8rem' }}>{activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes?.length || 0}</span>
                                         </h3>
                                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                                             {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
-                                                <div key={idx} style={{
-                                                    background: 'white',
-                                                    padding: '1.5rem',
-                                                    borderRadius: '8px',
-                                                    border: '2px solid hsl(var(--border-glass))',
-                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                                    transition: 'all 0.2s ease'
-                                                }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                            <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'hsl(var(--text-main))' }}>{r.title}</h4>
+                                                <div key={idx} className="admin-card" style={{ padding: '0', overflow: 'hidden' }}>
+                                                    <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#f8fafc' }}>
+                                                        <div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                                                                <h4 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700, color: 'hsl(var(--text-main))' }}>{r.title}</h4>
+                                                                <span className="badge" style={{ background: 'hsl(var(--accent-primary))', color: 'white' }}>{r.department}</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                                {r.industry && <span>{r.industry}</span>}
+                                                                <span>•</span>
+                                                                <span>{r.generation_metadata?.source || 'System'}</span>
+                                                                {r.generation_metadata?.fallback_reason && (
+                                                                    <span style={{ color: 'salmon', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <AlertCircle size={10} /> Fallback
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                            <button
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    if (!confirm(`Are you sure you want to delete "${r.title}"?`)) return;
-                                                                    try {
-                                                                        // New Endpoint for specific recipe deletion
-                                                                        const res = await fetch(`/api/admin/leads/${activeUser.id}/recipes`, {
-                                                                            method: 'DELETE',
-                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                            body: JSON.stringify({ title: r.title })
-                                                                        });
-                                                                        if (res.ok) {
-                                                                            // Refresh the leads data to update the UI
-                                                                            fetchLeads();
-                                                                        } else {
-                                                                            alert("Failed to delete recipe");
-                                                                        }
-                                                                    } catch (err) {
-                                                                        alert("Error deleting recipe: " + err);
+                                                        <button
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                if (!confirm(`Are you sure you want to delete "${r.title}"?`)) return;
+                                                                try {
+                                                                    const res = await fetch(`/api/admin/leads/${activeUser.id}/recipes`, {
+                                                                        method: 'DELETE',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ title: r.title })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        fetchLeads();
+                                                                    } else {
+                                                                        alert("Failed to delete recipe");
                                                                     }
-                                                                }}
-                                                                className="btn-danger-icon"
-                                                                title="Delete Blueprint"
-                                                                style={{ padding: '0.25rem' }}
-                                                            >
-                                                                <Trash size={14} />
-                                                            </button>
-                                                            <span className="badge" style={{ background: 'hsl(var(--accent-primary))', color: 'white' }}>{r.department}</span>
-                                                            {r.industry && (
-                                                                <span style={{
-                                                                    fontSize: '0.65rem',
-                                                                    textTransform: 'uppercase',
-                                                                    letterSpacing: '0.05em',
-                                                                    color: 'var(--text-muted)',
-                                                                    border: '1px solid var(--border-glass)',
-                                                                    padding: '1px 4px',
-                                                                    borderRadius: '3px'
-                                                                }}>
-                                                                    {r.industry}
-                                                                </span>
-                                                            )}
-                                                            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', border: '1px solid var(--border-glass)', padding: '1px 4px', borderRadius: '3px', marginLeft: '0.25rem' }}>
-                                                                {r.generation_metadata?.source || 'System'}
-                                                            </span>
-                                                            {r.generation_metadata?.fallback_reason && (
-                                                                <span style={{ color: 'salmon', marginLeft: '0.5rem' }}>
-                                                                    ⚠️ {r.generation_metadata.fallback_reason}
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                                } catch (err) {
+                                                                    alert("Error deleting recipe: " + err);
+                                                                }
+                                                            }}
+                                                            className="btn-danger-icon"
+                                                            title="Delete Blueprint"
+                                                        >
+                                                            <Trash size={16} />
+                                                        </button>
                                                     </div>
-                                                    {/* Recipe Card Details */}
-                                                    <div style={{ display: 'grid', gap: '1rem', fontSize: '0.9rem' }}>
-                                                        {/* Public View Section */}
-                                                        <div style={{ background: 'hsl(var(--bg-secondary))', padding: '1rem', borderRadius: '6px', border: '1px solid hsl(var(--border-glass))' }}>
-                                                            <h5 style={{ margin: '0 0 0.75rem 0', color: 'hsl(var(--accent-primary))', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Public View</h5>
 
-                                                            <div style={{ marginBottom: '0.75rem' }}>
-                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Problem</label>
-                                                                <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5 }}>{r.public_view?.problem || 'N/A'}</p>
+                                                    <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+                                                        {/* Public View */}
+                                                        <div>
+                                                            <h5 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1rem', letterSpacing: '0.05em', fontWeight: 700 }}>Public View</h5>
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Problem</strong>
+                                                                <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{r.public_view?.problem || 'N/A'}</p>
                                                             </div>
-
-                                                            <div style={{ marginBottom: '0.75rem' }}>
-                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Solution</label>
-                                                                <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5 }}>{r.public_view?.solution_narrative || 'N/A'}</p>
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Solution</strong>
+                                                                <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{r.public_view?.solution_narrative || 'N/A'}</p>
                                                             </div>
-
                                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                                 <div>
-                                                                    <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Value Proposition</label>
-                                                                    <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5 }}>{r.public_view?.value_proposition || 'N/A'}</p>
+                                                                    <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Value Prop</strong>
+                                                                    <p style={{ fontSize: '0.9rem', margin: 0 }}>{r.public_view?.value_proposition || 'N/A'}</p>
                                                                 </div>
                                                                 <div>
-                                                                    <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>ROI Estimate</label>
-                                                                    <p style={{ margin: 0, color: 'hsl(140, 70%, 50%)', fontWeight: 600, lineHeight: 1.5 }}>{r.public_view?.roi_estimate || 'N/A'}</p>
+                                                                    <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>ROI</strong>
+                                                                    <p style={{ fontSize: '0.9rem', margin: 0, color: 'hsl(140, 70%, 40%)', fontWeight: 600 }}>{r.public_view?.roi_estimate || 'N/A'}</p>
                                                                 </div>
                                                             </div>
-
-                                                            {r.public_view?.detailed_explanation && (
-                                                                <div style={{ marginTop: '0.75rem' }}>
-                                                                    <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Detailed Explanation</label>
-                                                                    <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5, fontSize: '0.85rem' }}>{r.public_view.detailed_explanation}</p>
-                                                                </div>
-                                                            )}
-
-                                                            {r.public_view?.walkthrough_steps && r.public_view.walkthrough_steps.length > 0 && (
-                                                                <div style={{ marginTop: '0.75rem' }}>
-                                                                    <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Walkthrough Steps</label>
-                                                                    <ol style={{ margin: '0.5rem 0 0 1.25rem', padding: 0, color: 'hsl(var(--text-main))', lineHeight: 1.6 }}>
-                                                                        {(Array.isArray(r.public_view.walkthrough_steps) ? r.public_view.walkthrough_steps : []).map((step: string, i: number) => (
-                                                                            <li key={i} style={{ fontSize: '0.85rem' }}>{step}</li>
-                                                                        ))}
-                                                                    </ol>
-                                                                </div>
-                                                            )}
                                                         </div>
 
-                                                        {/* Admin View Section */}
-                                                        <div style={{ background: 'hsl(var(--bg-secondary))', padding: '1rem', borderRadius: '6px', border: '1px solid hsl(var(--border-glass))' }}>
-                                                            <h5 style={{ margin: '0 0 0.75rem 0', color: 'hsl(var(--accent-gold))', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin View</h5>
+                                                        {/* Admin View / Technical */}
+                                                        <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem' }}>
+                                                            <h5 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'hsl(var(--accent-primary))', marginBottom: '1rem', letterSpacing: '0.05em', fontWeight: 700 }}>Technical Details</h5>
 
-                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>
-                                                                <div>
-                                                                    <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Implementation Difficulty</label>
-                                                                    <span style={{
-                                                                        display: 'inline-block',
-                                                                        padding: '0.25rem 0.75rem',
-                                                                        borderRadius: '4px',
-                                                                        fontSize: '0.8rem',
-                                                                        fontWeight: 600,
-                                                                        background: r.admin_view?.implementation_difficulty === 'Low' ? 'hsl(140, 70%, 90%)' :
-                                                                            r.admin_view?.implementation_difficulty === 'Med' ? 'hsl(45, 90%, 85%)' :
-                                                                                'hsl(0, 70%, 90%)',
-                                                                        color: r.admin_view?.implementation_difficulty === 'Low' ? 'hsl(140, 70%, 30%)' :
-                                                                            r.admin_view?.implementation_difficulty === 'Med' ? 'hsl(45, 90%, 30%)' :
-                                                                                'hsl(0, 70%, 30%)'
-                                                                    }}>
-                                                                        {r.admin_view?.implementation_difficulty || 'N/A'}
-                                                                    </span>
-                                                                </div>
-                                                                <div>
-                                                                    <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Tech Stack</label>
-                                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                                                                        {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : []).map((t: string) => ({ tool: t, role: 'Core Integration' }))).slice(0, 3).map((detail: any, i: number) => (
-                                                                            <span key={i} style={{
-                                                                                fontSize: '0.75rem',
-                                                                                background: 'hsl(var(--accent-secondary))',
-                                                                                color: 'white',
-                                                                                padding: '2px 6px',
-                                                                                borderRadius: '3px',
-                                                                                fontWeight: 600
-                                                                            }}>
-                                                                                {detail.tool}
-                                                                            </span>
-                                                                        ))}
-                                                                        {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : [])).length > 3 && (
-                                                                            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>
-                                                                                +{(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : [])).length - 3} more
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Difficulty</label>
+                                                                <span className={`status-badge ${r.admin_view?.implementation_difficulty === 'Low' ? 'success' : r.admin_view?.implementation_difficulty === 'High' ? 'warning' : 'info'}`}>
+                                                                    {r.admin_view?.implementation_difficulty || 'Unknown'}
+                                                                </span>
                                                             </div>
 
-                                                            <div style={{ marginBottom: '0.75rem' }}>
-                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Workflow Steps</label>
-                                                                <p style={{ margin: 0, color: 'hsl(var(--text-main))', lineHeight: 1.5, fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>{r.admin_view?.workflow_steps || 'N/A'}</p>
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Upsell Opportunity</label>
+                                                                <p style={{ margin: 0, fontWeight: 500, color: 'hsl(var(--accent-primary))' }}>{r.admin_view?.upsell_opportunity || 'N/A'}</p>
                                                             </div>
 
                                                             <div>
-                                                                <label style={{ color: 'hsl(var(--text-muted))', display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.8rem' }}>Upsell Opportunity</label>
-                                                                <p style={{ margin: 0, color: 'hsl(140, 70%, 50%)', fontWeight: 600, lineHeight: 1.5 }}>{r.admin_view?.upsell_opportunity || 'N/A'}</p>
+                                                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                                                                    {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : []).map((t: string) => ({ tool: t }))).slice(0, 5).map((detail: any, i: number) => (
+                                                                        <span key={i} style={{ fontSize: '0.75rem', background: 'white', border: '1px solid var(--border-glass)', padding: '2px 6px', borderRadius: '4px' }}>
+                                                                            {detail.tool}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1556,8 +1528,11 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     </div>
                                 ) : (
                                     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                                        <Eye size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                                        <p>Select a user to view their activity history.</p>
+                                        <div style={{ background: '#f1f5f9', padding: '2rem', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                                            <User size={48} style={{ opacity: 0.3 }} />
+                                        </div>
+                                        <p style={{ fontSize: '1.1rem', fontWeight: 500 }}>Select a user to view their activity history.</p>
+                                        <p style={{ fontSize: '0.9rem' }}>Choose from the list on the left.</p>
                                     </div>
                                 )}
                             </div>
@@ -1883,17 +1858,21 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Users Tab - Real User Management */}
             {
                 activeTab === 'users' && (
-                    <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <h3>Registered Users <span style={{ fontSize: '0.8rem', color: '#888' }}>({users.length})</span></h3>
-                                <button onClick={fetchUsers} className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}>
-                                    <RefreshCw size={12} /> Force Refresh
+                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+                        <div className="admin-page-header">
+                            <div>
+                                <h3 className="admin-page-title">
+                                    <Users size={24} className="text-accent" /> Registered Users <span className="status-badge" style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>{users.length}</span>
+                                </h3>
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={fetchUsers} className="btn-secondary" title="Refresh List">
+                                    <RefreshCw size={16} />
+                                </button>
+                                <button onClick={() => openEditUserModal()} className="btn-primary">
+                                    <Plus size={18} /> Add User
                                 </button>
                             </div>
-                            <button onClick={() => openEditUserModal()} className="btn-primary">
-                                <Plus size={18} /> Add User
-                            </button>
                         </div>
 
                         {/* Debug Raw State */}
@@ -1908,47 +1887,50 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             </div>
                         )}
 
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
-                                    <th style={{ padding: '1rem' }}>Name</th>
-                                    <th style={{ padding: '1rem' }}>Email</th>
-                                    <th style={{ padding: '1rem' }}>Role</th>
-                                    <th style={{ padding: '1rem' }}>Status</th>
-                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map(u => (
-                                    <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1rem' }}>{u.name || '-'}</td>
-                                        <td style={{ padding: '1rem' }}>{u.email}</td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <span style={{
-                                                background: u.role === 'admin' ? 'hsl(var(--accent-gold))' : '#333',
-                                                color: u.role === 'admin' ? 'black' : 'white',
-                                                padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600
-                                            }}>
-                                                {u.role}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <span style={{ color: u.isActive ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
-                                                {u.isActive ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                            <button onClick={() => openEditUserModal(u)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
-                                                <Edit size={16} />
-                                            </button>
-                                            <button onClick={() => handleDeleteUserReal(u.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
-                                                <Trash size={16} />
-                                            </button>
-                                        </td>
+                        <div className="admin-table-container">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th style={{ textAlign: 'right' }}>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {users.map(u => (
+                                        <tr key={u.id}>
+                                            <td style={{ fontWeight: 500 }}>{u.name || '-'}</td>
+                                            <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
+                                            <td>
+                                                <span className={`status-badge ${u.role === 'admin' ? 'warning' : 'neutral'}`}>
+                                                    {u.role}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={`status-badge ${u.isActive ? 'success' : 'error'}`}>
+                                                    {u.isActive ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                                    <button onClick={() => openEditUserModal(u)} className="btn-ghost" title="Edit User">
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleResetPassword(u.id)} className="btn-ghost" title="Reset Password">
+                                                        <Key size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteUserReal(u.id)} className="btn-ghost user-delete-btn" title="Delete User" style={{ color: 'salmon' }}>
+                                                        <Trash size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )
             }

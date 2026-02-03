@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash, Search, RefreshCw, Zap, Sparkles, X } from 'lucide-react';
+import { Trash, Search, RefreshCw, Zap, Sparkles, X } from 'lucide-react';
 import { Opportunity } from '../../lib/engine';
 import { RoadmapCard } from '../RoadmapCard';
 
@@ -91,6 +91,7 @@ export function LibraryManager() {
 
             if (res.ok) {
                 const data = await res.json();
+                console.log("AI Gen Response:", data);
                 setGeneratedOptions(data.blueprints || []);
                 setHasGenerated(true);
             } else {
@@ -237,7 +238,11 @@ export function LibraryManager() {
                     <div className="glass-panel" style={{ width: '900px', padding: '2rem', borderRadius: '12px', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <h3><Sparkles size={20} style={{ display: 'inline', marginRight: '0.5rem', color: 'gold' }} /> AI Use Case Generator</h3>
-                            <button onClick={() => setIsGeneratorOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                            <button onClick={() => {
+                                setIsGeneratorOpen(false);
+                                setHasGenerated(false);
+                                setGeneratedOptions([]);
+                            }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                                 <X size={24} />
                             </button>
                         </div>
@@ -287,7 +292,7 @@ export function LibraryManager() {
                         ) : (
                             <div className="animate-fade-in">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                    <p style={{ color: 'var(--text-muted)' }}>Generated 3 potential use cases. Review and save the best ones.</p>
+                                    <p style={{ color: 'var(--text-muted)' }}>Generated {generatedOptions.length} potential use cases. Review and save the best ones.</p>
                                     <button onClick={() => setHasGenerated(false)} className="btn-secondary">
                                         <RefreshCw size={14} style={{ marginRight: '0.5rem' }} /> Try Again
                                     </button>

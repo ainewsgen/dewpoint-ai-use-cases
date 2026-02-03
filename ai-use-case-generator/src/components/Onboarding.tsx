@@ -11,7 +11,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [painPoint, setPainPoint] = useState('');
     const [url, setUrl] = useState('');
     const [industry, setIndustry] = useState('');
-    const [role, setRole] = useState('');
+    const [role, setRole] = useState('Founder / Owner');
     const [size, setSize] = useState('Solopreneur');
     const [stack, setStack] = useState<string[]>([]);
 

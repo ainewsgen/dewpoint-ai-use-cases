@@ -67,7 +67,7 @@ app.get('/ping', (req, res) => {
 import icpsRoutes from './routes/icps';
 import libraryRoutes from './routes/library';
 import syncLibraryRoutes from './routes/sync-library';
-import adminIcpsRoutes from './routes/admin-icps'; // New Route
+import { adminIcpsRouter } from './routes/admin-icps'; // Fixed Import
 
 // API Routes
 app.use('/api/auth', authEnhancedRoutes); // Enhanced auth with JWT
@@ -79,7 +79,7 @@ app.use('/api', integrationsRoutes); // Enhanced integrations
 app.use('/api', scanRoutes); // Server-side scanning
 app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats
-app.use('/api/admin/icps', adminIcpsRoutes); // Register ICP Manager
+app.use('/api/admin/icps', adminIcpsRouter); // Register ICP Manager
 app.use('/api', icpsRoutes); // Industry ICPs
 app.use('/api', libraryRoutes); // Use Case Library
 app.use('/api', libraryRoutes); // Use Case Library

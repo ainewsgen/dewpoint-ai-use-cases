@@ -179,6 +179,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
             });
             if (res.ok) {
                 const data = await res.json();
+                console.log("Stats API Response:", data);
                 console.log('Usage Stats Loaded:', data);
                 setUsageStats(data);
             } else {
@@ -646,7 +647,6 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                                         >
                                             <Edit size={12} /> Edit
                                         </button>
-                                    )}
                                 </div>
                                 <div style={{ marginTop: '1rem', height: '6px', background: '#333', borderRadius: '3px', overflow: 'hidden' }}>
                                     <div style={{

@@ -74,13 +74,17 @@ export class UsageService {
         // 1. Fetch Spending & Requests (Debug wrapped)
         let result: { totalSpend: number, requestCount: number }[] = [];
         try {
+            console.log(`[UsageService] Fetching stats since ${startOfDay.toISOString()}`);
+
             // @ts-ignore
             result = await db.select({
-                totalSpend: sql<number>`sum(${apiUsage.totalCost})`,
+                totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
                 requestCount: sql<number>`count(*)`
             })
                 .from(apiUsage)
                 .where(gte(apiUsage.timestamp, startOfDay));
+
+            console.log("[UsageService] Raw Result:", result);
         } catch (e: any) {
             console.error("UsageService: Failed to fetch apiUsage", e);
             // Don't crash, just return 0s so debugging can continue

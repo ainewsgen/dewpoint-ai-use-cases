@@ -20,10 +20,21 @@ export function LibraryManager() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSyncing, setIsSyncing] = useState(false);
 
+
     // AI Generator State
     const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+    const [isGeneral, setIsGeneral] = useState(false);
     const [genForm, setGenForm] = useState({ industry: '', role: '', painPoint: '' });
     const [isGenerating, setIsGenerating] = useState(false);
+
+    // Effect: Handle General Toggle
+    useEffect(() => {
+        if (isGeneral) {
+            setGenForm(prev => ({ ...prev, industry: 'General', role: 'General Implementation' }));
+        } else {
+            setGenForm(prev => ({ ...prev, industry: '', role: '' }));
+        }
+    }, [isGeneral]);
     const [generatedOptions, setGeneratedOptions] = useState<Opportunity[]>([]);
     const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -249,24 +260,45 @@ export function LibraryManager() {
 
                         {!hasGenerated ? (
                             <form onSubmit={handleGenerate} style={{ display: 'grid', gap: '1.5rem', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
+                                {/* General Switch */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+                                    <input
+                                        type="checkbox"
+                                        id="gen-general"
+                                        checked={isGeneral}
+                                        onChange={e => setIsGeneral(e.target.checked)}
+                                        style={{ width: '1.25rem', height: '1.25rem', accentColor: 'hsl(var(--accent-primary))' }}
+                                    />
+                                    <label htmlFor="gen-general" style={{ cursor: 'pointer', fontSize: '0.95rem', userSelect: 'none' }}>
+                                        Generate <strong>General / Agnostic</strong> Use Cases
+                                        <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>
+                                            Creates broad examples applicable to any industry.
+                                        </span>
+                                    </label>
+                                </div>
+
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem' }}>Target Industry</label>
                                     <input
                                         required
+                                        disabled={isGeneral}
                                         className="input-field"
                                         value={genForm.industry}
                                         onChange={e => setGenForm({ ...genForm, industry: e.target.value })}
                                         placeholder="e.g. Legal, Healthcare, Construction"
+                                        style={{ opacity: isGeneral ? 0.5 : 1 }}
                                     />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem' }}>Target Role</label>
                                     <input
                                         required
+                                        disabled={isGeneral}
                                         className="input-field"
                                         value={genForm.role}
                                         onChange={e => setGenForm({ ...genForm, role: e.target.value })}
                                         placeholder="e.g. Partner, Project Manager, CFO"
+                                        style={{ opacity: isGeneral ? 0.5 : 1 }}
                                     />
                                 </div>
                                 <div>

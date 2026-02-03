@@ -33,13 +33,16 @@ router.post('/admin/library', requireAuth, requireAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+
         const newCase = await db.insert(useCaseLibrary).values({
             industry,
             title,
             description,
             roiEstimate: roiEstimate || "N/A",
             difficulty: difficulty || "Med",
-            tags: tags || []
+            tags: tags || [],
+            data: req.body.data || null,
+            isPublished: req.body.isPublished || false
         }).returning();
 
         res.json({ useCase: newCase[0] });
@@ -53,7 +56,7 @@ router.post('/admin/library', requireAuth, requireAdmin, async (req, res) => {
 router.put('/admin/library/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { industry, title, description, roiEstimate, difficulty, tags } = req.body;
+        const { industry, title, description, roiEstimate, difficulty, tags, data, isPublished } = req.body;
 
         const updatedCase = await db.update(useCaseLibrary)
             .set({
@@ -62,7 +65,9 @@ router.put('/admin/library/:id', requireAuth, requireAdmin, async (req, res) => 
                 description,
                 roiEstimate,
                 difficulty,
-                tags
+                tags,
+                data,
+                isPublished
             })
             .where(eq(useCaseLibrary.id, parseInt(id as string)))
             .returning();

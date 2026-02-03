@@ -53,12 +53,14 @@ router.post('/admin/library/sync', requireAuth, requireAdmin, async (req, res) =
 
                 if (existing.length === 0) {
                     await db.insert(useCaseLibrary).values({
-                        industry,
-                        title,
-                        description,
-                        roiEstimate: roi,
-                        difficulty,
-                        tags
+                        industry: recipe.industry || "General",
+                        title: recipe.title,
+                        description: recipe.public_view?.solution_narrative || "No description",
+                        roiEstimate: recipe.public_view?.roi_estimate || "N/A",
+                        difficulty: recipe.admin_view?.implementation_difficulty || "Med",
+                        tags: recipe.admin_view?.tech_stack || [],
+                        data: recipe, // NEW: Store full recipe
+                        isPublished: false
                     });
                     addedCount++;
                 } else {

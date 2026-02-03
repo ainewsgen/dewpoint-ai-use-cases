@@ -141,6 +141,8 @@ export const useCaseLibrary = pgTable('use_case_library', {
     roiEstimate: text('roi_estimate'),
     difficulty: text('difficulty'), // 'Low' | 'Med' | 'High'
     tags: jsonb('tags').$type<string[]>(),
+    data: jsonb('data'), // Full Opportunity/Recipe JSON
+    isPublished: boolean('is_published').default(false),
     createdAt: timestamp('created_at').defaultNow(),
 });
 

@@ -393,30 +393,30 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 }}>
                                     Your Role
                                 </label>
-                                {/* Role Selection Buttons */}
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                                     {['Founder / Owner', 'Executive (CXO/VP)', 'Manager / Lead', 'Freelancer / Consultant'].map(r => (
                                         <button
                                             key={r}
                                             onClick={() => setRole(r)}
                                             style={{
-                                                padding: '0.6rem 0.5rem',
-                                                borderRadius: '8px',
+                                                padding: '1rem 0.5rem',
+                                                borderRadius: '12px',
                                                 border: role === r ? '2px solid hsl(var(--accent-primary))' : '1px solid var(--border-glass)',
-                                                background: role === r ? 'hsla(var(--accent-primary)/0.1)' : 'var(--bg-card)',
+                                                background: role === r ? 'hsla(var(--accent-primary)/0.05)' : 'var(--bg-card)',
                                                 color: role === r ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
-                                                fontSize: '0.8rem',
+                                                fontSize: '0.9rem',
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                                 cursor: 'pointer',
-                                                fontWeight: role === r ? 700 : 500,
-                                                textAlign: 'center',
-                                                transition: 'all 0.2s ease',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
+                                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                boxShadow: role === r ? '0 4px 12px hsla(var(--accent-primary)/0.15)' : 'none',
+                                                transform: role === r ? 'translateY(-2px)' : 'none',
+                                                minHeight: '80px' // Ensure uniform height
                                             }}
                                             title={r}
                                         >
-                                            {r.split(' (')[0]}
+                                            <span style={{ fontWeight: role === r ? 700 : 600, fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.2 }}>
+                                                {r.replace(' (', '\n(')}
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
@@ -466,77 +466,76 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 })}
                             </div>
                         </div>
-                    </div>
 
-                    {/* TECH STACK SECTION */}
-                    <div style={{ marginTop: '1rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
-                        <label className="section-label" style={{
-                            display: 'block', fontSize: '0.75rem', fontWeight: 800,
-                            color: 'hsl(var(--accent-primary))', marginBottom: '1.5rem',
-                            textTransform: 'uppercase', letterSpacing: '0.1em'
-                        }}>
-                            What tools do you use?
-                        </label>
+                        {/* TECH STACK SECTION */}
+                        <div style={{ marginTop: '1rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
+                            <label className="section-label" style={{
+                                display: 'block', fontSize: '0.75rem', fontWeight: 800,
+                                color: 'hsl(var(--accent-primary))', marginBottom: '1.5rem',
+                                textTransform: 'uppercase', letterSpacing: '0.1em'
+                            }}>
+                                What tools do you use?
+                            </label>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
-                            {Object.entries({
-                                ...techCategories,
-                                "CRM & Sales": ['Salesforce', 'HubSpot', 'Zoho CRM', 'Pipedrive', 'Monday.com Sales', 'Google Sheets', 'Microsoft Excel'],
-                                "Productivity": ['Notion', 'Asana', 'Jira', 'Trello', 'ClickUp', 'Monday.com', 'Airtable', 'Google Sheets', 'Microsoft Excel'],
-                                "Finance & HR": ['QuickBooks', 'Xero', 'NetSuite', 'Gusto', 'Rippling', 'Expensify', 'Google Sheets', 'Microsoft Excel'],
-                                "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect', 'Personal Cellphone']
-                            }).map(([category, tools]) => (
-                                <div key={category}>
-                                    <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>{category}</h4>
-                                    <div className="chips-grid" style={{ gap: '0.5rem' }}>
-                                        {tools.map(t => (
-                                            <button
-                                                key={t}
-                                                className={`chip ${stack.includes(t) ? 'active' : ''}`}
-                                                onClick={() => toggleTech(t)}
-                                                style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
-                                            >
-                                                {t}
-                                            </button>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
+                                {Object.entries({
+                                    ...techCategories,
+                                    "CRM & Sales": ['Salesforce', 'HubSpot', 'Zoho CRM', 'Pipedrive', 'Monday.com Sales', 'Google Sheets', 'Microsoft Excel'],
+                                    "Productivity": ['Notion', 'Asana', 'Jira', 'Trello', 'ClickUp', 'Monday.com', 'Airtable', 'Google Sheets', 'Microsoft Excel'],
+                                    "Finance & HR": ['QuickBooks', 'Xero', 'NetSuite', 'Gusto', 'Rippling', 'Expensify', 'Google Sheets', 'Microsoft Excel'],
+                                    "Telephony & Voice": ['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect', 'Personal Cellphone']
+                                }).map(([category, tools]) => (
+                                    <div key={category}>
+                                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontWeight: 600 }}>{category}</h4>
+                                        <div className="chips-grid" style={{ gap: '0.5rem' }}>
+                                            {tools.map(t => (
+                                                <button
+                                                    key={t}
+                                                    className={`chip ${stack.includes(t) ? 'active' : ''}`}
+                                                    onClick={() => toggleTech(t)}
+                                                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
+                                                >
+                                                    {t}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Custom Tech Input */}
+                            <div style={{ marginTop: '2rem' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Add any other tools... (Press Enter)"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const val = e.currentTarget.value.trim();
+                                            if (val && !stack.includes(val)) {
+                                                setStack(prev => [...prev, val]);
+                                                e.currentTarget.value = '';
+                                            }
+                                        }
+                                    }}
+                                    style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'white' }}
+                                />
+                                {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).length > 0 && (
+                                    <div className="chips-grid" style={{ marginTop: '1rem' }}>
+                                        {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).map(s => (
+                                            <button key={s} className="chip active" onClick={() => toggleTech(s)}>{s}</button>
                                         ))}
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Custom Tech Input */}
-                        <div style={{ marginTop: '2rem' }}>
-                            <input
-                                type="text"
-                                placeholder="Add any other tools... (Press Enter)"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        const val = e.currentTarget.value.trim();
-                                        if (val && !stack.includes(val)) {
-                                            setStack(prev => [...prev, val]);
-                                            e.currentTarget.value = '';
-                                        }
-                                    }
-                                }}
-                                style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'white' }}
-                            />
-                            {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).length > 0 && (
-                                <div className="chips-grid" style={{ marginTop: '1rem' }}>
-                                    {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).map(s => (
-                                        <button key={s} className="chip active" onClick={() => toggleTech(s)}>{s}</button>
-                                    ))}
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick={handleSubmit} className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
-                        Generate Roadmap <Sparkles size={18} style={{ marginLeft: '8px' }} />
-                    </button>
+                    <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
+                        <button onClick={handleSubmit} className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
+                            Generate Roadmap <Sparkles size={18} style={{ marginLeft: '8px' }} />
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+            );
 }

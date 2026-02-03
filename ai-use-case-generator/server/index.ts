@@ -100,8 +100,12 @@ app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res)
                 total_cost DECIMAL(10, 6),
                 timestamp TIMESTAMP DEFAULT NOW()
             );
+
+            -- LIBRARY SCHEMA UPDATE (Auto-Fix)
+            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS data JSONB;
+            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
         `);
-        console.log("Fixed Schema: Created api_usage table.");
+        console.log("Fixed Schema: Created api_usage table and updated library.");
         res.json({ success: true, message: "Created api_usage table (Emergency Fix)" });
     } catch (error: any) {
         console.error("Fix Schema Error:", error);
@@ -248,8 +252,19 @@ if (fs.existsSync(distPath)) {
 }
 
 // Start server immediately
-const server = app.listen(Number(PORT), '0.0.0.0', () => {
+const server = app.listen(Number(PORT), '0.0.0.0', async () => {
     console.log(`📊 API available at http://0.0.0.0:${PORT}/api`);
+
+    // AUTO-MIGRATE ON START
+    try {
+        await db.execute(sql`
+            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS data JSONB;
+            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
+        `);
+        console.log("✅ Library Schema Auto-Migrated");
+    } catch (e) {
+        console.error("Schema Migration Warning:", e);
+    }
 
     // Self-healing: Ensure Schema is correct (SQL Injection for migration reliability)
     // Run this async without blocking, or await if critical. We'll fire-and-forget but log errors.

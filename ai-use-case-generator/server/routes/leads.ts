@@ -280,7 +280,24 @@ router.delete('/admin/leads/:userId/recipes', async (req, res) => {
     }
 });
 
-// Delete a Lead (remove from list, keep user)
+// Delete a Lead by ID (Global)
+router.delete('/admin/leads/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await db.delete(leads).where(eq(leads.id, id)).returning();
+
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'Lead not found' });
+        }
+
+        res.json({ success: true, deletedId: id });
+    } catch (error) {
+        console.error('Delete lead error:', error);
+        res.status(500).json({ error: 'Failed to delete lead' });
+    }
+});
+
+// Delete a Lead (remove from list, keep user) - LEGACY / User Specific
 router.delete('/admin/leads/user/:userId', async (req, res) => {
     try {
         const userId = parseInt(req.params.userId);

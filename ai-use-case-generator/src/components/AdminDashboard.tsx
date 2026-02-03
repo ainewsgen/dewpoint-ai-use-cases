@@ -403,9 +403,11 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
     };
 
     const handleDeleteLead = async (id: number) => {
-        if (confirm('Are you sure you want to remove this lead? The user account will remain active.')) {
+        // id is now the LEAD ID
+        if (confirm('Are you sure you want to delete this lead record?')) {
             try {
-                await fetch(`/api/admin/leads/user/${id}`, { method: 'DELETE' });
+                // Use the new ID-based endpoint
+                await fetch(`/api/admin/leads/${id}`, { method: 'DELETE' });
                 fetchLeads(); // Refresh the leads list which powers the UI
             } catch (error) {
                 console.error('Delete lead failed', error);
@@ -1012,15 +1014,25 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                     // Group duplicates by Email (or URL if no email)
                     const uniqueUsers = adminLeads.reduce((acc: any, row: any) => {
                         // Logic Change: Registered users grouped by User ID/Email.
-                        // Anonymous users (no userId) are tracked SEPARATELY per run (using lead.id).
+                        // Anonymous users grouped by Shadow ID -> URL -> Lead ID
                         const isRegistered = !!row.user?.id;
+                        const leadShadowId = row.lead?.shadowId;
 
                         let key;
                         if (isRegistered) {
                             key = row.user.email || row.company?.url || 'unknown_user';
                         } else {
-                            // Anonymous: Use unique lead ID to prevent grouping
-                            key = row.id ? `anon_${row.id}` : `anon_unknown_${Math.random()}`;
+                            // Anonymous Grouping Priority:
+                            // 1. Shadow ID (Cookie) - Strongest link for anonymous users
+                            // 2. URL - Weak link but better than nothing
+                            // 3. Lead ID - Fallback (No grouping)
+                            if (leadShadowId) {
+                                key = `shadow_${leadShadowId}`;
+                            } else if (row.company?.url) {
+                                key = `url_${row.company.url}`;
+                            } else {
+                                key = row.id ? `anon_${row.id}` : `anon_unknown_${Math.random()}`;
+                            }
                         }
 
                         if (!acc[key]) {
@@ -1028,10 +1040,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 ...row,
                                 // Use the row's specific recipe as the initial array
                                 allRecipes: row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [],
-                                interactionCount: 1
+                                interactionCount: 1,
+                                // Explicitly mark grouping method for UI
+                                groupingMethod: isRegistered ? 'user' : (leadShadowId ? 'shadow' : 'url')
                             };
                         } else {
-                            // Merge recipes for registered users
+                            // Merge recipes
                             const newRecipes = row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [];
                             acc[key].allRecipes.push(...newRecipes);
                             acc[key].interactionCount += 1;
@@ -1064,10 +1078,22 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         }}
                                         className="admin-user-row"
                                     >
-                                        <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>{user.company.name || "Anonymous"}</h4>
-                                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--accent-primary))' }}>{user.company.email || user.company.url}</p>
+                                        <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>
+                                            {user.company.name !== 'Anonymous' ? user.company.name : (
+                                                <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                                    {user.groupingMethod === 'shadow' ? 'Actively Tracking' : 'Ghost User'}
+                                                </span>
+                                            )}
+                                        </h4>
+                                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--accent-primary))' }}>
+                                            {user.company.email !== 'unknown' ? user.company.email : (
+                                                user.groupingMethod === 'shadow'
+                                                    ? <span title={user.lead?.shadowId}>ID: {user.lead?.shadowId?.slice(0, 8)}...</span>
+                                                    : user.company.url || 'No Contact Info'
+                                            )}
+                                        </p>
                                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                                            {user.company.role} • {user.allRecipes.length} Blueprints
+                                            {user.company.role || 'Visitor'} • {user.allRecipes.length} Blueprints
                                         </p>
 
                                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
@@ -1081,9 +1107,10 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteLead(user.userId);
+                                                    // Pass LEAD ID (row.id) not userId
+                                                    handleDeleteLead(user.id);
                                                 }}
-                                                title="Delete Lead (Keep User)"
+                                                title="Delete Lead"
                                                 className="btn-danger-icon"
                                                 style={{ padding: '0.25rem' }}
                                             >

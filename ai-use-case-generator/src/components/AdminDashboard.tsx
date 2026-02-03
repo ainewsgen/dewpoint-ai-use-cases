@@ -70,12 +70,11 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     // Lead Edit State (Mock/Simulation for Leads View)
     const [editingUser, setEditingUser] = useState<string | null>(null); // This is "Lead ID"
-    // Rename 'editForm' usage in leads view to 'leadEditForm' via find/replace or restore original name if possible
-    // To avoid massive refactor of existing code, let's keep 'editForm' for Leads if possible, but I already overwrote it.
-    // I need to check where 'editForm' is used.
-    // Existing code uses 'editForm' for LEADS.
-    // So I should name my NEW state 'userEditForm' and restore 'editForm' for LEADS.
     const [editForm, setEditForm] = useState<Partial<CompanyData>>({});
+
+    // UI States
+    const [isLoadingLeads, setIsLoadingLeads] = useState(false);
+    const [leadsError, setLeadsError] = useState<string | null>(null);
 
     useEffect(() => {
         if (activeTab === 'users') {
@@ -83,19 +82,58 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
         } else if (activeTab === 'leads') {
             fetchLeads();
         } else if (activeTab === 'blueprints') {
-            // Fetch System Prompt
+            // Fetch System Prompt with Fallback
             fetch('/api/admin/config/system-prompt', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.prompt) setSystemPrompt(data.prompt);
+                .then(res => {
+                    if (!res.ok) throw new Error(res.statusText);
+                    return res.json();
                 })
-                .catch(err => console.error("Failed to load prompt config", err));
+                .then(data => {
+                    // Use server prompt if exists, otherwise Default
+                    if (data.prompt) {
+                        setSystemPrompt(data.prompt);
+                    } else {
+                        // DEFAULT PROMPT
+                        setSystemPrompt(`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+
+User Profile:
+- Company URL: {{url}}
+- Industry: {{industry}}
+- Company Size: {{size}}
+- Role: {{role}}
+- Tech Stack: {{stack}}
+- Primary Pain Point: {{painPoint}}
+- Website Summary: {{description}}
+- Deep Site Analysis: {{pageContext}}
+
+Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include the following fields:
+
+1.  **Title**: A catchy name for the automation.
+2.  **Department**: The target department (e.g., Sales, Finance, Ops).
+3.  **Problem**: A concise statement of the friction point.
+4.  **Solution Narrative**: A 1-sentence elevator pitch of the solution.
+5.  **Value Proposition**: Key benefit (e.g., "Eliminates context switching").
+6.  **ROI Estimate**: Specific time/money saved (e.g., "10 hrs/week").
+7.  **Deep Dive**: A detailed paragraph explaining the "How" and "Why".
+8.  **Example Scenario**: A real-world "Before & After" story.
+9.  **Walkthrough Steps**: A chronologically ordered list of 5-7 execution steps.
+10. **Tech Stack Details**: List of specific tools used + their role (e.g., "OpenAI: Reasoning").
+11. **Difficulty**: Implementation effort (Low, Med, High).
+12. **Upsell**: A potential service retainer or expansion opportunity.`);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to load prompt config", err);
+                    setSystemPrompt("Error loading system prompt. Please refresh or check console.");
+                });
         }
     }, [activeTab]);
 
     const fetchLeads = async () => {
+        setIsLoadingLeads(true);
+        setLeadsError(null);
         try {
             const res = await fetch('/api/admin/leads');
             if (res.ok) {
@@ -122,9 +160,14 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
                     user: row.user
                 }));
                 setAdminLeads(formattedLeads);
+            } else {
+                setLeadsError(`Failed to fetch leads: ${res.statusText}`);
             }
         } catch (error) {
             console.error('Failed to fetch admin leads', error);
+            setLeadsError("Network error fetching leads.");
+        } finally {
+            setIsLoadingLeads(false);
         }
     };
 
@@ -1065,6 +1108,25 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Logic for Grouping Leads */}
             {
                 activeTab === 'leads' && (() => {
+                    if (isLoadingLeads) {
+                        return (
+                            <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                <div className="spinner" style={{ marginBottom: '1rem' }} />
+                                <p>Loading leads...</p>
+                            </div>
+                        );
+                    }
+
+                    if (leadsError) {
+                        return (
+                            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', borderColor: 'salmon' }}>
+                                <h3 style={{ color: 'salmon', marginBottom: '1rem' }}>Error Loading Leads</h3>
+                                <p style={{ color: '#ccc' }}>{leadsError}</p>
+                                <button onClick={fetchLeads} className="btn-secondary" style={{ marginTop: '1rem' }}>Try Again</button>
+                            </div>
+                        );
+                    }
+
                     // Group duplicates by Email (or URL if no email)
                     const uniqueUsers = adminLeads.reduce((acc: any, row: any) => {
                         // Logic Change: Registered users grouped by User ID/Email.

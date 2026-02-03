@@ -70,7 +70,7 @@ export function AdminDashboard({ leads }: AdminDashboardProps) {
 
     // Lead Edit State (Mock/Simulation for Leads View)
     const [editingUser, setEditingUser] = useState<string | null>(null); // This is "Lead ID"
-    const [editForm, setEditForm] = useState<Partial<CompanyData>>({});
+    const [editForm, setEditForm] = useState<any>({});
 
     // UI States
     const [isLoadingLeads, setIsLoadingLeads] = useState(false);
@@ -510,12 +510,39 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     const openEditUser = (lead: any, e: React.MouseEvent) => {
         e.stopPropagation();
         setEditingUser(lead.id);
-        setEditForm(lead.company);
+        // Hydrate form with company data + user details
+        setEditForm({
+            ...lead.company,
+            name: lead.user?.name // Add user name to form
+        });
     };
 
-    const saveEditUser = () => {
-        alert('User profile updated (Simulated). In a real app, this would patch the DB.');
-        setEditingUser(null);
+    const saveEditUser = async () => {
+        if (!editingUser) return;
+        try {
+            // Extract name (for user) and the rest (for company)
+            const { name, ...companyData } = editForm as any;
+
+            const res = await fetch(`/api/admin/leads/${editingUser}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    companyData,
+                    userName: name
+                })
+            });
+
+            if (res.ok) {
+                // Success
+                await fetchLeads(); // Refresh list
+                setEditingUser(null);
+            } else {
+                const err = await res.json();
+                alert(`Error: ${err.error}`);
+            }
+        } catch (e) {
+            alert('Failed to save changes');
+        }
     };
 
 

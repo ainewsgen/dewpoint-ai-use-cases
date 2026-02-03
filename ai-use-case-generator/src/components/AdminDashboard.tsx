@@ -1620,11 +1620,29 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 </div>
                             </div>
 
-                            <div className="admin-modal-footer">
-                                <button onClick={() => setEditingBlueprint(null)} className="admin-btn-secondary">Discard changes</button>
-                                <button onClick={handleSaveBlueprint} className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
-                                    <Save size={18} style={{ marginRight: '0.5rem' }} /> Update Blueprint
-                                </button>
+                            <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
+                                    <button onClick={() => setEditingBlueprint(null)} className="admin-btn-secondary">Discard changes</button>
+                                    <button onClick={handleSaveBlueprint} className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
+                                        <Save size={18} style={{ marginRight: '0.5rem' }} /> Update Blueprint
+                                    </button>
+                                </div>
+
+                                <div style={{
+                                    borderTop: '1px solid #f1f5f9',
+                                    paddingTop: '1rem',
+                                    textAlign: 'center',
+                                    fontSize: '0.75rem',
+                                    color: '#94a3b8',
+                                    lineHeight: '1.4'
+                                }}>
+                                    <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                                        Authorized Use Only
+                                    </p>
+                                    <p>
+                                        This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1811,14 +1829,32 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 </div>
                             </div>
 
-                            <div className="admin-modal-footer">
-                                <button type="button" onClick={() => setEditingUser(null)} className="admin-btn-secondary">Discard Changes</button>
-                                <button
-                                    onClick={saveEditUser}
-                                    className="admin-btn-primary"
-                                >
-                                    <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} /> Commit Profiles Updates
-                                </button>
+                            <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
+                                    <button type="button" onClick={() => setEditingUser(null)} className="admin-btn-secondary">Discard Changes</button>
+                                    <button
+                                        onClick={saveEditUser}
+                                        className="admin-btn-primary"
+                                    >
+                                        <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} /> Commit Profiles Updates
+                                    </button>
+                                </div>
+
+                                <div style={{
+                                    borderTop: '1px solid #f1f5f9',
+                                    paddingTop: '1rem',
+                                    textAlign: 'center',
+                                    fontSize: '0.75rem',
+                                    color: '#94a3b8',
+                                    lineHeight: '1.4'
+                                }}>
+                                    <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                                        Authorized Use Only
+                                    </p>
+                                    <p>
+                                        This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2281,24 +2317,42 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                         </div>
                     </div>
 
-                    <div className="admin-modal-footer">
-                        {integration && (
-                            <button
-                                type="button"
-                                className="admin-btn-secondary"
-                                onClick={() => handleTest()}
-                                disabled={isTesting}
-                                style={{ padding: '0.875rem 1.5rem' }}
-                            >
-                                {isTesting ? <RefreshCw size={18} className="spin" /> : <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} />}
-                                Test Connection
+                    <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
+                            {integration && (
+                                <button
+                                    type="button"
+                                    className="admin-btn-secondary"
+                                    onClick={() => handleTest()}
+                                    disabled={isTesting}
+                                    style={{ padding: '0.875rem 1.5rem' }}
+                                >
+                                    {isTesting ? <RefreshCw size={18} className="spin" /> : <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} />}
+                                    Test Connection
+                                </button>
+                            )}
+                            <div style={{ flex: 1 }} />
+                            <button type="button" onClick={onClose} className="admin-btn-secondary">Cancel</button>
+                            <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2rem' }}>
+                                <Zap size={18} style={{ marginRight: '0.5rem' }} /> {integration ? 'Update Tool' : 'Register Tool'}
                             </button>
-                        )}
-                        <div style={{ flex: 1 }} />
-                        <button type="button" onClick={onClose} className="admin-btn-secondary">Cancel</button>
-                        <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2rem' }}>
-                            <Zap size={18} style={{ marginRight: '0.5rem' }} /> {integration ? 'Update Tool' : 'Register Tool'}
-                        </button>
+                        </div>
+
+                        <div style={{
+                            borderTop: '1px solid #f1f5f9',
+                            paddingTop: '1rem',
+                            textAlign: 'center',
+                            fontSize: '0.75rem',
+                            color: '#94a3b8',
+                            lineHeight: '1.4'
+                        }}>
+                            <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                                Authorized Use Only
+                            </p>
+                            <p>
+                                This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
+                            </p>
+                        </div>
                     </div>
                 </form>
             </div>

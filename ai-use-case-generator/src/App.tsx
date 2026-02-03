@@ -374,7 +374,7 @@ function App() {
                     />
                 )}
 
-                <Footer />
+                {view !== 'ADMIN' && <Footer />}
             </div>
         </ErrorBoundary>
     );

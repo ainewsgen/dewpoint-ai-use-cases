@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { BookOpen, Server, Plus, BadgeCheck, Frown, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Server, Plus, BadgeCheck, Frown, Sparkles, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 
 
 // Initial fallback data
@@ -117,6 +117,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
 
                 // 3. Map Static to Opportunity
                 const formattedStatic: Opportunity[] = staticCases.map(sc => ({
+                    id: sc.id,
                     title: sc.title,
                     department: "General",
                     industry: sc.industry,
@@ -190,6 +191,28 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
         }
     };
 
+    const handleDelete = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this use case? This cannot be undone.")) return;
+        try {
+            const token = localStorage.getItem('dpg_auth_token');
+            const res = await fetch(`https://dewpoint-strategy-app.onrender.com/api/admin/library/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                setLibRecipes(prev => prev.filter(r => r.id !== id));
+            } else {
+                alert("Failed to delete use case. Check console for details.");
+            }
+        } catch (err) {
+            console.error("Failed to delete use case", err);
+            alert("Error deleting use case.");
+        }
+    };
+
     const filteredRecipes = filter === 'All'
         ? libRecipes
         : libRecipes.filter(r => r.department === filter);
@@ -233,6 +256,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
                         isAdmin={isAdmin}
                         isSaved={savedRecipes.some(r => r.title === opp.title)}
                         onToggle={() => handleToggleSave(opp)}
+                        onDelete={opp.id ? () => handleDelete(opp.id!) : undefined}
                     />
                 ))}
             </div>
@@ -240,7 +264,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
     );
 }
 
-function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, isAdmin: boolean, isSaved: boolean, onToggle: () => void }) {
+function LibraryCard({ opp, isAdmin, isSaved, onToggle, onDelete }: { opp: Opportunity, isAdmin: boolean, isSaved: boolean, onToggle: () => void, onDelete?: () => void }) {
     const [showDetails, setShowDetails] = useState(false);
 
     return (
@@ -267,12 +291,37 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle }: { opp: Opportunity, is
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         cursor: 'pointer',
                         color: isSaved ? 'white' : 'var(--text-muted)',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        marginLeft: '0.5rem'
                     }}
                     title={isSaved ? "Saved to Roadmap" : "Add to Roadmap"}
                 >
                     {isSaved ? <BadgeCheck size={18} /> : <Plus size={18} />}
                 </button>
+
+                {/* Admin Delete Button */}
+                {isAdmin && onDelete && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete();
+                        }}
+                        style={{
+                            background: 'rgba(255, 99, 71, 0.1)',
+                            border: '1px solid rgba(255, 99, 71, 0.2)',
+                            borderRadius: '50%',
+                            width: '32px', height: '32px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: 'tomato',
+                            transition: 'all 0.2s',
+                            marginLeft: '0.5rem'
+                        }}
+                        title="Delete Use Case"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                )}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>

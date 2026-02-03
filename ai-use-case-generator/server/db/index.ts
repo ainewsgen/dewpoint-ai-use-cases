@@ -10,7 +10,9 @@ if (!connectionString) {
 
 const pool = new Pool({
     connectionString: connectionString || 'postgres://dummy:dummy@localhost:5432/dummy',
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+    ssl: (connectionString?.includes('neon.tech') || connectionString?.includes('render.com') || process.env.NODE_ENV === 'production')
+        ? { rejectUnauthorized: false }
+        : undefined
 });
 
 export const db = drizzle(pool, { schema });

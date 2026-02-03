@@ -288,8 +288,11 @@ function App() {
                                     setView('DISCOVERY');
                                     return;
                                 }
-                                // Allow anonymous access - Roadmap component will handle empty overlap
+                                // Allow anonymous access but nudge for login
                                 setView('ROADMAP');
+                                if (!user) {
+                                    setAuthModal('LOGIN');
+                                }
                             }}
                             style={{
                                 background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',

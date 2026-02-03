@@ -22,6 +22,7 @@ export interface CompanyData {
 
 // ... (interfaces)
 export interface Opportunity {
+    id?: number;
     title: string;
     department: string;
     industry?: string;

@@ -276,6 +276,20 @@ const server = app.listen(Number(PORT), '0.0.0.0', async () => {
         try {
             console.log("🛠️ Checking Database Schema...");
 
+            // 0. Create API Usage Table (Missing in auto-heal)
+            await db.execute(sql`
+                CREATE TABLE IF NOT EXISTS api_usage (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id),
+                    shadow_id TEXT,
+                    model TEXT,
+                    prompt_tokens INTEGER,
+                    completion_tokens INTEGER,
+                    total_cost DECIMAL(10, 6),
+                    timestamp TIMESTAMP DEFAULT NOW()
+                );
+            `);
+
             // 1. Create Companies Table (Missing in Prod)
             await db.execute(sql`
                 CREATE TABLE IF NOT EXISTS companies (

@@ -1647,18 +1647,64 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             }
 
             {/* Edit Lead/User Modal */}
+            {/* Edit Lead/User Modal */}
             {
                 editingUser && (
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Company URL</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.url || ''}
-                                            onChange={e => setEditForm({ ...editForm, url: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
-                                        />
-                                    </div>
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                        background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 2000
+                    }} onClick={() => setEditingUser(null)}>
+                        <div
+                            className="glass-panel animate-scale-in"
+                            style={{ width: '800px', maxHeight: '90vh', overflowY: 'auto' }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
+                                Edit Profile
+                            </h3>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+
+                                {/* Left Column */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Industry</label>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>User Name</label>
+                                        <div className="input-with-icon">
+                                            <User size={16} />
+                                            <input
+                                                type="text"
+                                                value={editForm.name || ''}
+                                                onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Company URL</label>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div className="input-with-icon" style={{ flex: 1 }}>
+                                                <Globe size={16} />
+                                                <input
+                                                    type="text"
+                                                    value={editForm.url || ''}
+                                                    onChange={e => setEditForm({ ...editForm, url: e.target.value })}
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={handleScan}
+                                                disabled={isScanning || !editForm.url}
+                                                className="btn-secondary"
+                                                style={{ padding: '0 0.75rem' }}
+                                                title="Scan website to auto-fill fields"
+                                            >
+                                                {isScanning ? <RefreshCw size={16} className="spin" /> : <Sparkles size={16} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Industry</label>
                                         <input
                                             type="text"
                                             value={editForm.industry || ''}
@@ -1666,11 +1712,9 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                             style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
                                         />
                                     </div>
-                                </div >
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Role</label>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Role</label>
                                         <input
                                             type="text"
                                             value={editForm.role || ''}
@@ -1678,6 +1722,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                             style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#111', color: 'white' }}
                                         />
                                     </div>
+
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Company Size</label>
                                         <select
@@ -1752,237 +1797,237 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 </div>
 
                             </div >
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
-            <button onClick={() => setEditingUser(null)} className="btn-secondary">Cancel</button>
-            <button onClick={saveEditUser} className="btn-primary">
-                <Save size={16} /> Save Changes
-            </button>
-        </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1rem' }}>
+                                <button onClick={() => setEditingUser(null)} className="btn-secondary">Cancel</button>
+                                <button onClick={saveEditUser} className="btn-primary">
+                                    <Save size={16} /> Save Changes
+                                </button>
+                            </div>
                         </div >
                     </div >
                 )
-}
-{
-    activeTab === 'integrations' && (
-        <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h3>Connected Tools & APIs</h3>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => {
-                        setCurrentIntegration({
-                            id: 0, name: 'OpenAI', authType: 'api_key', baseUrl: '', enabled: true,
-                        });
-                        setIsEditingIntegration(true);
-                    }} className="btn-primary" style={{ background: 'hsl(var(--accent-primary))' }}>
-                        <Bot size={16} /> Connect OpenAI
-                    </button>
-                    <button onClick={() => {
-                        setCurrentIntegration(null);
-                        setIsEditingIntegration(true);
-                    }} className="btn-secondary">
-                        <Plus size={16} /> Add Custom
-                    </button>
-                </div>
-            </div>
-
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
-                        <th style={{ padding: '1rem' }}>Name</th>
-                        <th style={{ padding: '1rem' }}>Type</th>
-                        <th style={{ padding: '1rem' }}>Base URL</th>
-                        <th style={{ padding: '1rem' }}>Status</th>
-                        <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {integrations.map(i => (
-                        <tr key={i.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '1rem' }}>{i.name}</td>
-                            <td style={{ padding: '1rem' }}>{i.authType === 'api_key' ? 'API Key' : 'OAuth'}</td>
-                            <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
-                            <td style={{ padding: '1rem' }}>
-                                <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
-                                    {i.enabled ? 'Active' : 'Disabled'}
-                                </span>
-                            </td>
-                            <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                <button
-                                    onClick={() => handleTestConnection(i.id)}
-                                    disabled={testingId === i.id}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: 'var(--text-muted)',
-                                        cursor: 'pointer',
-                                        marginRight: '1rem'
-                                    }}
-                                    title="Test Connection"
-                                >
-                                    <RefreshCw size={16} className={testingId === i.id ? "spin" : ""} />
+            }
+            {
+                activeTab === 'integrations' && (
+                    <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h3>Connected Tools & APIs</h3>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button onClick={() => {
+                                    setCurrentIntegration({
+                                        id: 0, name: 'OpenAI', authType: 'api_key', baseUrl: '', enabled: true,
+                                    });
+                                    setIsEditingIntegration(true);
+                                }} className="btn-primary" style={{ background: 'hsl(var(--accent-primary))' }}>
+                                    <Bot size={16} /> Connect OpenAI
                                 </button>
-                                <button onClick={() => openEditIntegration(i)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
-                                    <Edit size={16} />
+                                <button onClick={() => {
+                                    setCurrentIntegration(null);
+                                    setIsEditingIntegration(true);
+                                }} className="btn-secondary">
+                                    <Plus size={16} /> Add Custom
                                 </button>
-                                <button onClick={() => handleDeleteIntegration(i.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
-                                    <Trash size={16} />
+                            </div>
+                        </div>
+
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
+                                    <th style={{ padding: '1rem' }}>Name</th>
+                                    <th style={{ padding: '1rem' }}>Type</th>
+                                    <th style={{ padding: '1rem' }}>Base URL</th>
+                                    <th style={{ padding: '1rem' }}>Status</th>
+                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {integrations.map(i => (
+                                    <tr key={i.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '1rem' }}>{i.name}</td>
+                                        <td style={{ padding: '1rem' }}>{i.authType === 'api_key' ? 'API Key' : 'OAuth'}</td>
+                                        <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
+                                                {i.enabled ? 'Active' : 'Disabled'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                            <button
+                                                onClick={() => handleTestConnection(i.id)}
+                                                disabled={testingId === i.id}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: 'var(--text-muted)',
+                                                    cursor: 'pointer',
+                                                    marginRight: '1rem'
+                                                }}
+                                                title="Test Connection"
+                                            >
+                                                <RefreshCw size={16} className={testingId === i.id ? "spin" : ""} />
+                                            </button>
+                                            <button onClick={() => openEditIntegration(i)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
+                                                <Edit size={16} />
+                                            </button>
+                                            <button onClick={() => handleDeleteIntegration(i.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
+                                                <Trash size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            }
+            {/* Users Tab - Real User Management */}
+            {
+                activeTab === 'users' && (
+                    <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <h3>Registered Users <span style={{ fontSize: '0.8rem', color: '#888' }}>({users.length})</span></h3>
+                                <button onClick={fetchUsers} className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}>
+                                    <RefreshCw size={12} /> Force Refresh
                                 </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    )
-}
-{/* Users Tab - Real User Management */ }
-{
-    activeTab === 'users' && (
-        <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <h3>Registered Users <span style={{ fontSize: '0.8rem', color: '#888' }}>({users.length})</span></h3>
-                    <button onClick={fetchUsers} className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}>
-                        <RefreshCw size={12} /> Force Refresh
-                    </button>
-                </div>
-                <button onClick={() => openEditUserModal()} className="btn-primary">
-                    <Plus size={18} /> Add User
-                </button>
-            </div>
+                            </div>
+                            <button onClick={() => openEditUserModal()} className="btn-primary">
+                                <Plus size={18} /> Add User
+                            </button>
+                        </div>
 
-            {/* Debug Raw State */}
-            {(users.length === 0 || fetchError) && (
-                <div style={{ padding: '1rem', background: 'rgba(255,100,100,0.1)', border: '1px solid salmon', borderRadius: '8px', marginBottom: '1rem' }}>
-                    <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ Debug info:</p>
-                    <pre style={{ fontSize: '0.7rem', color: '#ccc' }}>
-                        Active Tab: {activeTab}{'\n'}
-                        Users State Array Length: {users.length}{'\n'}
-                        Fetch Error: {fetchError || 'None'}
-                    </pre>
-                </div>
-            )}
+                        {/* Debug Raw State */}
+                        {(users.length === 0 || fetchError) && (
+                            <div style={{ padding: '1rem', background: 'rgba(255,100,100,0.1)', border: '1px solid salmon', borderRadius: '8px', marginBottom: '1rem' }}>
+                                <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ Debug info:</p>
+                                <pre style={{ fontSize: '0.7rem', color: '#ccc' }}>
+                                    Active Tab: {activeTab}{'\n'}
+                                    Users State Array Length: {users.length}{'\n'}
+                                    Fetch Error: {fetchError || 'None'}
+                                </pre>
+                            </div>
+                        )}
 
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
-                        <th style={{ padding: '1rem' }}>Name</th>
-                        <th style={{ padding: '1rem' }}>Email</th>
-                        <th style={{ padding: '1rem' }}>Role</th>
-                        <th style={{ padding: '1rem' }}>Status</th>
-                        <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map(u => (
-                        <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '1rem' }}>{u.name || '-'}</td>
-                            <td style={{ padding: '1rem' }}>{u.email}</td>
-                            <td style={{ padding: '1rem' }}>
-                                <span style={{
-                                    background: u.role === 'admin' ? 'hsl(var(--accent-gold))' : '#333',
-                                    color: u.role === 'admin' ? 'black' : 'white',
-                                    padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600
-                                }}>
-                                    {u.role}
-                                </span>
-                            </td>
-                            <td style={{ padding: '1rem' }}>
-                                <span style={{ color: u.isActive ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
-                                    {u.isActive ? 'Active' : 'Inactive'}
-                                </span>
-                            </td>
-                            <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                <button onClick={() => openEditUserModal(u)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
-                                    <Edit size={16} />
-                                </button>
-                                <button onClick={() => handleDeleteUserReal(u.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
-                                    <Trash size={16} />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    )
-}
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
+                                    <th style={{ padding: '1rem' }}>Name</th>
+                                    <th style={{ padding: '1rem' }}>Email</th>
+                                    <th style={{ padding: '1rem' }}>Role</th>
+                                    <th style={{ padding: '1rem' }}>Status</th>
+                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map(u => (
+                                    <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '1rem' }}>{u.name || '-'}</td>
+                                        <td style={{ padding: '1rem' }}>{u.email}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{
+                                                background: u.role === 'admin' ? 'hsl(var(--accent-gold))' : '#333',
+                                                color: u.role === 'admin' ? 'black' : 'white',
+                                                padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600
+                                            }}>
+                                                {u.role}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{ color: u.isActive ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
+                                                {u.isActive ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                            <button onClick={() => openEditUserModal(u)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
+                                                <Edit size={16} />
+                                            </button>
+                                            <button onClick={() => handleDeleteUserReal(u.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
+                                                <Trash size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            }
 
-{/* Edit/Create User Modal */ }
-{
-    isEditingRealUser && (
-        <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <h3>{currentRealUser ? 'Edit User' : 'Add New User'}</h3>
-                    <button onClick={() => setIsEditingRealUser(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
-                </div>
-                <form onSubmit={handleSaveUser} style={{ display: 'grid', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email</label>
-                        <input
-                            type="email"
-                            required
-                            value={userEditForm.email}
-                            onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                        />
+            {/* Edit/Create User Modal */}
+            {
+                isEditingRealUser && (
+                    <div className="modal-overlay">
+                        <div className="modal-content glass-panel" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                <h3>{currentRealUser ? 'Edit User' : 'Add New User'}</h3>
+                                <button onClick={() => setIsEditingRealUser(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
+                            </div>
+                            <form onSubmit={handleSaveUser} style={{ display: 'grid', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={userEditForm.email}
+                                        onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
+                                    <input
+                                        type="text"
+                                        value={userEditForm.name}
+                                        onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Role</label>
+                                    <select
+                                        value={userEditForm.role}
+                                        onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#222', color: 'white' }}
+                                    >
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                        {currentRealUser ? 'New Password (leave blank to keep)' : 'Password'}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required={!currentRealUser}
+                                        value={userEditForm.password}
+                                        onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="button" onClick={() => setIsEditingRealUser(false)} className="btn-secondary">Cancel</button>
+                                    <button type="submit" className="btn-primary">{currentRealUser ? 'Save Changes' : 'Create User'}</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
-                        <input
-                            type="text"
-                            value={userEditForm.name}
-                            onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Role</label>
-                        <select
-                            value={userEditForm.role}
-                            onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: '#222', color: 'white' }}
-                        >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                            {currentRealUser ? 'New Password (leave blank to keep)' : 'Password'}
-                        </label>
-                        <input
-                            type="password"
-                            required={!currentRealUser}
-                            value={userEditForm.password}
-                            onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-glass)' }}
-                        />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                        <button type="button" onClick={() => setIsEditingRealUser(false)} className="btn-secondary">Cancel</button>
-                        <button type="submit" className="btn-primary">{currentRealUser ? 'Save Changes' : 'Create User'}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
+                )
+            }
 
-{ activeTab === 'icps' && <IcpManager /> }
-{ activeTab === 'library' && <LibraryManager /> }
+            {activeTab === 'icps' && <IcpManager />}
+            {activeTab === 'library' && <LibraryManager />}
 
-{/* Integration Modal */ }
-{
-    isEditingIntegration && (
-        <IntegrationModal
-            integration={currentIntegration || undefined}
-            onClose={() => setIsEditingIntegration(false)}
-            onSave={handleSaveIntegration}
-        />
-    )
-}
+            {/* Integration Modal */}
+            {
+                isEditingIntegration && (
+                    <IntegrationModal
+                        integration={currentIntegration || undefined}
+                        onClose={() => setIsEditingIntegration(false)}
+                        onSave={handleSaveIntegration}
+                    />
+                )
+            }
         </div >
     );
 }

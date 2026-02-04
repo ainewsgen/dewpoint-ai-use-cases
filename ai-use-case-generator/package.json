@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "node --env-file=.env --import tsx/esm --watch server/index.ts",
-    "build:server": "(tsc -p tsconfig.server.json || true) && mkdir -p dist/server/db && cp server/db/migrations.sql dist/server/db/ && echo '{\"type\":\"commonjs\"}' > dist/server/package.json",
+    "build:server": "(tsc -p tsconfig.server.json || true) && mkdir -p dist/server/db && cp server/db/migrations.sql dist/server/db/",
     "build": "rm -rf dist && npx vite build && npm run build:server",
     "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",

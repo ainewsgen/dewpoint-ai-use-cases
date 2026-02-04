@@ -3,81 +3,7 @@ import { Opportunity } from '../lib/engine';
 import { BookOpen, Server, Plus, BadgeCheck, Frown, Sparkles, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 
 
-// Initial fallback data
-const DEFAULT_RECIPES: Opportunity[] = [
-    {
-        title: "The Silent Assistant",
-        department: "Operations",
-        public_view: {
-            problem: "Employee burnout from repetitive data entry tasks.",
-            solution_narrative: "An autonomous agent that intercepts email instructions, parses the intent, and updates internal records without human touch.",
-            value_proposition: "Eliminates cognitive load and context switching.",
-            roi_estimate: "15 hours/month saved",
-            detailed_explanation: "Functions as a routing layer for your inbox. Instead of manual data entry, you forward structured or unstructured emails to the agent, which handles the Database/System updates instantly.",
-            example_scenario: "Forwarding a client email to 'assistant@company.com' automatically updates the Hubspot deal stage and notifies the account manager."
-        },
-        admin_view: {
-            tech_stack: ["Antigravity", "Email API", "OpenAI GPT-4o"],
-            implementation_difficulty: "Med",
-            workflow_steps: "1. Ingest email 2. Parse JSON 3. Execute DB Update",
-            upsell_opportunity: "Monthly maintenance."
-        }
-    },
-    {
-        title: "The Invoice Watchdog",
-        department: "Finance",
-        public_view: {
-            problem: "Duplicate invoices and vendor overbilling.",
-            solution_narrative: "An always-on auditor that reviews every PDF invoice against contract terms.",
-            value_proposition: "Catches overbilling before payment.",
-            roi_estimate: "$5k+ recovered annually",
-            detailed_explanation: "Uses computer vision (OCR) to extract line items from PDF invoices and matches them against your master service agreements.",
-            example_scenario: "Detects a price increase in a monthly SaaS bill that was not pre-approved and flags it for review."
-        },
-        admin_view: {
-            tech_stack: ["Antigravity", "OCR API", "Finance Tool"],
-            implementation_difficulty: "High",
-            workflow_steps: "1. Ingest PDF 2. OCR 3. Match PO",
-            upsell_opportunity: "Revenue share."
-        }
-    },
-    {
-        title: "The Lead Qualifier",
-        department: "Sales",
-        public_view: {
-            problem: "Sales team wasting time on unqualified leads.",
-            solution_narrative: "An agent that researches every new inquiry on the web and drafts a perfect, personalized reply.",
-            value_proposition: "Focus only on 5-star prospects.",
-            roi_estimate: "10 hours/week saved",
-            detailed_explanation: "Enriches incoming lead data with public information (LinkedIn, Company Website) to score intent and fit before a human ever sees it.",
-            example_scenario: "A lead from a 'Student' is auto-rejected with a polite email, while a 'VP' gets a high-priority Calendly link."
-        },
-        admin_view: {
-            tech_stack: ["Antigravity", "Search API", "Database"],
-            implementation_difficulty: "Med",
-            workflow_steps: "1. Webhook 2. Scrape Company 3. Score Lead",
-            upsell_opportunity: "Scraping credits."
-        }
-    },
-    {
-        title: "The Content Engine",
-        department: "Marketing",
-        public_view: {
-            problem: "Inconsistent social media presence.",
-            solution_narrative: "An agent that watches industry news and drafts LinkedIn posts in your specific brand voice.",
-            value_proposition: "Thought leadership on autopilot.",
-            roi_estimate: "30+ posts/month",
-            detailed_explanation: "Monitors RSS feeds and Google News for keywords relevant to your industry, then uses your past posts to generate new content in your unique voice.",
-            example_scenario: "News breaks about 'AI Regulation'. The engine drafts a thoughtful LinkedIn post comparing it to your previous stance on data privacy."
-        },
-        admin_view: {
-            tech_stack: ["Antigravity", "News API", "LinkedIn API"],
-            implementation_difficulty: "Low",
-            workflow_steps: "1. Monitor Keywords 2. Summarize 3. Draft Post",
-            upsell_opportunity: "Content strategy retainer."
-        }
-    }
-];
+// Fallback recipes removed. Library is now fully dynamic from the Admin database.
 
 interface LibraryProps {
     isAdmin: boolean;
@@ -91,7 +17,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
 
     // Save/Load Logic
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
-    const [libRecipes, setLibRecipes] = useState<Opportunity[]>(DEFAULT_RECIPES);
+    const [libRecipes, setLibRecipes] = useState<Opportunity[]>([]);
 
     useEffect(() => {
         // Fetch from Backend
@@ -107,15 +33,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
                     staticCases = data.useCases || [];
                 }
 
-                // 2. Fetch Community Library
-                const communityRes = await fetch(`${apiBase}/community-library`);
-                let communityCases: Opportunity[] = [];
-                if (communityRes.ok) {
-                    const data = await communityRes.json();
-                    communityCases = data.recipes || [];
-                }
-
-                // 3. Map Static to Opportunity
+                // 2. Map Database Use Cases to Opportunity objects
                 const formattedStatic: Opportunity[] = staticCases.map(sc => ({
                     id: sc.id,
                     title: sc.title,
@@ -139,18 +57,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
                     generation_metadata: { source: 'System', model: 'Static Library' }
                 }));
 
-                // 4. Merge
-                const merged = [...DEFAULT_RECIPES];
-
-                formattedStatic.forEach(r => {
-                    if (!merged.find(m => m.title === r.title)) merged.push(r);
-                });
-
-                communityCases.forEach(r => {
-                    if (!merged.find(m => m.title === r.title)) merged.push(r);
-                });
-
-                setLibRecipes(merged);
+                setLibRecipes(formattedStatic);
             } catch (err) {
                 console.error("Failed to load library", err);
             }

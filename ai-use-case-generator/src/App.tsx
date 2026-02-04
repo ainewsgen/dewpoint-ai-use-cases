@@ -104,6 +104,32 @@ function App() {
             });
             console.log("Shadow Lead Captured Successfully");
 
+            // AUTO-ARCHIVE: Save all generated recipes to Library as unpublished
+            const token = localStorage.getItem('dpg_auth_token');
+            for (const opp of opportunities) {
+                try {
+                    await fetch(`/api/admin/library`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            industry: opp.industry || data.industry || 'General',
+                            title: opp.title,
+                            description: opp.public_view.solution_narrative,
+                            roiEstimate: opp.public_view.roi_estimate,
+                            difficulty: opp.admin_view.implementation_difficulty,
+                            tags: opp.admin_view.tech_stack,
+                            data: opp,
+                            isPublished: false
+                        })
+                    });
+                } catch (libErr) {
+                    console.error("Failed to auto-archive recipe", libErr);
+                }
+            }
+
             // Update local session history
             setLeads(prev => [{
                 id: Date.now().toString(),

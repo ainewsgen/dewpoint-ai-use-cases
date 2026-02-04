@@ -7,18 +7,27 @@ interface RoadmapCardProps {
     opp: Opportunity;
     onRemove?: () => void;
     onSave?: () => void; // Added for Library "Save" action
+    onTogglePublish?: () => void; // New: For Admin Library
+    isPublished?: boolean; // New: For Admin Library
     isAdmin: boolean;
     readonly?: boolean; // For display only
     isReference?: boolean; // Changes button to "Add to Library" or similar
 }
 
-export function RoadmapCard({ opp, onRemove, onSave, isAdmin, readonly, isReference }: RoadmapCardProps) {
+export function RoadmapCard({ opp, onRemove, onSave, onTogglePublish, isPublished, isAdmin, readonly, isReference }: RoadmapCardProps) {
     const [showDetails, setShowDetails] = useState(false);
 
     return (
-        <div className="glass-panel recipe-card animate-fade-in" style={{ borderTopColor: 'hsl(var(--accent-secondary))', height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <span className={`badge ${opp.public_view.roi_estimate.includes('$') ? 'cost' : 'eff'}`}>{opp.department}</span>
+        <div className="glass-panel recipe-card animate-fade-in" style={{ borderTopColor: 'hsl(var(--accent-secondary))', height: '100%', display: 'flex', flexDirection: 'column', opacity: (isPublished === false) ? 0.7 : 1 }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span className={`badge ${opp.public_view.roi_estimate.includes('$') ? 'cost' : 'eff'}`}>{opp.department}</span>
+                    {opp.industry && (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                            | {opp.industry}
+                        </span>
+                    )}
+                </div>
                 <span style={{ color: 'hsl(var(--accent-gold))', fontSize: '0.8rem', fontWeight: 700 }}>{opp.public_view.roi_estimate}</span>
             </div>
             <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{opp.title}</h3>
@@ -95,9 +104,20 @@ export function RoadmapCard({ opp, onRemove, onSave, isAdmin, readonly, isRefere
                 </button>
 
                 {/* Action Buttons */}
+                {!readonly && onTogglePublish && isAdmin && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onTogglePublish(); }}
+                        className="btn-secondary"
+                        style={{ padding: '0.5rem', color: isPublished ? 'hsl(var(--accent-primary))' : 'var(--text-muted)' }}
+                        title={isPublished ? "Unpublish" : "Publish"}
+                    >
+                        {isPublished ? <Sparkles size={16} /> : <Server size={16} />}
+                    </button>
+                )}
+
                 {!readonly && onRemove && (
                     <button
-                        onClick={onRemove}
+                        onClick={(e) => { e.stopPropagation(); onRemove(); }}
                         className="btn-secondary"
                         style={{ borderColor: 'salmon', color: 'salmon', padding: '0.5rem' }}
                         title="Remove"
@@ -108,7 +128,7 @@ export function RoadmapCard({ opp, onRemove, onSave, isAdmin, readonly, isRefere
 
                 {!readonly && onSave && (
                     <button
-                        onClick={onSave}
+                        onClick={(e) => { e.stopPropagation(); onSave(); }}
                         className="btn-primary"
                         style={{ padding: '0.5rem' }}
                         title="Save to Library"

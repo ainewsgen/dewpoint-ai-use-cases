@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash, Search, RefreshCw, Zap, Sparkles, X } from 'lucide-react';
+import { Trash, Search, RefreshCw, Zap, Sparkles, X, Server } from 'lucide-react';
 import { Opportunity } from '../../lib/engine';
 import { RoadmapCard } from '../RoadmapCard';
 
@@ -158,6 +158,36 @@ export function LibraryManager() {
         }
     };
 
+    const handleTogglePublish = async (id: number, currentStatus: boolean) => {
+        try {
+            const res = await fetch(`/api/admin/library/${id}/toggle`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isPublished: !currentStatus })
+            });
+            if (res.ok) {
+                setUseCases(prev => prev.map(c => c.id === id ? { ...c, isPublished: !currentStatus } : c));
+            }
+        } catch (error) {
+            console.error("Toggle error", error);
+        }
+    };
+
+    const handleCleanupAI = async () => {
+        if (!confirm("This will delete ALL AI-generated recipe cards from the library. This cannot be undone. Continue?")) return;
+        try {
+            const res = await fetch('/api/admin/library/cleanup/ai', { method: 'DELETE' });
+            if (res.ok) {
+                alert("AI-generated cards cleaned up! 🧹");
+                fetchUseCases();
+            } else {
+                alert("Cleanup failed.");
+            }
+        } catch (e) {
+            alert("Cleanup error.");
+        }
+    };
+
     // Filter Logic
     const filteredCases = useCases.filter(c =>
         c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -172,6 +202,13 @@ export function LibraryManager() {
                     <p style={{ color: 'var(--text-muted)' }}>Manage static examples and generate new content.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                        onClick={handleCleanupAI}
+                        className="btn-secondary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'salmon', borderColor: 'salmon' }}
+                    >
+                        <Trash size={16} /> Cleanup AI
+                    </button>
                     <button
                         onClick={handleSync}
                         disabled={isSyncing}
@@ -213,14 +250,24 @@ export function LibraryManager() {
                                 <RoadmapCard
                                     opp={c.data}
                                     isAdmin={true}
-                                    readonly={false} // Allow Save/Remove actions? Actually RoadmapCard actions are specific
+                                    readonly={false}
+                                    isPublished={c.isPublished}
+                                    onTogglePublish={() => handleTogglePublish(c.id, !!c.isPublished)}
                                     onRemove={() => handleDelete(c.id)}
                                 />
                             ) : (
-                                <div className="glass-panel recipe-card">
+                                <div className="glass-panel recipe-card" style={{ opacity: c.isPublished ? 1 : 0.7 }}>
                                     <div className="card-header">
                                         <span className="badge eff">{c.industry}</span>
-                                        <span style={{ color: '#aaa', fontSize: '0.8rem' }}>{c.difficulty}</span>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button
+                                                onClick={() => handleTogglePublish(c.id, !!c.isPublished)}
+                                                style={{ background: 'none', border: 'none', color: c.isPublished ? 'hsl(var(--accent-primary))' : 'var(--text-muted)', cursor: 'pointer' }}
+                                            >
+                                                {c.isPublished ? <Sparkles size={16} /> : <Server size={16} />}
+                                            </button>
+                                            <span style={{ color: '#aaa', fontSize: '0.8rem' }}>{c.difficulty}</span>
+                                        </div>
                                     </div>
                                     <h3>{c.title}</h3>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>{c.description}</p>

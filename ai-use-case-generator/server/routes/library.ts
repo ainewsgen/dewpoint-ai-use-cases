@@ -93,6 +93,36 @@ router.put('/admin/library/:id', requireAuth, requireAdmin, async (req, res) => 
     }
 });
 
+// Admin: Toggle Publish Status
+router.patch('/admin/library/:id/toggle', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isPublished } = req.body;
+
+        const updatedCase = await db.update(useCaseLibrary)
+            .set({ isPublished })
+            .where(eq(useCaseLibrary.id, parseInt(id as string)))
+            .returning();
+
+        res.json({ success: true, isPublished: updatedCase[0].isPublished });
+    } catch (error: any) {
+        console.error('Toggle publish error:', error);
+        res.status(500).json({ error: 'Failed to toggle status', details: error.message });
+    }
+});
+
+// Admin: Cleanup AI Generated Cards (heuristic: data is not null)
+router.delete('/admin/library/cleanup/ai', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        // We delete items where 'data' is NOT NULL, as they were likely synced/generated
+        const result = await db.execute(sql`DELETE FROM use_case_library WHERE data IS NOT NULL`);
+        res.json({ success: true, message: "AI-generated cards cleaned up" });
+    } catch (error: any) {
+        console.error('Cleanup error:', error);
+        res.status(500).json({ error: 'Failed to cleanup', details: error.message });
+    }
+});
+
 // Admin: Delete Use Case
 router.delete('/admin/library/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
@@ -105,4 +135,5 @@ router.delete('/admin/library/:id', requireAuth, requireAdmin, async (req, res) 
     }
 });
 
+import { sql } from 'drizzle-orm';
 export default router;

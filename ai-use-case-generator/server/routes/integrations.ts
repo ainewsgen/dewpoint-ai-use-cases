@@ -187,17 +187,25 @@ router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: A
     try {
         const { id, provider, name, apiKey, baseUrl } = req.body;
 
-        // 1. Identify Provider
-        let effectiveProvider = provider || (name?.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
-
-        // 2. Get API Key
+        let effectiveProvider = provider;
+        let effectiveName = name;
         let effectiveKey = apiKey;
-        if (id && !effectiveKey) {
+
+        // 1. Fetch from DB if ID provided (for list-view tests)
+        if (id) {
             const [int] = await db.select().from(integrations).where(eq(integrations.id, id));
-            if (int && int.apiKey) {
-                effectiveKey = decrypt(int.apiKey);
+            if (int) {
+                if (!effectiveProvider) effectiveProvider = int.provider;
+                if (!effectiveName) effectiveName = int.name;
+                if (!effectiveKey && int.apiKey) effectiveKey = decrypt(int.apiKey);
             }
         }
+
+        // 2. Identify Provider fallback
+        if (effectiveKey?.startsWith('AIza')) {
+            effectiveProvider = 'gemini';
+        }
+        effectiveProvider = effectiveProvider || (effectiveName?.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
 
         if (!effectiveKey) {
             return res.status(400).json({ error: 'No API Key provided for test' });

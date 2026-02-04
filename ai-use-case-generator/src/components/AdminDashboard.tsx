@@ -832,77 +832,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {/* Debugger Tab */}
             {activeTab === 'debugger' && <DebugConsole />}
 
-            {/* Leads Tab */}
-            {activeTab === 'leads' && (
-                <div className="admin-grid animate-fade-in" style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                    {isLoadingLeads ? (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                            <Activity className="animate-spin" size={24} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                            <p>Loading leads...</p>
-                        </div>
-                    ) : leadsError ? (
-                        <div style={{ gridColumn: '1/-1', padding: '1rem', border: '1px solid salmon', borderRadius: '8px', color: 'salmon', background: 'rgba(250, 128, 114, 0.1)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                                <AlertCircle size={18} /> Error Loading Leads
-                            </div>
-                            {leadsError}
-                        </div>
-                    ) : adminLeads.length === 0 ? (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', border: '1px dashed var(--border-glass)', borderRadius: '12px' }}>
-                            <p>No leads found in the database.</p>
-                        </div>
-                    ) : (
-                        adminLeads.map((lead: any) => (
-                            <div key={lead.id} className="glass-panel" style={{ padding: '1.5rem', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                                    <div>
-                                        <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'hsl(var(--text-main))' }}>
-                                            {lead.company?.name || 'Unknown Company'}
-                                        </h4>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                            <span className="lead-badge" style={{ background: 'hsla(var(--accent-primary)/0.1)', color: 'hsl(var(--accent-primary))', fontSize: '0.7rem', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
-                                                {lead.company?.industry || 'Unspecified'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            if (confirm('Delete this lead and associated data?')) {
-                                                handleDeleteLead(lead.id);
-                                            }
-                                        }}
-                                        className="btn-icon danger"
-                                        title="Delete Lead"
-                                        style={{ color: 'var(--text-muted)', opacity: 0.6 }}
-                                    >
-                                        <Trash size={16} />
-                                    </button>
-                                </div>
 
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'grid', gap: '0.5rem', flex: 1 }}>
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <User size={14} style={{ opacity: 0.7 }} />
-                                        {lead.company?.email || 'No Email'}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                                        <Bot size={14} style={{ opacity: 0.7, marginTop: '3px' }} />
-                                        <span style={{ fontStyle: 'italic', opacity: 0.8 }}>
-                                            {lead.company?.painPoint || 'No pain point recorded'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                    <span>{new Date(lead.timestamp).toLocaleDateString()}</span>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Layers size={12} /> {lead.recipes?.length || 0} Blueprints
-                                    </span>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            )}
 
             {/* Blueprints & AI Tab */}
             {

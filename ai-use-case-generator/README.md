@@ -235,14 +235,13 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Global UI Spacing Fix**: Implemented a robust centralized layout wrapper to resolve navigation obstructions across all devices.
 - ✅ **Per-User Usage Tracking**: Integrated spend analytics at the user level.
 - ✅ **Library Draft Mode**: Implemented mandatory review for all new library content.
 - ✅ **Production Hardening**: Removed emergency schema repair routes; tightened API security.
 - ✅ Anonymous AI generation (no login required)
 - ✅ Complete lead capture with company profiles
 - ✅ Enhanced admin dashboard with full blueprint details
-- ✅ Anonymous usage tracking for observability
-- ✅ Fixed validation (only `painPoint` required)
 
 ### Recent Commits
 

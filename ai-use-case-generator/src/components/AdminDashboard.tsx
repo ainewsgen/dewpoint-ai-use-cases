@@ -598,14 +598,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                     <nav style={{
                         background: 'hsla(var(--bg-card)/0.5)',
                         padding: '0.25rem',
-                        borderRadius: '50px',
+                        borderRadius: '12px',
                         border: '1px solid var(--border-glass)',
                         display: 'flex',
-                        overflowX: 'auto',
-                        whiteSpace: 'nowrap',
+                        flexWrap: 'wrap',
+                        gap: '0.25rem',
                         maxWidth: '100%',
-                        scrollbarWidth: 'none',
-                        WebkitOverflowScrolling: 'touch'
                     }}>
                         <button
                             onClick={() => setActiveTab('leads')}

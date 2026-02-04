@@ -83,7 +83,7 @@ export function DocumentManager() {
         }
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('dpg_auth_token');
             const res = await fetch('/api/admin/documents', {
                 method: 'POST',
                 headers: {
@@ -102,12 +102,13 @@ export function DocumentManager() {
             }
         } catch (error) {
             console.error("Upload failed", error);
+            alert("Upload failed. Please check the console for details or ensure you are logged in correctly.");
         }
     };
 
     const togglePublish = async (id: number, currentStatus: boolean) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('dpg_auth_token');
             await fetch(`/api/admin/documents/${id}`, {
                 method: 'PATCH',
                 headers: {
@@ -119,6 +120,7 @@ export function DocumentManager() {
             fetchDocuments();
         } catch (error) {
             console.error("Toggle publish failed", error);
+            alert("Failed to update status.");
         }
     };
 
@@ -126,7 +128,7 @@ export function DocumentManager() {
         if (!confirm("Are you sure you want to delete this document?")) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('dpg_auth_token');
             await fetch(`/api/admin/documents/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -134,6 +136,7 @@ export function DocumentManager() {
             fetchDocuments();
         } catch (error) {
             console.error("Delete failed", error);
+            alert("Failed to delete document.");
         }
     };
 

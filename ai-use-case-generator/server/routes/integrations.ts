@@ -219,7 +219,7 @@ router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: A
                     apiKey: effectiveKey,
                     systemPrompt: "You are a connection tester.",
                     userContext: "Return { \"status\": \"ok\" } JSON object. No markdown.",
-                    model: "gemini-1.5-flash" // Faster/cheaper for test
+                    model: "gemini-1.5-flash-001" // Faster/cheaper for test
                 });
                 return res.json({ success: true, message: 'Successfully connected to Google Gemini!' });
             } catch (err: any) {

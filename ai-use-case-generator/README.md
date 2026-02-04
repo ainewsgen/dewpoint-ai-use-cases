@@ -2,7 +2,7 @@
 
 **Live App:** https://dewpoint-strategy-app.onrender.com  
 **Repository:** ainewsgen/dewpoint-ai-use-cases  
-**Last Updated:** 2026-01-31
+**Last Updated:** 2026-02-04
 
 A full-stack lead generation tool that creates personalized AI automation "recipe cards" for businesses based on their industry, pain points, and tech stack.
 
@@ -21,6 +21,9 @@ A full-stack lead generation tool that creates personalized AI automation "recip
 - View saved recipes with admin-only insights (implementation difficulty, upsell opportunities)
 - Track AI usage with **per-user spend analytics**
 - Manage Use Case Library with **Draft Mode** (Mandatory Review)
+- **New: Strategic Document Management** (Whitepapers, Guides, ROI Reports)
+- **New: AI-Generated Content Summaries** (Automatic descriptions for resource uploads)
+- **New: Resource Analytics** (Track document downloads per lead)
 - Configure AI providers and monitor system health
 
 ---
@@ -130,6 +133,12 @@ VITE_API_URL=http://localhost:5000
    - **Draft Mode**: Imported use cases default to "Draft" status
    - Publish/Unpublish toggle for search visibility
 
+5. **Resource Management (New)**
+    - Upload Strategic Resources (Implementation Guides, ROI Reports)
+    - **Draft vs. Published** status management
+    - View **Download Analytics** for each resource
+    - Automated AI descriptions for all uploads
+
 ### Budget Control ✅
 - Set daily spending limit (default: $5.00)
 - Hard limit blocks requests when exceeded
@@ -163,6 +172,7 @@ api_usage (tracking)
 - `integrations` - AI provider configurations
 - `api_usage` - Request logging and cost tracking
 - `cms_contents` - Announcements and library content
+- `documents` - Strategic resources (guides, reports) and download counts
 
 ### User Flow
 
@@ -235,6 +245,10 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Strategic Document System**: Full management suite for Implementation Guides and Reports.
+- ✅ **AI Content Generation**: Automatic description generation for uploaded resources via Gemini.
+- ✅ **Download Analytics**: Tracking and reporting on lead engagement with strategic resources.
+- ✅ **Mobile Polishing**: Optimized UI for tablets and smartphones (card grids, typography).
 - ✅ **Global UI Spacing Fix**: Implemented a robust centralized layout wrapper to resolve navigation obstructions across all devices.
 - ✅ **Per-User Usage Tracking**: Integrated spend analytics at the user level.
 - ✅ **Library Draft Mode**: Implemented mandatory review for all new library content.

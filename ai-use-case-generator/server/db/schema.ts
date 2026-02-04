@@ -177,8 +177,10 @@ export const documents = pgTable('documents', {
     name: text('name').notNull(),
     type: text('type').notNull(), // 'Report' | 'Implementation Guide'
     content: text('content').notNull(), // Base64 Content
+    description: text('description'),
     fileName: text('file_name'),
     fileType: text('file_type'),
     isPublished: boolean('is_published').default(false),
+    downloadCount: integer('download_count').default(0),
     createdAt: timestamp('created_at').defaultNow(),
 });

@@ -100,9 +100,11 @@ CREATE TABLE IF NOT EXISTS documents (
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     content TEXT NOT NULL,
+    description TEXT,
     file_name TEXT,
     file_type TEXT,
     is_published BOOLEAN DEFAULT false,
+    download_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -171,3 +173,5 @@ ALTER TABLE leads ADD COLUMN IF NOT EXISTS fingerprint_hash TEXT;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS download_count INTEGER DEFAULT 0;

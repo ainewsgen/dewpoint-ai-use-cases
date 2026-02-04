@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Upload,
     Trash2,
-    CheckCircle,
-    XCircle,
     Plus,
-    Download,
-    Loader2,
-    MonitorStop
+    Loader2
 } from 'lucide-react';
 
 interface Document {
@@ -15,9 +11,11 @@ interface Document {
     name: string;
     type: string;
     content: string;
-    fileName: string;
-    fileType: string;
+    description?: string;
+    fileName?: string;
+    fileType?: string;
     isPublished: boolean;
+    downloadCount?: number;
     createdAt: string;
 }
 
@@ -31,6 +29,7 @@ export function DocumentManager() {
         name: '',
         type: 'Report',
         content: '',
+        description: '',
         fileName: '',
         fileType: ''
     });
@@ -143,13 +142,6 @@ export function DocumentManager() {
         }
     };
 
-    const handlePreview = (content: string, fileName: string) => {
-        const link = document.createElement('a');
-        link.href = content;
-        link.download = fileName;
-        link.click();
-    };
-
     return (
         <div style={{ padding: '0.5rem' }}>
             {/* Upload Section */}
@@ -210,6 +202,18 @@ export function DocumentManager() {
                             <input id="file-upload" type="file" hidden onChange={handleFileChange} />
                         </label>
                     </div>
+                    <div style={{ gridColumn: 'span 3' }}>
+                        <textarea
+                            placeholder="Document Description (Visible to users on the roadmap)..."
+                            value={newDoc.description || ''}
+                            onChange={(e) => setNewDoc({ ...newDoc, description: e.target.value })}
+                            className="admin-textarea"
+                            style={{ width: '100%', minHeight: '80px', fontSize: '0.85rem', background: '#f8fafc' }}
+                        />
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                            💡 Tip: If you leave this blank, AI will generate a description for you after upload.
+                        </p>
+                    </div>
                     <button
                         type="submit"
                         disabled={!newDoc.name || !newDoc.content}
@@ -238,7 +242,7 @@ export function DocumentManager() {
                                 <th>Name</th>
                                 <th>Type</th>
                                 <th>File</th>
-                                <th>Status</th>
+                                <th>Downloads</th>
                                 <th>Uploaded</th>
                                 <th>Actions</th>
                             </tr>
@@ -260,15 +264,9 @@ export function DocumentManager() {
                                         </div>
                                     </td>
                                     <td>
-                                        {doc.isPublished ? (
-                                            <span style={{ color: 'var(--accent-success)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem' }}>
-                                                <CheckCircle size={12} /> Published
-                                            </span>
-                                        ) : (
-                                            <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem' }}>
-                                                <XCircle size={12} /> Draft
-                                            </span>
-                                        )}
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 600, textAlign: 'center' }}>
+                                            {doc.downloadCount || 0}
+                                        </div>
                                     </td>
                                     <td>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -276,29 +274,44 @@ export function DocumentManager() {
                                         </div>
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button
-                                                onClick={() => togglePublish(doc.id, doc.isPublished)}
-                                                className="btn-icon"
-                                                title={doc.isPublished ? "Unpublish" : "Publish"}
-                                            >
-                                                {doc.isPublished ? <MonitorStop size={16} /> : <CheckCircle size={16} />}
-                                            </button>
-                                            <button
-                                                onClick={() => handlePreview(doc.content, doc.fileName)}
-                                                className="btn-icon"
-                                                title="Download/Preview"
-                                            >
-                                                <Download size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(doc.id)}
-                                                className="btn-icon"
-                                                style={{ color: 'hsl(var(--accent-destructive))' }}
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{
+                                                fontSize: '0.7rem',
+                                                padding: '0.2rem 0.5rem',
+                                                borderRadius: '4px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                background: doc.isPublished ? 'hsla(var(--accent-primary)/0.1)' : 'rgba(255,255,255,0.05)',
+                                                color: doc.isPublished ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                                border: `1px solid ${doc.isPublished ? 'hsla(var(--accent-primary)/0.2)' : 'var(--border-glass)'}`
+                                            }}>
+                                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: doc.isPublished ? 'hsl(var(--accent-primary))' : 'var(--text-muted)' }}></span>
+                                                {doc.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => togglePublish(doc.id, doc.isPublished)}
+                                                    className={doc.isPublished ? "btn-secondary" : "btn-primary"}
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                                                >
+                                                    {doc.isPublished ? 'Unpublish' : 'Publish'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(doc.id)}
+                                                    style={{
+                                                        background: 'rgba(255, 59, 48, 0.1)',
+                                                        color: '#ff3b30',
+                                                        border: 'none',
+                                                        padding: '0.4rem 0.5rem',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

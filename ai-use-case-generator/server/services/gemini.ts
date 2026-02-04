@@ -1,4 +1,4 @@
-
+declare const process: any;
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AIRequestParams } from './openai.js'; // Shared interface
 
@@ -23,6 +23,27 @@ export class GeminiService {
         } catch (error) {
             console.error("Gemini Service Error:", error);
             throw error;
+        }
+    }
+
+    static async generateDocumentDescription(name: string, type: string, fileName: string): Promise<string> {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) return "";
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `Act as an expert AI Strategy Consultant. Generate a short, professional description (max 20 words) for a document called "${name}". 
+        The document type is "${type}" and the file is named "${fileName}".
+        The description should sound high-value and implementation-focused.
+        Return ONLY the description text.`;
+
+        try {
+            const result = await model.generateContent(prompt);
+            return result.response.text().trim();
+        } catch (error) {
+            console.error("AI Description Generation Error:", error);
+            return "";
         }
     }
 

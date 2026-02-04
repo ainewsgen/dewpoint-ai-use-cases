@@ -24,13 +24,17 @@ async function checkDb() {
         res.rows.forEach(row => console.log(` - ${row.table_name}`));
 
         const docCheck = await pool.query(`
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND table_name = 'documents'
-            );
+            SELECT id, name, is_published, type 
+            FROM documents
+            ORDER BY created_at DESC;
         `);
-        console.log(`\n'documents' table exists: ${docCheck.rows[0].exists}`);
+        console.log(`\nDocuments in DB (${docCheck.rows.length}):`);
+        docCheck.rows.forEach(row => {
+            console.log(` - [${row.is_published ? 'PUBLISHED' : 'DRAFT'}] ${row.name} (${row.type})`);
+        });
+
+        const publishedCount = docCheck.rows.filter(r => r.is_published).length;
+        console.log(`\nTotal Published: ${publishedCount}`);
 
     } catch (err) {
         console.error('Error checking DB:', err);

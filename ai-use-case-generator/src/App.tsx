@@ -393,7 +393,7 @@ function App() {
                             user={user}
                         />
                     )}
-                    {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
+                    {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} onSignup={() => setAuthModal('SIGNUP')} />}
 
                     {/* Admin Dashboard restored as top-level view */}
                     {view === 'ADMIN' && <AdminDashboard />}

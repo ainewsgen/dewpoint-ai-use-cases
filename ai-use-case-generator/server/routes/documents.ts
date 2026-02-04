@@ -3,6 +3,7 @@ import { db } from '../db/index.js';
 import { documents } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { GeminiService } from '../services/gemini.js';
 
 const router = Router();
 
@@ -41,10 +42,19 @@ router.get('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
 // POST /api/admin/documents (Upload)
 router.post('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { name, type, content, fileName, fileType } = req.body;
+        let { name, type, content, fileName, fileType, description } = req.body;
 
         if (!name || !type || !content) {
             return res.status(400).json({ error: "Name, type, and content are required" });
+        }
+
+        // Auto-generate description if missing
+        if (!description) {
+            try {
+                description = await GeminiService.generateDocumentDescription(name, type, fileName || "");
+            } catch (err) {
+                console.error("AI Description failed, skipping...", err);
+            }
         }
 
         const newDoc = await db.insert(documents).values({
@@ -53,6 +63,7 @@ router.post('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
             content,
             fileName,
             fileType,
+            description,
             isPublished: false
         }).returning();
 
@@ -60,6 +71,25 @@ router.post('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
     } catch (error: any) {
         console.error("Create document error:", error);
         res.status(500).json({ error: "Failed to create document", details: error.message });
+    }
+});
+
+// POST /api/documents/:id/download (Track Analytics)
+router.post('/documents/:id/download', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.execute(
+            `UPDATE documents SET download_count = download_count + 1 WHERE id = ${parseInt(id as string)} RETURNING id`
+        );
+
+        if (!result.rows.length) {
+            return res.status(404).json({ error: "Document not found" });
+        }
+
+        res.json({ success: true });
+    } catch (error: any) {
+        console.error("Track download error:", error);
+        res.status(500).json({ error: "Failed to track download", details: error.message });
     }
 });
 
@@ -79,9 +109,9 @@ router.patch('/admin/documents/:id', requireAuth, requireAdmin, async (req, res)
         }
 
         res.json({ success: true, document: updated[0] });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Update document error:", error);
-        res.status(500).json({ error: "Failed to update document" });
+        res.status(500).json({ error: "Failed to update document", details: error.message });
     }
 });
 
@@ -99,9 +129,9 @@ router.delete('/admin/documents/:id', requireAuth, requireAdmin, async (req, res
         }
 
         res.json({ success: true, message: "Document deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Delete document error:", error);
-        res.status(500).json({ error: "Failed to delete document" });
+        res.status(500).json({ error: "Failed to delete document", details: error.message });
     }
 });
 

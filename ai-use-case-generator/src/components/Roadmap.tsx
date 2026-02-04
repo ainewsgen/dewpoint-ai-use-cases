@@ -10,11 +10,12 @@ interface RoadmapProps {
     isAdmin: boolean;
     user?: any;
     leads?: any[];
+    onSignup?: () => void;
 }
 
 type SortOption = 'ROI' | 'DEPARTMENT' | 'NEWEST';
 
-export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
+export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: RoadmapProps) {
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
     const [documents, setDocuments] = useState<any[]>([]);
     const [isLocked, setIsLocked] = useState(true);
@@ -231,19 +232,59 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
             </div>
 
             {/* Resources & Guides Section */}
-            {user?.email && (documents.length > 0 || isLoadingDocs) && (
-                <div style={{ marginTop: '5rem', borderTop: '1px solid var(--border-glass)', paddingTop: '4rem' }}>
-                    <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', padding: '0.75rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '12px', marginBottom: '1rem' }}>
-                            <BookOpen size={32} className="text-accent" />
-                        </div>
-                        <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Strategic Resources</h3>
-                        <p style={{ color: 'var(--text-muted)' }}>Implementation guides and expert reports curated for your journey.</p>
+            <div style={{ marginTop: '5rem', borderTop: '1px solid var(--border-glass)', paddingTop: '4rem' }}>
+                <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
+                    <div style={{ display: 'inline-flex', padding: '0.75rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '12px', marginBottom: '1rem' }}>
+                        <BookOpen size={32} className="text-accent" />
                     </div>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Strategic Resources</h3>
+                    <p style={{ color: 'var(--text-muted)' }}>Implementation guides and expert reports curated for your journey.</p>
+                </div>
 
+                {!user?.email ? (
+                    /* Locked State for Anonymous Users */
+                    <div className="glass-panel" style={{
+                        padding: '3rem',
+                        textAlign: 'center',
+                        background: 'linear-gradient(135deg, hsla(var(--bg-card)/0.4) 0%, hsla(var(--bg-card)/0.1) 100%)',
+                        border: '1px dashed var(--border-glass)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '1rem'
+                    }}>
+                        <div style={{ padding: '1rem', background: 'hsla(var(--accent-gold)/0.1)', borderRadius: '50%' }}>
+                            <Lock size={32} className="text-gold" />
+                        </div>
+                        <h4 style={{ fontSize: '1.2rem' }}>Implementation Guides Locked</h4>
+                        <p style={{ color: 'var(--text-muted)', maxWidth: '450px', fontSize: '0.9rem' }}>
+                            Sign up to unlock step-by-step deployment manuals and ROI reports for your selected AI blueprints.
+                        </p>
+                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--accent-gold))', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            Login to Access
+                        </p>
+                        {onSignup && (
+                            <button
+                                onClick={onSignup}
+                                className="btn-primary"
+                                style={{ marginTop: '0.5rem', padding: '0.6rem 1.5rem' }}
+                            >
+                                Get Started for Free
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    /* Logged In View */
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
                         {isLoadingDocs ? (
-                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>Loading resources...</div>
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                                <div className="animate-pulse">Loading expert resources...</div>
+                            </div>
+                        ) : documents.length === 0 ? (
+                            /* Empty State for Logged In User */
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', border: '1px dashed var(--border-glass)', borderRadius: '12px' }}>
+                                <p style={{ color: 'var(--text-muted)' }}>No resources available yet. Check back soon for guides tailored to your roadmap.</p>
+                            </div>
                         ) : (
                             documents.map((doc) => (
                                 <div key={doc.id} className="glass-panel" style={{
@@ -278,14 +319,24 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                                     <div>
                                         <h4 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{doc.name}</h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                                            {doc.type === 'Implementation Guide'
+                                            {doc.description || (doc.type === 'Implementation Guide'
                                                 ? 'Step-by-step instructions to deploy these AI blueprints in your workflow.'
-                                                : 'Deeper market context and ROI analysis for your specific industry use cases.'}
+                                                : 'Deeper market context and ROI analysis for your specific industry use cases.')}
                                         </p>
                                     </div>
                                     <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
+                                                // Track analytics
+                                                try {
+                                                    const token = localStorage.getItem('dpg_auth_token');
+                                                    fetch(`/api/documents/${doc.id}/download`, {
+                                                        method: 'POST',
+                                                        headers: { 'Authorization': `Bearer ${token}` }
+                                                    });
+                                                } catch (e) { console.error("Analytics failed", e); }
+
+                                                // Trigger download
                                                 const link = document.createElement('a');
                                                 link.href = doc.content;
                                                 link.download = doc.fileName || `${doc.name}.pdf`;
@@ -301,8 +352,8 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                             ))
                         )}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

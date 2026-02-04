@@ -160,6 +160,35 @@ h5 {
     .container {
         padding: 1rem;
     }
+
+    h1 {
+        font-size: 2rem !important;
+    }
+
+    h2 {
+        font-size: 1.75rem !important;
+    }
+
+    .library-header h2 {
+        font-size: 1.8rem !important;
+    }
+
+    .library-header p {
+        font-size: 1rem !important;
+    }
+
+    .recipe-card {
+        padding: 1.25rem !important;
+    }
+
+    .admin-page-title {
+        font-size: 1.5rem !important;
+    }
+
+    .filter-bar button {
+        padding: 0.4rem 1rem !important;
+        font-size: 0.8rem !important;
+    }
 }
 
 /* Animations */
@@ -262,7 +291,11 @@ h5 {
 @media (max-width: 768px) {
     .matrix-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1rem;
+    }
+
+    .recipe-card h3 {
+        font-size: 1.1rem !important;
     }
 }
 

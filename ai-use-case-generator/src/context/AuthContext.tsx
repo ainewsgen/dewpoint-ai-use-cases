@@ -30,6 +30,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (res.ok) {
                 const data = await res.json();
                 setUser(data.user);
+                // Note: /auth/me usually won't return the token in body if only in cookies, 
+                // but if we have it in localStorage already, we keep it. 
+                // If it's missing, this checkAuth mostly relies on cookies.
             } else {
                 setUser(null);
             }
@@ -59,6 +62,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const data = await res.json();
         setUser(data.user);
+        if (data.token) {
+            localStorage.setItem('dpg_auth_token', data.token);
+        }
         return data.user;
     };
 
@@ -76,6 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const data = await res.json();
         setUser(data.user);
+        if (data.token) {
+            localStorage.setItem('dpg_auth_token', data.token);
+        }
         return data.user;
     };
 
@@ -83,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             await fetch(`${API_URL}/auth/logout`, { method: 'POST' });
             setUser(null);
+            localStorage.removeItem('dpg_auth_token');
         } catch (error) {
             console.error('Logout failed:', error);
         }

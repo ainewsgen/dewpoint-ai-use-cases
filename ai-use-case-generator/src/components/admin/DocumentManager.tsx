@@ -99,6 +99,9 @@ export function DocumentManager() {
                 // Reset file input
                 const fileInput = document.getElementById('file-upload') as HTMLInputElement;
                 if (fileInput) fileInput.value = '';
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                alert(`Upload failed: ${errData.error || res.statusText}`);
             }
         } catch (error) {
             console.error("Upload failed", error);

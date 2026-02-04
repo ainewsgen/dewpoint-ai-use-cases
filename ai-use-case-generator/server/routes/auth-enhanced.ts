@@ -65,6 +65,7 @@ router.post('/signup', async (req, res) => {
                 name: newUser.name,
                 role: newUser.role,
             },
+            token
         });
     } catch (error) {
         logger.error('Signup error', error);

@@ -107,17 +107,17 @@ CREATE TABLE IF NOT EXISTS documents (
 );
 
 -- 9. Industry ICPs Table
-CREATE TYPE dewpoint_icp_type AS ENUM ('dewpoint', 'internal');
-CREATE TYPE dewpoint_gtm_motion AS ENUM ('outbound', 'content', 'community', 'partner');
-CREATE TYPE dewpoint_pain_category AS ENUM ('revenue_leakage', 'capacity_constraint', 'cost_overrun', 'compliance_risk', 'customer_experience', 'data_fragmentation');
-CREATE TYPE dewpoint_time_to_value AS ENUM ('<30_days', '30_60_days', '60_90_days', 'gt_90_days');
-CREATE TYPE dewpoint_buying_complexity AS ENUM ('single_decision_maker', 'dual_approval', 'committee_light', 'committee_heavy');
-CREATE TYPE dewpoint_budget_ownership AS ENUM ('owner_discretionary', 'departmental', 'centralized_procurement');
-CREATE TYPE dewpoint_content_resonance AS ENUM ('operator_story', 'peer_case_study', 'data_benchmark', 'contrarian_insight');
-CREATE TYPE dewpoint_readiness AS ENUM ('low', 'medium', 'high');
-CREATE TYPE dewpoint_tolerance AS ENUM ('low', 'medium', 'high');
-CREATE TYPE dewpoint_reference_value AS ENUM ('low', 'medium', 'high');
-CREATE TYPE dewpoint_expansion_potential AS ENUM ('workflow_only', 'multi_workflow', 'platform_candidate');
+DO $$ BEGIN CREATE TYPE dewpoint_icp_type AS ENUM ('dewpoint', 'internal'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_gtm_motion AS ENUM ('outbound', 'content', 'community', 'partner'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_pain_category AS ENUM ('revenue_leakage', 'capacity_constraint', 'cost_overrun', 'compliance_risk', 'customer_experience', 'data_fragmentation'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_time_to_value AS ENUM ('<30_days', '30_60_days', '60_90_days', 'gt_90_days'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_buying_complexity AS ENUM ('single_decision_maker', 'dual_approval', 'committee_light', 'committee_heavy'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_budget_ownership AS ENUM ('owner_discretionary', 'departmental', 'centralized_procurement'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_content_resonance AS ENUM ('operator_story', 'peer_case_study', 'data_benchmark', 'contrarian_insight'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_readiness AS ENUM ('low', 'medium', 'high'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_tolerance AS ENUM ('low', 'medium', 'high'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_reference_value AS ENUM ('low', 'medium', 'high'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE dewpoint_expansion_potential AS ENUM ('workflow_only', 'multi_workflow', 'platform_candidate'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 CREATE TABLE IF NOT EXISTS industry_icps (
     id SERIAL PRIMARY KEY,

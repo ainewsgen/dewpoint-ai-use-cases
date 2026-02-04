@@ -19,9 +19,10 @@ export async function runMigrations() {
         const migrationSQL = fs.readFileSync(filePath, 'utf-8');
 
         await pool.query(migrationSQL);
-        console.log('✅ Database migrations completed successfully');
-    } catch (error) {
-        console.error('❌ Migration error:', error);
+        console.log('✅ Database migrations completed successfully. Schema refreshed.');
+    } catch (error: any) {
+        console.error('❌ Migration error:', error.message);
+        console.error('Stack:', error.stack);
         throw error; // Re-throw to be caught by the API
     } finally {
         await pool.end();

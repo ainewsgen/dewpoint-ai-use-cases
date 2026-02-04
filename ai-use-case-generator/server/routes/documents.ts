@@ -19,9 +19,9 @@ router.get('/documents', requireAuth, async (req, res) => {
         // but for now, since users might download them directly, we can include it or create a separate detail route.
         // Let's include everything for simplicity in the MVP.
         res.json({ success: true, documents: results });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Fetch documents error:", error);
-        res.status(500).json({ error: "Failed to fetch documents" });
+        res.status(500).json({ error: "Failed to fetch documents", details: error.message });
     }
 });
 
@@ -32,9 +32,9 @@ router.get('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
             .from(documents)
             .orderBy(desc(documents.createdAt));
         res.json({ success: true, documents: results });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Fetch admin documents error:", error);
-        res.status(500).json({ error: "Failed to fetch admin documents" });
+        res.status(500).json({ error: "Failed to fetch admin documents", details: error.message });
     }
 });
 
@@ -57,9 +57,9 @@ router.post('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
         }).returning();
 
         res.json({ success: true, document: newDoc[0] });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Create document error:", error);
-        res.status(500).json({ error: "Failed to create document" });
+        res.status(500).json({ error: "Failed to create document", details: error.message });
     }
 });
 

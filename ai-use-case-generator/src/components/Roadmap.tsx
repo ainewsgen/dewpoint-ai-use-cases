@@ -319,9 +319,11 @@ export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: Roadmap
                                     <div>
                                         <h4 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{doc.name}</h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                                            {doc.description || (doc.type === 'Implementation Guide'
-                                                ? 'Step-by-step instructions to deploy these AI blueprints in your workflow.'
-                                                : 'Deeper market context and ROI analysis for your specific industry use cases.')}
+                                            {doc.description && doc.description.trim() !== ''
+                                                ? doc.description
+                                                : (doc.type === 'Implementation Guide'
+                                                    ? 'Step-by-step instructions to deploy these AI blueprints in your workflow.'
+                                                    : 'Deeper market context and ROI analysis for your specific industry use cases.')}
                                         </p>
                                     </div>
                                     <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>

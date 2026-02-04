@@ -3,7 +3,8 @@ import {
     Upload,
     Trash2,
     Plus,
-    Loader2
+    Loader2,
+    Edit
 } from 'lucide-react';
 
 interface Document {
@@ -23,6 +24,7 @@ export function DocumentManager() {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
+    const [editingDoc, setEditingDoc] = useState<Document | null>(null);
 
     // Form State
     const [newDoc, setNewDoc] = useState({
@@ -94,7 +96,7 @@ export function DocumentManager() {
 
             if (res.ok) {
                 fetchDocuments();
-                setNewDoc({ name: '', type: 'Report', content: '', fileName: '', fileType: '' });
+                setNewDoc({ name: '', type: 'Report', content: '', description: '', fileName: '', fileType: '' });
                 // Reset file input
                 const fileInput = document.getElementById('file-upload') as HTMLInputElement;
                 if (fileInput) fileInput.value = '';
@@ -123,6 +125,38 @@ export function DocumentManager() {
         } catch (error) {
             console.error("Toggle publish failed", error);
             alert("Failed to update status.");
+        }
+    };
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingDoc) return;
+
+        try {
+            const token = localStorage.getItem('dpg_auth_token');
+            const res = await fetch(`/api/admin/documents/${editingDoc.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: editingDoc.name,
+                    type: editingDoc.type,
+                    description: editingDoc.description
+                })
+            });
+
+            if (res.ok) {
+                setEditingDoc(null);
+                fetchDocuments();
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                alert(`Update failed: ${errData.error || res.statusText}`);
+            }
+        } catch (error) {
+            console.error("Update failed", error);
+            alert("Update failed. Please check the console.");
         }
     };
 
@@ -291,6 +325,14 @@ export function DocumentManager() {
                                             </div>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <button
+                                                    onClick={() => setEditingDoc(doc)}
+                                                    className="btn-secondary"
+                                                    style={{ padding: '0.4rem 0.5rem', borderRadius: '6px' }}
+                                                    title="Edit"
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button
                                                     onClick={() => togglePublish(doc.id, doc.isPublished)}
                                                     className={doc.isPublished ? "btn-secondary" : "btn-primary"}
                                                     style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
@@ -320,6 +362,57 @@ export function DocumentManager() {
                     </table>
                 )}
             </div>
+
+            {/* Edit Modal */}
+            {editingDoc && (
+                <div className="admin-modal-overlay">
+                    <div className="admin-modal-content">
+                        <div className="admin-modal-header">
+                            <h3>Edit Document</h3>
+                            <button onClick={() => setEditingDoc(null)} className="btn-secondary">×</button>
+                        </div>
+                        <form onSubmit={handleUpdate}>
+                            <div className="admin-modal-body">
+                                <div className="admin-form-group">
+                                    <label className="admin-label">Display Name</label>
+                                    <input
+                                        className="admin-input"
+                                        value={editingDoc.name}
+                                        onChange={(e) => setEditingDoc({ ...editingDoc, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label className="admin-label">Resource Type</label>
+                                    <select
+                                        className="admin-select"
+                                        value={editingDoc.type}
+                                        onChange={(e) => setEditingDoc({ ...editingDoc, type: e.target.value })}
+                                    >
+                                        <option value="Report">Report</option>
+                                        <option value="Implementation Guide">Implementation Guide</option>
+                                        <option value="Case Study">Case Study</option>
+                                        <option value="Cheat Sheet">Cheat Sheet</option>
+                                    </select>
+                                </div>
+                                <div className="admin-form-group">
+                                    <label className="admin-label">Description</label>
+                                    <textarea
+                                        className="admin-textarea"
+                                        style={{ minHeight: '120px' }}
+                                        value={editingDoc.description || ''}
+                                        onChange={(e) => setEditingDoc({ ...editingDoc, description: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="admin-modal-footer">
+                                <button type="button" onClick={() => setEditingDoc(null)} className="admin-btn-secondary">Cancel</button>
+                                <button type="submit" className="admin-btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

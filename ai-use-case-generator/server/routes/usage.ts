@@ -1,6 +1,8 @@
+import { Router } from 'express';
 import { eq, sql, desc } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { UsageService } from '../services/usage.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import * as schema from '../db/schema.js';
 const { users, integrations } = schema;
 

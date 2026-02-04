@@ -2134,7 +2134,8 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
 
     // Metadata fields
     const metadata = (integration?.metadata as any) || {};
-    const [provider, setProvider] = useState<string>(metadata.provider || 'openai');
+    const effectiveProvider = metadata.provider || (integration?.name?.toLowerCase().includes('gemini') || integration?.name?.toLowerCase().includes('google') ? 'google' : 'openai');
+    const [provider, setProvider] = useState<string>(effectiveProvider);
     const [model, setModel] = useState<string>(metadata.model || '');
     const [availableModels, setAvailableModels] = useState<string[]>([]);
 
@@ -2315,7 +2316,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             </div>
                         </div>
 
-                        {(name.toLowerCase().includes('openai') || name.toLowerCase().includes('anthropic') || name.toLowerCase().includes('llm')) && (
+                        {(name.toLowerCase().includes('openai') || name.toLowerCase().includes('anthropic') || name.toLowerCase().includes('google') || name.toLowerCase().includes('gemini') || name.toLowerCase().includes('llm')) && (
                             <>
                                 <div className="admin-form-divider" data-label="Model Parameters"></div>
                                 <div className="admin-form-grid">

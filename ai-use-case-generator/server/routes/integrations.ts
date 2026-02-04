@@ -185,17 +185,33 @@ router.delete('/integrations/:id', requireAuth, async (req: AuthRequest, res) =>
 // Fetch Models Route
 router.post('/admin/integrations/fetch-models', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
-        const { id, apiKey } = req.body;
+        const { id, apiKey, provider } = req.body;
         let effectiveKey = apiKey;
+        let effectiveProvider = provider;
 
         if (id) {
             const [int] = await db.select().from(integrations).where(eq(integrations.id, id));
-            if (int && int.apiKey) effectiveKey = decrypt(int.apiKey);
+            if (int) {
+                if (!effectiveKey && int.apiKey) effectiveKey = decrypt(int.apiKey);
+                if (!effectiveProvider) effectiveProvider = int.provider;
+            }
         }
 
         if (!effectiveKey) return res.status(400).json({ error: "No API Key provided" });
 
-        const models = await GeminiService.listModels(effectiveKey);
+        // Auto-detect provider if missing
+        if (!effectiveProvider) {
+            effectiveProvider = effectiveKey.startsWith('AIza') ? 'gemini' : 'openai';
+        }
+
+        let models: string[] = [];
+        if (effectiveProvider === 'gemini' || effectiveProvider === 'google') {
+            models = await GeminiService.listModels(effectiveKey);
+        } else if (effectiveProvider === 'openai') {
+            // Mock static list for OpenAI as listModels not implemented
+            models = ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+        }
+
         res.json({ models });
     } catch (error: any) {
         console.error("Fetch Models Error:", error);

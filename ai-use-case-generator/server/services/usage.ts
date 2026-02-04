@@ -3,25 +3,36 @@ import { apiUsage, integrations } from '../db/schema';
 import { eq, sql, and, gte, lt, desc } from 'drizzle-orm';
 
 export class UsageService {
-    private static GPT4O_INPUT_COST = 5.00 / 1000000; // $5 per 1M tokens
-    private static GPT4O_OUTPUT_COST = 15.00 / 1000000; // $15 per 1M tokens
+    private static GPT4O_INPUT_COST = 5.00 / 1000000;
+    private static GPT4O_OUTPUT_COST = 15.00 / 1000000;
+
+    // Gemini 1.5 Pro ~ $3.50 / $10.50 (Simulate high tier safe bet)
+    // Gemini 1.5 Flash ~ $0.075 / $0.30 (Much cheaper)
+    // For safety, we default to GPT-4o pricing if unknown, or apply heuristic.
+
+    /**
+     * Helper to find the configured daily limit from the Primary (or any) integration.
+     */
+    private static async getGlobalDailyLimit(): Promise<number> {
+        // Find enabled integrations sorted by priority
+        const activeIntegrations = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true))
+            .orderBy(integrations.priority);
+
+        // Find first with a specific limit set
+        const primary = activeIntegrations.find(i => (i.metadata as any)?.daily_limit_usd !== undefined) || activeIntegrations[0];
+
+        const metaLimit = (primary?.metadata as any)?.daily_limit_usd;
+        // Default to $5.00 if strictly undefined, allow 0.
+        return (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
+    }
 
     /**
      * Checks if the current daily spend is within the limit.
      * Throws an error if limit exceeded.
      */
     static async checkBudgetExceeded(): Promise<void> {
-        // 1. Get Daily Limit (Find LATEST created integration to match Admin logic)
-        const openAIIntegrations = await db.query.integrations.findMany({
-            where: eq(integrations.name, 'OpenAI'),
-            orderBy: (integrations, { desc }) => [desc(integrations.id)],
-            limit: 1
-        });
-        const openAIInt = openAIIntegrations[0];
-
-        // Default to $5.00 if not set, but respect 0 if explicitly set
-        const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
-        const dailyLimit = metaLimit !== undefined ? Number(metaLimit) : 5.00;
+        const dailyLimit = await this.getGlobalDailyLimit();
 
         // 2. Calculate Today's Spend
         const startOfDay = new Date();
@@ -45,7 +56,21 @@ export class UsageService {
      * Accepts null userId for anonymous users.
      */
     static async logUsage(userId: number | null, promptTokens: number, completionTokens: number, model = 'gpt-4o', shadowId?: string) {
-        const cost = (promptTokens * this.GPT4O_INPUT_COST) + (completionTokens * this.GPT4O_OUTPUT_COST);
+        // Simple heuristic for cost - could be expanded to a map
+        let inputRate = this.GPT4O_INPUT_COST;
+        let outputRate = this.GPT4O_OUTPUT_COST;
+
+        if (model.includes('flash') || model.includes('mini')) {
+            // Approx cheap tier (Flash / GPT-4o-mini)
+            inputRate = 0.15 / 1000000;
+            outputRate = 0.60 / 1000000;
+        } else if (model.includes('gemini') && !model.includes('flash')) {
+            // Gemini Pro is slightly cheaper than GPT-4o but close enough to keep simple
+            inputRate = 3.50 / 1000000;
+            outputRate = 10.50 / 1000000;
+        }
+
+        const cost = (promptTokens * inputRate) + (completionTokens * outputRate);
 
         try {
             await db.insert(apiUsage).values({
@@ -58,7 +83,7 @@ export class UsageService {
                 timestamp: new Date()
             });
             const userLabel = userId ? `User ${userId}` : `Anonymous (Shadow: ${shadowId || 'none'})`;
-            console.log(`[Usage] Logged: $${cost.toFixed(6)} (${promptTokens}in/${completionTokens}out) for ${userLabel}`);
+            console.log(`[Usage] Logged: $${cost.toFixed(6)} (${promptTokens}in/${completionTokens}out) for ${userLabel} via ${model}`);
         } catch (e) {
             console.error("Failed to insert api_usage log (non-fatal):", e);
         }
@@ -74,8 +99,6 @@ export class UsageService {
         // 1. Fetch Spending & Requests (Debug wrapped)
         let result: { totalSpend: number, requestCount: number }[] = [];
         try {
-            console.log(`[UsageService] Fetching stats since ${startOfDay.toISOString()}`);
-
             // @ts-ignore
             result = await db.select({
                 totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
@@ -83,37 +106,22 @@ export class UsageService {
             })
                 .from(apiUsage)
                 .where(gte(apiUsage.timestamp, startOfDay));
-
-            console.log("[UsageService] Raw Result:", result);
         } catch (e: any) {
             console.error("UsageService: Failed to fetch apiUsage", e);
-            // Don't crash, just return 0s so debugging can continue
             result = [{ totalSpend: 0, requestCount: 0 }];
         }
 
-        // Fetch ALL integrations (enabled or not) using db.select() for safety
-        const allIntegrations = await db.select().from(integrations).orderBy(desc(integrations.id));
+        const limit = await this.getGlobalDailyLimit();
 
-        // 1. Try exact name match
-        // 2. Try metadata provider match
-        // 3. Fallback to the most recent integration
-        const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')
-            || allIntegrations.find(i => (i.metadata as any)?.provider === 'openai')
-            || allIntegrations[0];
-
-        console.log(`[UsageStats] Total Integrations: ${allIntegrations.length}`);
-        console.log(`[UsageStats] Selected Integration ID: ${openAIInt?.id}, Name: ${openAIInt?.name}`);
-
-        // Ensure default of 5.00 if strictly undefined or null, but allow 0 if explicitly set (and not null)
-        const metaLimit = (openAIInt?.metadata as any)?.daily_limit_usd;
-        const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
+        // Get active integration count for context
+        const allIntegrations = await db.select().from(integrations);
 
         return {
             spend: parseFloat(String(result[0]?.totalSpend || 0)),
             requests: parseInt(String(result[0]?.requestCount || 0), 10),
             limit,
-            integrationId: openAIInt?.id,
-            debugMeta: openAIInt?.metadata,
+            integrationId: 'global', // Simplified
+            debugMeta: {},
             integrationCount: allIntegrations.length
         };
     }

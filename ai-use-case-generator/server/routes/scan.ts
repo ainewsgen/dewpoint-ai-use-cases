@@ -22,6 +22,21 @@ router.post('/scan-url', async (req, res) => {
             url = 'https://' + url;
         }
 
+        // SSRF Protection: Block localhost and private IP ranges
+        try {
+            const parsedUrl = new URL(url);
+            const host = parsedUrl.hostname;
+
+            const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '::1';
+            const isPrivate = host.startsWith('10.') || host.startsWith('192.168.') || host.startsWith('172.16.') || host.startsWith('169.254.');
+
+            if (isLocal || isPrivate) {
+                return res.status(400).json({ error: 'Invalid or restricted URL' });
+            }
+        } catch (e) {
+            return res.status(400).json({ error: 'Malformed URL' });
+        }
+
         // 1. Fetch the HTML
         const response = await fetch(url, {
             headers: {

@@ -229,27 +229,6 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
     }
 });
 
-// Deep DB Diagnostic
-app.get('/api/debug/db-check', async (req, res) => {
-    try {
-        // Raw SQL check
-        const rawResult = await db.execute(sql`SELECT id, name, enabled, metadata FROM integrations ORDER BY id DESC`);
-
-        // Drizzle Select check
-        // @ts-ignore
-        const selectResult = await db.select().from(schema.integrations).limit(5);
-
-        res.json({
-            status: 'ok',
-            raw_count: rawResult.rows.length,
-            raw_rows: rawResult.rows,
-            drizzle_rows: selectResult,
-            db_url_set: !!process.env.DATABASE_URL
-        });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message, stack: error.stack });
-    }
-});
 
 // Serve static frontend files (Robust check)
 const staticPath = process.cwd();

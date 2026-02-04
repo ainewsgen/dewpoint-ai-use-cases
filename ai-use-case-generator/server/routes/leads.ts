@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { db } from '../db';
 import { leads, companies, users } from '../db/schema';
 import { eq, or, isNull } from 'drizzle-orm';
+import { requireAuth, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -240,7 +241,7 @@ router.get('/roadmap/:email', async (req, res) => {
 });
 
 // Delete a specific recipe from a user's roadmap (Admin)
-router.delete('/admin/leads/:userId/recipes', async (req, res) => {
+router.delete('/admin/leads/:userId/recipes', requireAuth, requireAdmin, async (req: any, res) => {
     try {
         const userId = parseInt(req.params.userId);
         const { title } = req.body; // Deleting by Title (assuming uniqueness in list)
@@ -266,7 +267,7 @@ router.delete('/admin/leads/:userId/recipes', async (req, res) => {
 });
 
 // Delete a Lead by ID (Global)
-router.delete('/admin/leads/:id', async (req, res) => {
+router.delete('/admin/leads/:id', requireAuth, requireAdmin, async (req: any, res) => {
     try {
         const id = parseInt(req.params.id);
         const result = await db.delete(leads).where(eq(leads.id, id)).returning();
@@ -283,7 +284,7 @@ router.delete('/admin/leads/:id', async (req, res) => {
 });
 
 // Update Lead (Admin)
-router.put('/admin/leads/:id', async (req, res) => {
+router.put('/admin/leads/:id', requireAuth, requireAdmin, async (req: any, res) => {
     try {
         const leadId = parseInt(req.params.id);
         const { companyData, userName } = req.body;
@@ -322,7 +323,7 @@ router.put('/admin/leads/:id', async (req, res) => {
 });
 
 // Delete a Lead (remove from list, keep user) - LEGACY / User Specific
-router.delete('/admin/leads/user/:userId', async (req, res) => {
+router.delete('/admin/leads/user/:userId', requireAuth, requireAdmin, async (req: any, res) => {
     try {
         const userId = parseInt(req.params.userId);
 
@@ -341,7 +342,7 @@ router.delete('/admin/leads/user/:userId', async (req, res) => {
 });
 
 // Get All Leads (Admin)
-router.get('/admin/leads', async (req, res) => {
+router.get('/admin/leads', requireAuth, requireAdmin, async (req, res) => {
     try {
         const allLeads = await db.select({
             lead: leads,

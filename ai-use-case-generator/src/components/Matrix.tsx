@@ -79,7 +79,7 @@ export function Matrix({ companyData, onUnlock: _onUnlock, isAdmin, onSaveReques
 
 
     return (
-        <div className="container animate-fade-in" style={{ position: 'relative', paddingTop: '6rem' }}>
+        <div className="container animate-fade-in" style={{ position: 'relative' }}>
             <header style={{ textAlign: 'center', marginBottom: '3rem', marginTop: '1rem' }}>
                 <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
                     <Sparkles size={48} className="text-accent" />

@@ -133,7 +133,7 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
         : libRecipes.filter(r => r.department === filter);
 
     return (
-        <div className="container animate-fade-in" style={{ paddingTop: '6rem' }}>
+        <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>
             <header className="library-header" style={{ marginBottom: '2rem', textAlign: 'center' }}>
                 <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
                     <BookOpen size={48} className="text-accent" />

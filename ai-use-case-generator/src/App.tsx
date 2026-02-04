@@ -264,9 +264,10 @@ function App() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     pointerEvents: 'none',
-                    background: 'linear-gradient(to bottom, hsla(var(--bg-card)/0.9) 0%, hsla(var(--bg-card)/0.4) 100%)',
-                    backdropFilter: 'blur(2px)',
-                    borderBottom: '1px solid hsla(var(--border-glass)/0.3)'
+                    background: 'linear-gradient(to bottom, hsla(var(--bg-card)/0.95) 0%, hsla(var(--bg-card)/0.7) 100%)',
+                    backdropFilter: 'blur(8px)',
+                    borderBottom: '1px solid hsla(var(--border-glass)/0.5)',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
                 }}>
                     {/* Brand - visible on larger screens */}
                     <div style={{ pointerEvents: 'auto' }}>
@@ -371,30 +372,32 @@ function App() {
                     </div>
                 </nav>
 
-                {view === 'DISCOVERY' && <Onboarding onComplete={handleOnboardingComplete} />}
-                {view === 'ANALYSIS' && <Analysis onComplete={handleAnalysisComplete} />}
-                {/* ... other views ... */}
-                {view === 'MATRIX' && (
-                    <Matrix
-                        companyData={data}
-                        onUnlock={handleCaptureLead}
-                        isAdmin={isAdminMode}
-                        onSaveRequest={handleRequestSave}
-                        user={user}
-                        onLoaded={handleMatrixLoaded}
-                    />
-                )}
-                {view === 'LIBRARY' && (
-                    <Library
-                        isAdmin={isAdminMode}
-                        onSaveRequest={handleRequestSave}
-                        user={user}
-                    />
-                )}
-                {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
+                <main className="main-content" style={{ paddingTop: '80px' }}>
+                    {view === 'DISCOVERY' && <Onboarding onComplete={handleOnboardingComplete} />}
+                    {view === 'ANALYSIS' && <Analysis onComplete={handleAnalysisComplete} />}
+                    {/* ... other views ... */}
+                    {view === 'MATRIX' && (
+                        <Matrix
+                            companyData={data}
+                            onUnlock={handleCaptureLead}
+                            isAdmin={isAdminMode}
+                            onSaveRequest={handleRequestSave}
+                            user={user}
+                            onLoaded={handleMatrixLoaded}
+                        />
+                    )}
+                    {view === 'LIBRARY' && (
+                        <Library
+                            isAdmin={isAdminMode}
+                            onSaveRequest={handleRequestSave}
+                            user={user}
+                        />
+                    )}
+                    {view === 'ROADMAP' && <Roadmap isAdmin={isAdminMode} user={user} leads={leads} />}
 
-                {/* Admin Dashboard restored as top-level view */}
-                {view === 'ADMIN' && <AdminDashboard />}
+                    {/* Admin Dashboard restored as top-level view */}
+                    {view === 'ADMIN' && <AdminDashboard />}
+                </main>
 
                 {authModal === 'LOGIN' && (
                     <Login

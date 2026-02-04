@@ -136,7 +136,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
     if (step === 1) {
         return (
-            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '12vh', padding: '1rem' }}>
+            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '2rem', padding: '1rem' }}>
                 {announcement && (
                     <div className="announcement-banner" style={{
                         background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
@@ -237,7 +237,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
     // Render Step 2
     return (
-        <div className="center-stage animate-fade-in" style={{ paddingTop: '12vh' }}>
+        <div className="center-stage animate-fade-in" style={{ paddingTop: '2rem' }}>
             {announcement && (
                 <div className="announcement-banner" style={{
                     background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',

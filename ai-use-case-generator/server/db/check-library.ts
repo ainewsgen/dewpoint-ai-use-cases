@@ -1,6 +1,6 @@
 
-import { db } from './index';
-import { useCaseLibrary } from './schema';
+import { db } from './index.js';
+import { useCaseLibrary } from './schema.js';
 
 async function checkLibrary() {
     try {

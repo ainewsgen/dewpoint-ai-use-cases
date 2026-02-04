@@ -1,5 +1,5 @@
 
-import { db } from '../db';
+import { db } from '../db/index.js';
 import { sql } from 'drizzle-orm';
 
 async function migrate() {

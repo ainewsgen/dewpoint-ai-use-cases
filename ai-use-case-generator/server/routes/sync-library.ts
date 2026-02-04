@@ -1,9 +1,9 @@
 
 import { Router } from 'express';
-import { db } from '../db';
-import { leads, useCaseLibrary, companies } from '../db/schema';
+import { db } from '../db/index.js';
+import { leads, useCaseLibrary, companies } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
-import { requireAdmin, requireAuth } from '../middleware/auth';
+import { requireAdmin, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 

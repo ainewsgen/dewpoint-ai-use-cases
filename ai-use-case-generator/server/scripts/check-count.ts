@@ -1,6 +1,6 @@
 
-import { db } from '../db';
-import { industryIcps } from '../db/schema';
+import { db } from '../db/index.js';
+import { industryIcps } from '../db/schema.js';
 import { count } from 'drizzle-orm';
 import dotenv from 'dotenv';
 

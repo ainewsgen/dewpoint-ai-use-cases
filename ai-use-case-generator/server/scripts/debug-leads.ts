@@ -1,6 +1,6 @@
 
-import { db } from '../db';
-import { leads, users, companies } from '../db/schema';
+import { db } from '../db/index.js';
+import { leads, users, companies } from '../db/schema.js';
 import { sql } from 'drizzle-orm';
 
 async function checkLeads() {

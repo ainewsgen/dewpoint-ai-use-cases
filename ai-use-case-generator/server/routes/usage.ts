@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { requireAuth, requireAdmin } from '../middleware/auth';
-import { UsageService } from '../services/usage';
-import { db } from '../db';
-import { integrations } from '../db/schema';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { UsageService } from '../services/usage.js';
+import { db } from '../db/index.js';
+import { integrations } from '../db/schema.js';
 import { eq, sql, desc } from 'drizzle-orm';
 
 const router = Router();
@@ -66,8 +66,8 @@ router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
     }
 });
 
-import { decrypt } from '../utils/encryption';
-import { OpenAIService } from '../services/openai';
+import { decrypt } from '../utils/encryption.js';
+import { OpenAIService } from '../services/openai.js';
 
 // ... existing code ...
 

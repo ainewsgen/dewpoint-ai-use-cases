@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { db } from '../db';
-import { integrations } from '../db/schema';
+import { db } from '../db/index.js';
+import { integrations } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
-import { encrypt, decrypt } from '../utils/encryption';
-import { OpenAIService } from '../services/openai';
-import { GeminiService } from '../services/gemini';
+import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth.js';
+import { encrypt, decrypt } from '../utils/encryption.js';
+import { OpenAIService } from '../services/openai.js';
+import { GeminiService } from '../services/gemini.js';
 
 const router = Router();
 

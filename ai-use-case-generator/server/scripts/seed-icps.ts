@@ -1,8 +1,8 @@
 
-import { db } from '../db';
-import { industryIcps } from '../db/schema';
-import { OpenAIService } from '../services/openai';
-import { decrypt } from '../utils/encryption';
+import { db } from '../db/index.js';
+import { industryIcps } from '../db/schema.js';
+import { OpenAIService } from '../services/openai.js';
+import { decrypt } from '../utils/encryption.js';
 import industries from '../data/industries.json';
 import smb1 from '../data/industries-smb.json';
 import smb2 from '../data/industries-smb-2.json';

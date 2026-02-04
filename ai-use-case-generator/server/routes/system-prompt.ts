@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { requireAuth, requireAdmin } from '../middleware/auth';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 // Use process.cwd() for robust path resolution across ESM/CJS and Local/Prod

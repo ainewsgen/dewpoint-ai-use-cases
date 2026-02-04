@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { load } from 'cheerio';
-import { db } from '../db';
-import { integrations } from '../db/schema';
+import { db } from '../db/index.js';
+import { integrations } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { decrypt } from '../utils/encryption';
-import { OpenAIService } from '../services/openai';
-import { buildScanPrompt } from '../lib/prompts';
+import { decrypt } from '../utils/encryption.js';
+import { OpenAIService } from '../services/openai.js';
+import { buildScanPrompt } from '../lib/prompts.js';
 
 const router = Router();
 

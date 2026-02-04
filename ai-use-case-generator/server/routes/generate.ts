@@ -1,14 +1,14 @@
 import express from 'express';
-import { db } from '../db';
-import { integrations, industryIcps } from '../db/schema';
+import { db } from '../db/index.js';
+import { integrations, industryIcps } from '../db/schema.js';
 import { eq, ilike, and } from 'drizzle-orm';
-import { decrypt } from '../utils/encryption';
-import { OpenAIService } from '../services/openai';
-import { UsageService } from '../services/usage';
-import { GeminiService } from '../services/gemini'; // Static import
-import { AuthRequest, requireAuth } from '../middleware/auth';
-import { buildIcpContext, buildGenericContext } from '../lib/prompts';
-import { SystemCapabilityService } from '../services/system';
+import { decrypt } from '../utils/encryption.js';
+import { OpenAIService } from '../services/openai.js';
+import { UsageService } from '../services/usage.js';
+import { GeminiService } from '../services/gemini.js'; // Static import
+import { AuthRequest, requireAuth } from '../middleware/auth.js';
+import { buildIcpContext, buildGenericContext } from '../lib/prompts.js';
+import { SystemCapabilityService } from '../services/system.js';
 
 
 const router = express.Router();

@@ -2,8 +2,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { db } from '../db';
-import { apiUsage } from '../db/schema';
+import { db } from '../db/index.js';
+import { apiUsage } from '../db/schema.js';
 import { desc } from 'drizzle-orm';
 
 async function main() {

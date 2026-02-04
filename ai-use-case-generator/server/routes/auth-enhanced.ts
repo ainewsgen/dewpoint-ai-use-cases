@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { db } from '../db';
-import { runMigrations } from '../db/migrate';
-import { users } from '../db/schema';
+import { db } from '../db/index.js';
+import { runMigrations } from '../db/migrate.js';
+import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import type { AuthRequest } from '../middleware/auth';
-import { logger } from '../utils/logger';
+import type { AuthRequest } from '../middleware/auth.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';

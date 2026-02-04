@@ -12,21 +12,21 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-import { logger } from './utils/logger';
-import { requireAuth, requireAdmin, AuthRequest } from './middleware/auth'; // Import Auth Middleware
-import authRoutes from './routes/auth';
-import authEnhancedRoutes from './routes/auth-enhanced';
-import leadsRoutes from './routes/leads';
-import cmsRoutes from './routes/cms';
-import usersRoutes from './routes/users';
-import integrationsRoutes from './routes/integrations';
-import scanRoutes from './routes/scan';
-import generateRoutes from './routes/generate';
-import usageRoutes from './routes/usage';
-import { runMigrations } from './db/migrate';
+import { logger } from './utils/logger.js';
+import { requireAuth, requireAdmin, AuthRequest } from './middleware/auth.js'; // Import Auth Middleware
+import authRoutes from './routes/auth.js';
+import authEnhancedRoutes from './routes/auth-enhanced.js';
+import leadsRoutes from './routes/leads.js';
+import cmsRoutes from './routes/cms.js';
+import usersRoutes from './routes/users.js';
+import integrationsRoutes from './routes/integrations.js';
+import scanRoutes from './routes/scan.js';
+import generateRoutes from './routes/generate.js';
+import usageRoutes from './routes/usage.js';
+import { runMigrations } from './db/migrate.js';
 import { sql } from 'drizzle-orm';
-import { db } from './db';
-import * as schema from './db/schema';
+import { db } from './db/index.js';
+import * as schema from './db/schema.js';
 
 dotenv.config();
 
@@ -70,7 +70,7 @@ app.use((req, res, next) => {
 });
 
 // Custom Middleware
-import { shadowTracking } from './middleware/shadow';
+import { shadowTracking } from './middleware/shadow.js';
 app.use(shadowTracking);
 
 app.use((req, res, next) => {
@@ -93,10 +93,10 @@ app.get('/ping', (req, res) => {
 
 
 
-import icpsRoutes from './routes/icps';
-import libraryRoutes from './routes/library';
-import syncLibraryRoutes from './routes/sync-library';
-import { adminIcpsRouter } from './routes/admin-icps'; // Fixed Import
+import icpsRoutes from './routes/icps.js';
+import libraryRoutes from './routes/library.js';
+import syncLibraryRoutes from './routes/sync-library.js';
+import { adminIcpsRouter } from './routes/admin-icps.js'; // Fixed Import
 
 // API Routes
 app.use('/api/auth', authEnhancedRoutes); // Enhanced auth with JWT
@@ -113,7 +113,7 @@ app.use('/api', icpsRoutes); // Industry ICPs
 app.use('/api', libraryRoutes); // Use Case Library
 app.use('/api', syncLibraryRoutes); // Sync Logic
 
-import systemPromptRoutes from './routes/system-prompt';
+import systemPromptRoutes from './routes/system-prompt.js';
 app.use('/api/admin', systemPromptRoutes); // Persistent Config
 
 
@@ -149,12 +149,12 @@ app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res)
 });
 
 // DRY RUN DIAGNOSTIC (Full Pipeline Test)
-import { integrations } from './db/schema';
+import { integrations } from './db/schema.js';
 import { eq } from 'drizzle-orm';
-import { decrypt } from './utils/encryption';
-import { OpenAIService } from './services/openai';
-import { GeminiService } from './services/gemini';
-import { UsageService } from './services/usage';
+import { decrypt } from './utils/encryption.js';
+import { OpenAIService } from './services/openai.js';
+import { GeminiService } from './services/gemini.js';
+import { UsageService } from './services/usage.js';
 
 
 

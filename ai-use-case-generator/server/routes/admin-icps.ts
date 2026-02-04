@@ -1,10 +1,10 @@
 
 import { Router } from 'express';
-import { db } from '../db';
-import { industryIcps, integrations } from '../db/schema';
+import { db } from '../db/index.js';
+import { industryIcps, integrations } from '../db/schema.js';
 import { eq, ilike, desc, sql } from 'drizzle-orm';
-import { OpenAIService } from '../services/openai';
-import { decrypt } from '../utils/encryption';
+import { OpenAIService } from '../services/openai.js';
+import { decrypt } from '../utils/encryption.js';
 
 const router = Router();
 

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
-import { db } from '../db';
-import { users, companies, leads } from '../db/schema';
+import { db } from '../db/index.js';
+import { users, companies, leads } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
-import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
+import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 const SALT_ROUNDS = 10;

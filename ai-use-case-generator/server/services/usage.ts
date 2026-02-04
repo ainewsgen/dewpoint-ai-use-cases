@@ -1,5 +1,5 @@
-import { db } from '../db';
-import { apiUsage, integrations } from '../db/schema';
+import { db } from '../db/index.js';
+import { apiUsage, integrations } from '../db/schema.js';
 import { eq, sql, and, gte, lt, desc } from 'drizzle-orm';
 
 export class UsageService {

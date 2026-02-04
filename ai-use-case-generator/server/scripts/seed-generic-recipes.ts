@@ -1,5 +1,5 @@
-import { db } from '../db';
-import { useCaseLibrary } from '../db/schema';
+import { db } from '../db/index.js';
+import { useCaseLibrary } from '../db/schema.js';
 import { sql } from 'drizzle-orm';
 import dotenv from 'dotenv';
 dotenv.config();

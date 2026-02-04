@@ -1,7 +1,7 @@
 
 import 'dotenv/config';
-import { db } from '../db';
-import { leads, useCaseLibrary, companies, industryIcps } from '../db/schema';
+import { db } from '../db/index.js';
+import { leads, useCaseLibrary, companies, industryIcps } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 
 async function main() {

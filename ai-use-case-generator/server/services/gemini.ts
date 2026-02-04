@@ -1,6 +1,6 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AIRequestParams } from './openai'; // Shared interface
+import { AIRequestParams } from './openai.js'; // Shared interface
 
 export class GeminiService {
     static async generateJSON(params: AIRequestParams): Promise<any> {

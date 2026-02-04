@@ -1,5 +1,5 @@
 
-import { buildIcpContext } from './lib/prompts';
+import { buildIcpContext } from './lib/prompts.js';
 
 const mockIcp = {
     icpPersona: 'Test Persona',

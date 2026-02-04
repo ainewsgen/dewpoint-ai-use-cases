@@ -1,9 +1,9 @@
 
 import 'dotenv/config';
-import { db } from '../db';
-import { integrations } from '../db/schema';
-import { decrypt } from '../utils/encryption';
-import { OpenAIService } from '../services/openai';
+import { db } from '../db/index.js';
+import { integrations } from '../db/schema.js';
+import { decrypt } from '../utils/encryption.js';
+import { OpenAIService } from '../services/openai.js';
 
 async function checkIntegrations() {
     console.log("Checking integrations...");

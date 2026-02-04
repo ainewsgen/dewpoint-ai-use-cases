@@ -1,7 +1,7 @@
 
 import 'dotenv/config';
-import { db } from '../db';
-import { useCaseLibrary } from '../db/schema';
+import { db } from '../db/index.js';
+import { useCaseLibrary } from '../db/schema.js';
 import { desc } from 'drizzle-orm';
 
 async function listLibrary() {

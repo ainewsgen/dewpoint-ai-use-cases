@@ -101,7 +101,7 @@ export function DocumentManager() {
                 if (fileInput) fileInput.value = '';
             } else {
                 const errData = await res.json().catch(() => ({}));
-                alert(`Upload failed: ${errData.error || res.statusText}`);
+                alert(`Upload failed: ${errData.error || res.statusText}${errData.details ? ` (${errData.details})` : ''}`);
             }
         } catch (error) {
             console.error("Upload failed", error);

@@ -19,6 +19,7 @@ export function LibraryManager() {
     const [useCases, setUseCases] = useState<UseCase[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [editingUseCase, setEditingUseCase] = useState<UseCase | null>(null);
 
 
     // AI Generator State
@@ -148,6 +149,26 @@ export function LibraryManager() {
         }
     };
 
+    const handleUpdateUseCase = async (id: number, updatedFields: Partial<UseCase>) => {
+        try {
+            const res = await fetch(`/api/admin/library/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedFields)
+            });
+
+            if (res.ok) {
+                setUseCases(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+                setEditingUseCase(null);
+            } else {
+                alert("Failed to update use case ❌");
+            }
+        } catch (error) {
+            console.error("Update error", error);
+            alert("Error updating use case");
+        }
+    };
+
     const handleDelete = async (id: number) => {
         if (!confirm("Are you sure you want to delete this Use Case?")) return;
         try {
@@ -253,6 +274,7 @@ export function LibraryManager() {
                                     readonly={false}
                                     isPublished={c.isPublished}
                                     onTogglePublish={() => handleTogglePublish(c.id, !!c.isPublished)}
+                                    onEdit={() => setEditingUseCase(c)}
                                     onRemove={() => handleDelete(c.id)}
                                 />
                             ) : (
@@ -392,6 +414,90 @@ export function LibraryManager() {
                     </div>
                 </div>
             )}
+
+            {editingUseCase && (
+                <EditUseCaseModal
+                    useCase={editingUseCase}
+                    onClose={() => setEditingUseCase(null)}
+                    onSave={(updated) => handleUpdateUseCase(editingUseCase.id, updated)}
+                />
+            )}
+        </div>
+    );
+}
+
+function EditUseCaseModal({ useCase, onClose, onSave }: { useCase: UseCase, onClose: () => void, onSave: (updated: Partial<UseCase>) => void }) {
+    const [title, setTitle] = useState(useCase.title);
+    const [industry, setIndustry] = useState(useCase.industry);
+    const [description, setDescription] = useState(useCase.description);
+    const [roiEstimate, setRoiEstimate] = useState(useCase.roiEstimate);
+    const [difficulty, setDifficulty] = useState(useCase.difficulty);
+    const [tags, setTags] = useState(useCase.tags.join(', '));
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave({
+            title,
+            industry,
+            description,
+            roiEstimate,
+            difficulty,
+            tags: tags.split(',').map(s => s.trim()).filter(Boolean)
+        });
+    };
+
+    return (
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+            display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000
+        }}>
+            <div className="glass-panel" style={{ width: '600px', padding: '2rem', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <h3>Edit Use Case</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>Title</label>
+                        <input className="input-field" value={title} onChange={e => setTitle(e.target.value)} required />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>Industry</label>
+                        <input className="input-field" value={industry} onChange={e => setIndustry(e.target.value)} required />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>Description</label>
+                        <textarea className="input-field" value={description} onChange={e => setDescription(e.target.value)} rows={4} required />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>ROI Estimate</label>
+                            <input className="input-field" value={roiEstimate} onChange={e => setRoiEstimate(e.target.value)} />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>Difficulty</label>
+                            <select className="input-field" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                                <option value="Low">Low</option>
+                                <option value="Med">Med</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem' }}>Tags (comma separated)</label>
+                        <input className="input-field" value={tags} onChange={e => setTags(e.target.value)} />
+                    </div>
+
+                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                        <button type="button" onClick={onClose} className="btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                        <button type="submit" className="btn-primary" style={{ flex: 1 }}>Save Changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
 import { Opportunity } from '../lib/engine';
-import { Frown, Sparkles, Trash2, ArrowRight, Server } from 'lucide-react';
+import { Frown, Sparkles, Trash2, ArrowRight, Server, Edit } from 'lucide-react';
 
 interface RoadmapCardProps {
     opp: Opportunity;
     onRemove?: () => void;
     onSave?: () => void; // Added for Library "Save" action
+    onEdit?: () => void; // New: For editing library cards
     onTogglePublish?: () => void; // New: For Admin Library
     isPublished?: boolean; // New: For Admin Library
     isAdmin: boolean;
@@ -14,7 +15,7 @@ interface RoadmapCardProps {
     isReference?: boolean; // Changes button to "Add to Library" or similar
 }
 
-export function RoadmapCard({ opp, onRemove, onSave, onTogglePublish, isPublished, isAdmin, readonly, isReference }: RoadmapCardProps) {
+export function RoadmapCard({ opp, onRemove, onSave, onEdit, onTogglePublish, isPublished, isAdmin, readonly, isReference }: RoadmapCardProps) {
     const [showDetails, setShowDetails] = useState(false);
 
     return (
@@ -112,6 +113,17 @@ export function RoadmapCard({ opp, onRemove, onSave, onTogglePublish, isPublishe
                         title={isPublished ? "Unpublish" : "Publish"}
                     >
                         {isPublished ? <Sparkles size={16} /> : <Server size={16} />}
+                    </button>
+                )}
+
+                {!readonly && onEdit && isAdmin && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                        className="btn-secondary"
+                        style={{ padding: '0.5rem' }}
+                        title="Edit Use Case"
+                    >
+                        <Edit size={16} />
                     </button>
                 )}
 

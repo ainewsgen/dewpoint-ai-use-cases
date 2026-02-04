@@ -136,12 +136,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
     if (step === 1) {
         return (
-            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '8vh', padding: '1rem' }}>
+            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '12vh', padding: '1rem' }}>
                 {announcement && (
                     <div className="announcement-banner" style={{
                         background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
                         color: 'white', padding: '0.4rem 1rem', borderRadius: '50px',
-                        marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
                         fontWeight: 600, fontSize: '0.75rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)',
                         textAlign: 'center'
                     }}>
@@ -237,12 +237,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
     // Render Step 2
     return (
-        <div className="center-stage animate-fade-in">
+        <div className="center-stage animate-fade-in" style={{ paddingTop: '12vh' }}>
             {announcement && (
                 <div className="announcement-banner" style={{
                     background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
                     color: 'white', padding: '0.75rem 1.5rem', borderRadius: '50px',
-                    marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
                     fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)'
                 }}>
                     <Sparkles size={16} />

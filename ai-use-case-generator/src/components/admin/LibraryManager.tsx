@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash, Search, RefreshCw, Zap, Sparkles, X, Save } from 'lucide-react';
+import { Trash, Search, RefreshCw, Zap, Sparkles, X, Save, MonitorStop, CheckCircle } from 'lucide-react';
 import { Opportunity } from '../../lib/engine';
 
 interface UseCase {
@@ -251,9 +251,20 @@ export function LibraryManager() {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <button onClick={() => handleDelete(editForm.id)} className="btn-secondary" style={{ color: 'salmon', borderColor: 'rgba(250,128,114,0.3)' }}>
                                     <Trash size={16} /> Delete
+                                </button>
+                                <button
+                                    onClick={() => handleTogglePublish(editForm.id, !!editForm.isPublished)}
+                                    className="btn-secondary"
+                                    style={{
+                                        color: editForm.isPublished ? '#64748b' : 'hsl(var(--accent-primary))',
+                                        borderColor: editForm.isPublished ? 'var(--border-glass)' : 'hsla(var(--accent-primary)/0.3)'
+                                    }}
+                                >
+                                    {editForm.isPublished ? <MonitorStop size={16} /> : <CheckCircle size={16} />}
+                                    {editForm.isPublished ? 'Unpublish (Draft)' : 'Publish Live'}
                                 </button>
                                 <button onClick={handleUpdate} className="btn-primary">
                                     <Save size={18} /> Save Changes

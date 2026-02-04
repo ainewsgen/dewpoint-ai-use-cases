@@ -258,14 +258,15 @@ function App() {
                 <nav style={{
                     position: 'fixed',
                     top: 0, right: 0, left: 0,
-                    padding: '0.75rem 1rem',
+                    padding: '0.75rem 1.25rem',
                     zIndex: 100,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     pointerEvents: 'none',
-                    background: 'linear-gradient(to bottom, hsla(var(--bg-card)/0.8) 0%, transparent 100%)',
-                    backdropFilter: 'blur(5px)'
+                    background: 'linear-gradient(to bottom, hsla(var(--bg-card)/0.9) 0%, hsla(var(--bg-card)/0.4) 100%)',
+                    backdropFilter: 'blur(2px)',
+                    borderBottom: '1px solid hsla(var(--border-glass)/0.3)'
                 }}>
                     {/* Brand - visible on larger screens */}
                     <div style={{ pointerEvents: 'auto' }}>

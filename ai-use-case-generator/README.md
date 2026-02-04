@@ -19,7 +19,8 @@ A full-stack lead generation tool that creates personalized AI automation "recip
 **For DewPoint (Admin):**
 - Capture qualified leads with complete company profiles
 - View saved recipes with admin-only insights (implementation difficulty, upsell opportunities)
-- Track AI usage and manage budget
+- Track AI usage with **per-user spend analytics**
+- Manage Use Case Library with **Draft Mode** (Mandatory Review)
 - Configure AI providers and monitor system health
 
 ---
@@ -114,8 +115,9 @@ VITE_API_URL=http://localhost:5000
 
 2. **Observability**
    - AI usage tracking (total requests, spend, budget)
+   - **Spend By User** table (granular AI cost tracking)
    - System health checks
-   - Diagnostic tools (schema fix, dry run simulation)
+   - Diagnostic tools (dry run simulation)
 
 3. **Integrations**
    - Configure OpenAI/Gemini API keys
@@ -123,9 +125,10 @@ VITE_API_URL=http://localhost:5000
    - Test connections
    - Enable/disable providers
 
-4. **Content Management**
+4. **Content Management / Library**
    - Manage announcements
-   - Edit free library content
+   - **Draft Mode**: Imported use cases default to "Draft" status
+   - Publish/Unpublish toggle for search visibility
 
 ### Budget Control ✅
 - Set daily spending limit (default: $5.00)
@@ -207,7 +210,6 @@ Fallback to Templates (if AI fails)
 
 - **GET `/api/health`** - Uptime check
 - **GET `/api/debug/schema-check`** - Verify database schema
-- **POST `/api/admin/usage/fix-schema`** - Create missing tables
 - **POST `/api/admin/dry-run`** - Simulate full AI generation
 
 ### Common Issues
@@ -229,10 +231,13 @@ Fallback to Templates (if AI fails)
 
 ---
 
-## 📈 Current State (2026-01-31)
+## 📈 Current State (2026-02-04)
 
 ### Recent Improvements
 
+- ✅ **Per-User Usage Tracking**: Integrated spend analytics at the user level.
+- ✅ **Library Draft Mode**: Implemented mandatory review for all new library content.
+- ✅ **Production Hardening**: Removed emergency schema repair routes; tightened API security.
 - ✅ Anonymous AI generation (no login required)
 - ✅ Complete lead capture with company profiles
 - ✅ Enhanced admin dashboard with full blueprint details

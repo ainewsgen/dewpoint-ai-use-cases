@@ -1,25 +1,31 @@
-import { Router } from 'express';
-import { requireAuth, requireAdmin } from '../middleware/auth.js';
-import { UsageService } from '../services/usage.js';
-import { db } from '../db/index.js';
-import { integrations } from '../db/schema.js';
 import { eq, sql, desc } from 'drizzle-orm';
+import { db } from '../db/index.js';
+import { UsageService } from '../services/usage.js';
+import * as schema from '../db/schema.js';
+const { users, integrations } = schema;
 
 const router = Router();
 
-// Get Daily Usage Stats
-router.get('/usage/stats', requireAuth, requireAdmin, async (req, res) => {
+// Get Usage Breakdown By User
+router.get('/admin/usage/by-user', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const stats = await UsageService.getDailyStats();
-        res.json(stats);
+        // Aggregate spend and request count per user
+        const userStats = await db.select({
+            userId: users.id,
+            userName: users.name,
+            userEmail: users.email,
+            totalSpend: sql<number>`CAST(SUM(total_cost) AS DOUBLE PRECISION)`,
+            requestCount: sql<number>`COUNT(*)`
+        })
+            .from(schema.apiUsage)
+            .leftJoin(users, eq(schema.apiUsage.userId, users.id))
+            .groupBy(users.id, users.name, users.email)
+            .orderBy(desc(sql`total_spend`));
+
+        res.json({ users: userStats });
     } catch (error: any) {
-        console.error('Usage Stats Error:', error);
-        res.status(500).json({
-            error: 'Failed to fetch usage stats',
-            details: error.message,
-            stack: error.stack,
-            at: 'server/routes/usage.ts'
-        });
+        console.error('User Usage Error:', error);
+        res.status(500).json({ error: 'Failed to fetch user usage stats' });
     }
 });
 
@@ -127,26 +133,6 @@ router.post('/usage/readiness-check', requireAuth, requireAdmin, async (req, res
     }
 });
 
-// FIX SCHEMA: Create api_usage table if missing
-router.post('/usage/fix-schema', requireAuth, requireAdmin, async (req, res) => {
-    try {
-        await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS api_usage (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id),
-                model TEXT,
-                prompt_tokens INTEGER,
-                completion_tokens INTEGER,
-                total_cost DECIMAL(10, 6),
-                timestamp TIMESTAMP DEFAULT NOW()
-            );
-        `);
-        console.log("Fixed Schema: Created api_usage table.");
-        res.json({ success: true, message: "Created api_usage table" });
-    } catch (error: any) {
-        console.error("Fix Schema Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
+// Readiness Check (Already implemented)
 
 export default router;

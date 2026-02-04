@@ -51,8 +51,9 @@ export function AdminDashboard() {
     const [isEditingRealUser, setIsEditingRealUser] = useState(false);
     const [currentRealUser, setCurrentRealUser] = useState<any>(null);
     const [userEditForm, setUserEditForm] = useState({ email: '', name: '', role: 'user', password: '' });
-    const [isDiagnosing, setIsDiagnosing] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
+    const [userUsageStats, setUserUsageStats] = useState<any[]>([]);
+    const [isLoadingUsage, setIsLoadingUsage] = useState(false);
 
 
     // Blueprint Edit State
@@ -220,20 +221,28 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     }, [activeTab]);
 
     const fetchUsageStats = async () => {
+        setIsLoadingUsage(true);
         try {
             const res = await fetch('/api/admin/usage/stats', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             if (res.ok) {
                 const data = await res.json();
-                console.log("Stats API Response:", data);
-                console.log('Usage Stats Loaded:', data);
                 setUsageStats(data);
-            } else {
-                console.error('Usage Stats Failed:', await res.text());
+            }
+
+            // Fetch Per-User Stats
+            const userRes = await fetch('/api/admin/usage/by-user', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (userRes.ok) {
+                const userData = await userRes.json();
+                setUserUsageStats(userData.users || []);
             }
         } catch (error) {
             console.error('Failed to fetch usage stats', error);
+        } finally {
+            setIsLoadingUsage(false);
         }
     };
 
@@ -794,51 +803,83 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
                         {/* System Forecast / Diagnostic */}
                         <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '1.5rem' }}>
-                            <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 0 }}>
-                                <Activity size={18} /> System Forecast
+                            <h4 style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 0 }}>
+                                <Users size={18} /> Spend By User
                             </h4>
-
-                            {(() => {
-                                const hasActiveIntegration = integrations.some(i => i.enabled);
-                                const budgetExceeded = (usageStats?.spend || 0) >= (usageStats?.limit || 100);
-
-                                // Determine State
-                                let status = 'System (Fallback)';
-                                let color = 'salmon';
-                                let reason = 'Unknown Error';
-                                let bg = 'rgba(250, 128, 114, 0.1)';
-
-                                if (!hasActiveIntegration) {
-                                    status = 'System (Fallback)';
-                                    color = 'orange';
-                                    bg = 'rgba(255, 165, 0, 0.1)';
-                                    reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
-                                } else if (budgetExceeded) {
-                                    status = 'System (Fallback)';
-                                    color = 'salmon';
-                                    bg = 'rgba(250, 128, 114, 0.1)';
-                                    reason = `Daily budget limit ($${usageStats?.limit}) has been reached relative to current spend ($${usageStats?.spend}).`;
-                                } else {
-                                    status = 'AI (Live Generation)';
-                                    color = 'hsl(140, 70%, 40%)';
-                                    bg = 'hsla(140, 70%, 40%, 0.1)';
-                                    reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
-                                }
-
-                                return (
-                                    <div style={{ padding: '0.75rem', borderRadius: '8px', background: bg, border: `1px solid ${color}`, color: color, fontSize: '0.9rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
-                                            Predicted Mode: {status}
-                                        </div>
-                                        <div style={{ marginTop: '0.25rem', opacity: 0.9 }}>{reason}</div>
-                                    </div>
-                                );
-                            })()}
+                            {isLoadingUsage ? (
+                                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                                    <RefreshCw className="animate-spin" size={20} style={{ margin: '0 auto' }} />
+                                </div>
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <thead>
+                                            <tr style={{ background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid var(--border-glass)' }}>
+                                                <th style={{ textAlign: 'left', padding: '1rem', fontWeight: 600 }}>User</th>
+                                                <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Requests</th>
+                                                <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Total Spend</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {userUsageStats.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No usage data recorded yet.</td>
+                                                </tr>
+                                            ) : userUsageStats.map(u => (
+                                                <tr key={u.userId} style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                                                    <td style={{ padding: '1rem' }}>
+                                                        <div style={{ fontWeight: 600 }}>{u.userName || 'Anonymous'}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.userEmail}</div>
+                                                    </td>
+                                                    <td style={{ textAlign: 'right', padding: '1rem' }}>{u.requestCount}</td>
+                                                    <td style={{ textAlign: 'right', padding: '1rem', fontWeight: 700 }}>${u.totalSpend?.toFixed(4)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
+
+                        {(() => {
+                            const hasActiveIntegration = integrations.some(i => i.enabled);
+                            const budgetExceeded = (usageStats?.spend || 0) >= (usageStats?.limit || 100);
+
+                            // Determine State
+                            let status = 'System (Fallback)';
+                            let color = 'salmon';
+                            let reason = 'Unknown Error';
+                            let bg = 'rgba(250, 128, 114, 0.1)';
+
+                            if (!hasActiveIntegration) {
+                                status = 'System (Fallback)';
+                                color = 'orange';
+                                bg = 'rgba(255, 165, 0, 0.1)';
+                                reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
+                            } else if (budgetExceeded) {
+                                status = 'System (Fallback)';
+                                color = 'salmon';
+                                bg = 'rgba(250, 128, 114, 0.1)';
+                                reason = `Daily budget limit ($${usageStats?.limit}) has been reached relative to current spend ($${usageStats?.spend}).`;
+                            } else {
+                                status = 'AI (Live Generation)';
+                                color = 'hsl(140, 70%, 40%)';
+                                bg = 'hsla(140, 70%, 40%, 0.1)';
+                                reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
+                            }
+
+                            return (
+                                <div style={{ padding: '0.75rem', borderRadius: '8px', background: bg, border: `1px solid ${color}`, color: color, fontSize: '0.9rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+                                        Predicted Mode: {status}
+                                    </div>
+                                    <div style={{ marginTop: '0.25rem', opacity: 0.9 }}>{reason}</div>
+                                </div>
+                            );
+                        })()}
                     </div>
-                )
-            }
+                )}
 
             {/* Debugger Tab */}
             {activeTab === 'debugger' && <DebugConsole />}

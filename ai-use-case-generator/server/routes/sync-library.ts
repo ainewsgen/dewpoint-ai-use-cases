@@ -60,7 +60,7 @@ router.post('/admin/library/sync', requireAuth, requireAdmin, async (req, res) =
                         difficulty: recipe.admin_view?.implementation_difficulty || "Med",
                         tags: recipe.admin_view?.tech_stack || [],
                         data: recipe, // NEW: Store full recipe
-                        isPublished: true
+                        isPublished: false // DEFAULT TO DRAFT
                     });
                     addedCount++;
                 } else {

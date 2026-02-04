@@ -56,7 +56,7 @@ router.post('/admin/library', requireAuth, requireAdmin, async (req, res) => {
             difficulty: difficulty || "Med",
             tags: tags || [],
             data: req.body.data || null,
-            isPublished: req.body.isPublished || false
+            isPublished: false // Default to Draft for review
         }).returning();
 
         res.json({ useCase: newCase[0] });

@@ -115,7 +115,7 @@ export function LibraryManager() {
                     difficulty: opp.admin_view.implementation_difficulty,
                     tags: opp.admin_view.tech_stack,
                     data: opp,
-                    isPublished: true
+                    isPublished: false // DEFAULT TO DRAFT for review
                 })
             });
             if (res.ok) {
@@ -211,8 +211,11 @@ export function LibraryManager() {
                                     opacity: uc.isPublished ? 1 : 0.5
                                 }}
                             >
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem', color: selectedId === uc.id ? 'hsl(var(--accent-primary))' : 'inherit' }}>
+                                <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem', color: selectedId === uc.id ? 'hsl(var(--accent-primary))' : 'inherit', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {uc.title}
+                                    {!uc.isPublished && (
+                                        <span style={{ fontSize: '0.65rem', background: '#f1f5f9', color: '#64748b', padding: '1px 5px', borderRadius: '4px', border: '1px solid #e2e8f0', fontWeight: 700 }}>DRAFT</span>
+                                    )}
                                 </div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                     {uc.industry} • {uc.difficulty}

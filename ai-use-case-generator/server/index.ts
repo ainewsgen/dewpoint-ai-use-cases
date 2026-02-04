@@ -128,34 +128,6 @@ app.use('/api/admin', systemPromptRoutes); // Persistent Config
 
 
 
-// EMERGENCY REPAIR ROUTE (Bypassing Router complexities)
-app.post('/api/admin/repair-schema', requireAuth, requireAdmin, async (req, res) => {
-    try {
-        logger.warn("Attempting to repair schema (Emergency Route)...");
-        await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS api_usage (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id),
-                model TEXT,
-                prompt_tokens INTEGER,
-                completion_tokens INTEGER,
-                total_cost DECIMAL(10, 6),
-                timestamp TIMESTAMP DEFAULT NOW()
-            );
-
-            -- LIBRARY SCHEMA UPDATE (Auto-Fix)
-            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS data JSONB;
-            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
-            ALTER TABLE use_case_library ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
-        `);
-        logger.info("Fixed Schema: Created api_usage table and updated library.");
-        res.json({ success: true, message: "Created api_usage table (Emergency Fix)" });
-    } catch (error: any) {
-        logger.error("Fix Schema Error", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // DRY RUN DIAGNOSTIC (Full Pipeline Test)
 import { integrations } from './db/schema.js';
 import { eq } from 'drizzle-orm';
@@ -277,7 +249,7 @@ const server = app.listen(Number(PORT), '0.0.0.0', async () => {
     logger.info(`API Server Started on port ${PORT}`);
 
 
-    // Self-healing schema checks removed per Audit Remediation (Use migrations instead)
+    // API Server Started
 });
 
 // Run migrations in background

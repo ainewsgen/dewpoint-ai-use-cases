@@ -104,6 +104,7 @@ app.get('/ping', (req, res) => {
 import icpsRoutes from './routes/icps.js';
 import libraryRoutes from './routes/library.js';
 import syncLibraryRoutes from './routes/sync-library.js';
+import documentsRoutes from './routes/documents.js';
 import { adminIcpsRouter } from './routes/admin-icps.js'; // Fixed Import
 
 // API Routes
@@ -120,6 +121,7 @@ app.use('/api/admin/icps', adminIcpsRouter); // Register ICP Manager
 app.use('/api', icpsRoutes); // Industry ICPs
 app.use('/api', libraryRoutes); // Use Case Library
 app.use('/api', syncLibraryRoutes); // Sync Logic
+app.use('/api', documentsRoutes); // Document Management
 
 import systemPromptRoutes from './routes/system-prompt.js';
 app.use('/api/admin', systemPromptRoutes); // Persistent Config

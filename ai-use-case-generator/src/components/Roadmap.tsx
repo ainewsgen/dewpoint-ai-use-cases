@@ -1,7 +1,7 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { Opportunity } from '../lib/engine';
-import { Map, Lock } from 'lucide-react';
+import { Map, Lock, BookOpen, Download, FileText, ArrowRight } from 'lucide-react';
 import { RoadmapCard } from './RoadmapCard';
 
 
@@ -16,7 +16,9 @@ type SortOption = 'ROI' | 'DEPARTMENT' | 'NEWEST';
 
 export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
     const [savedRecipes, setSavedRecipes] = useState<Opportunity[]>([]);
+    const [documents, setDocuments] = useState<any[]>([]);
     const [isLocked, setIsLocked] = useState(true);
+    const [isLoadingDocs, setIsLoadingDocs] = useState(false);
     const [sortBy] = useState<SortOption>('ROI');
 
     useEffect(() => {
@@ -54,6 +56,7 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                         // Update UI with combined list
                         setSavedRecipes(merged);
                     }
+                    fetchPublishedDocs();
                 } catch (error) {
                     console.error("Failed to sync roadmap from server", error);
                 }
@@ -62,6 +65,24 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                 // Unlock IF they have local items, OR if we want to show empty state (unlocked but empty)
                 // Let's unlock always, so they can see the "Empty" state which nudges them to Library.
                 setIsLocked(false);
+            }
+        };
+
+        const fetchPublishedDocs = async () => {
+            setIsLoadingDocs(true);
+            try {
+                const token = localStorage.getItem('dpg_auth_token');
+                const res = await fetch('/api/documents', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setDocuments(data.documents);
+                }
+            } catch (error) {
+                console.error("Failed to fetch documents", error);
+            } finally {
+                setIsLoadingDocs(false);
             }
         };
 
@@ -208,6 +229,80 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                     ))
                 )}
             </div>
+
+            {/* Resources & Guides Section */}
+            {user?.email && (documents.length > 0 || isLoadingDocs) && (
+                <div style={{ marginTop: '5rem', borderTop: '1px solid var(--border-glass)', paddingTop: '4rem' }}>
+                    <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
+                        <div style={{ display: 'inline-flex', padding: '0.75rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '12px', marginBottom: '1rem' }}>
+                            <BookOpen size={32} className="text-accent" />
+                        </div>
+                        <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Strategic Resources</h3>
+                        <p style={{ color: 'var(--text-muted)' }}>Implementation guides and expert reports curated for your journey.</p>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                        {isLoadingDocs ? (
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>Loading resources...</div>
+                        ) : (
+                            documents.map((doc) => (
+                                <div key={doc.id} className="glass-panel" style={{
+                                    padding: '1.5rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '1rem',
+                                    transition: 'transform 0.2s',
+                                    cursor: 'default'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <div style={{
+                                            padding: '0.5rem',
+                                            background: 'hsla(var(--accent-primary)/0.1)',
+                                            borderRadius: '8px',
+                                            color: 'hsl(var(--accent-primary))'
+                                        }}>
+                                            <FileText size={20} />
+                                        </div>
+                                        <span style={{
+                                            fontSize: '0.7rem',
+                                            padding: '0.25rem 0.5rem',
+                                            background: 'hsla(var(--bg-card)/0.8)',
+                                            borderRadius: '4px',
+                                            color: 'var(--text-muted)',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.05em'
+                                        }}>
+                                            {doc.type}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h4 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{doc.name}</h4>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                                            {doc.type === 'Implementation Guide'
+                                                ? 'Step-by-step instructions to deploy these AI blueprints in your workflow.'
+                                                : 'Deeper market context and ROI analysis for your specific industry use cases.'}
+                                        </p>
+                                    </div>
+                                    <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+                                        <button
+                                            onClick={() => {
+                                                const link = document.createElement('a');
+                                                link.href = doc.content;
+                                                link.download = doc.fileName || `${doc.name}.pdf`;
+                                                link.click();
+                                            }}
+                                            className="btn-secondary"
+                                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                        >
+                                            <Download size={16} /> Download {doc.type} <ArrowRight size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

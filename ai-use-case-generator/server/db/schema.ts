@@ -171,3 +171,14 @@ export const apiUsage = pgTable('api_usage', {
     totalCost: decimal('total_cost', { precision: 10, scale: 6 }), // stores up to $9999.999999
     timestamp: timestamp('timestamp').defaultNow(),
 });
+
+export const documents = pgTable('documents', {
+    id: serial('id').primaryKey(),
+    name: text('name').notNull(),
+    type: text('type').notNull(), // 'Report' | 'Implementation Guide'
+    content: text('content').notNull(), // Base64 Content
+    fileName: text('file_name'),
+    fileType: text('file_type'),
+    isPublished: boolean('is_published').default(false),
+    createdAt: timestamp('created_at').defaultNow(),
+});

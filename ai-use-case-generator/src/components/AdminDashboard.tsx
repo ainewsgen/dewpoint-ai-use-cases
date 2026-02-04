@@ -3,6 +3,7 @@ import { CompanyData, Opportunity } from '../lib/engine';
 import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users, Terminal } from 'lucide-react';
 import { IcpManager } from './admin/IcpManager';
 import { LibraryManager } from './admin/LibraryManager';
+import { DocumentManager } from './admin/DocumentManager';
 import { DebugConsole } from './admin/DebugConsole';
 
 interface Integration {
@@ -25,7 +26,7 @@ interface IntegrationModalProps {
 }
 
 export function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library' | 'debugger'>('leads');
+    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library' | 'debugger' | 'documents'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     // Local state for fetched leads (ignoring props now)
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
@@ -732,6 +733,20 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             }}
                         >
                             <Terminal size={18} /> Debugger
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('documents')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'documents' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'documents' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'documents' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <FileText size={18} /> Documents
                         </button>
                     </nav>
                 </div>
@@ -2063,6 +2078,8 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
             {activeTab === 'icps' && <IcpManager />}
             {activeTab === 'library' && <LibraryManager />}
+            {activeTab === 'documents' && <DocumentManager />}
+            {activeTab === 'debugger' && <DebugConsole />}
 
             {/* Integration Modal */}
             {

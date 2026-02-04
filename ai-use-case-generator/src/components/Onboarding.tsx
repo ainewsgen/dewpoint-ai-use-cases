@@ -136,13 +136,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
     if (step === 1) {
         return (
-            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '12vh' }}>
+            <div className="center-stage animate-fade-in" style={{ justifyContent: 'flex-start', paddingTop: '8vh', padding: '1rem' }}>
                 {announcement && (
                     <div className="announcement-banner" style={{
                         background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)',
                         color: 'white', padding: '0.4rem 1rem', borderRadius: '50px',
-                        marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        fontWeight: 600, fontSize: '0.8rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)'
+                        marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        fontWeight: 600, fontSize: '0.75rem', boxShadow: '0 4px 15px hsla(var(--accent-primary)/0.3)',
+                        textAlign: 'center'
                     }}>
                         <Sparkles size={14} />
                         {announcement}
@@ -182,11 +183,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 </div>
 
                 <div className="glass-panel form-card" style={{
-                    width: '100%', maxWidth: '600px', padding: '2.5rem',
+                    width: '100%', maxWidth: '600px', padding: '1.5rem 1.5rem 2.5rem 1.5rem',
                     boxShadow: '0 25px 60px -15px rgba(32, 100, 185, 0.25)',
                     border: '1px solid white',
                     background: 'rgba(255,255,255,0.8)',
-                    borderRadius: '16px'
+                    borderRadius: '16px',
+                    position: 'relative'
                 }}>
                     <div className="progress-bar" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'rgba(0,0,0,0.05)' }}>
                         <div className="fill" style={{ width: '50%', height: '100%', background: 'hsl(var(--accent-gold))' }}></div>
@@ -267,7 +269,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             Who do you serve?
                         </label>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
                             <button
                                 type="button"
                                 onClick={() => setScrapedContext({ ...scrapedContext, icpType: 'dewpoint' })}
@@ -505,7 +507,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                 What tools do you use?
                             </label>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem 3rem' }}>
                                 {Object.entries({
                                     ...techCategories,
                                     "CRM & Sales": ['Salesforce', 'HubSpot', 'Zoho CRM', 'Pipedrive', 'Monday.com Sales', 'Google Sheets', 'Microsoft Excel'],

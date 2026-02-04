@@ -156,6 +156,12 @@ h5 {
     padding: 2rem;
 }
 
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -251,6 +257,13 @@ h5 {
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     /* Slightly wider cards */
     gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .matrix-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }
 
 .recipe-card {

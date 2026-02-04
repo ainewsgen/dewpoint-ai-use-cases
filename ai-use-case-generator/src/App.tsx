@@ -255,104 +255,115 @@ function App() {
     return (
         <ErrorBoundary>
             <div className="app-shell">
-                <nav style={{ position: 'fixed', top: 0, right: 0, left: 0, padding: '1rem', zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}>
-                    {/* ... (rest of nav remains the same, assuming valid) */}
-                    {/* To avoid huge replace block, I'm wrapping the whole div. The content inside is unchanged. */}
+                <nav style={{
+                    position: 'fixed',
+                    top: 0, right: 0, left: 0,
+                    padding: '0.75rem 1rem',
+                    zIndex: 100,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    pointerEvents: 'none',
+                    background: 'linear-gradient(to bottom, hsla(var(--bg-card)/0.8) 0%, transparent 100%)',
+                    backdropFilter: 'blur(5px)'
+                }}>
                     {/* Brand - visible on larger screens */}
-                    <div style={{ pointerEvents: 'auto', paddingLeft: '1rem' }}>
+                    <div style={{ pointerEvents: 'auto' }}>
                         <div className="logo-pill" style={{ padding: '0.25rem 0.5rem' }}>
-                            <img src="/logo-icon.png" alt="DPG" style={{ height: '32px' }} />
+                            <img src="/logo-icon.png" alt="DPG" style={{ height: '28px' }} />
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', pointerEvents: 'auto' }}>
-
-                        {/* User Login - Global HIDDEN per requirements. Only show if user is logged in (Profile) */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '0.4rem',
+                        alignItems: 'center',
+                        pointerEvents: 'auto',
+                        flexWrap: 'wrap',
+                        justifyContent: 'flex-end',
+                        maxWidth: '80vw'
+                    }}>
 
                         {user && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '0.5rem' }}>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                    <User size={14} style={{ marginRight: '4px' }} />
-                                    {user.name || user.email.split('@')[0]}
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                                    <User size={12} style={{ marginRight: '4px' }} />
+                                    <span style={{ maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {user.name || user.email.split('@')[0]}
+                                    </span>
                                 </div>
                                 <button
                                     onClick={() => logout()}
                                     title="Logout"
                                     style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
                                 >
-                                    <LogOut size={16} />
+                                    <LogOut size={14} />
                                 </button>
                             </div>
                         )}
 
                         {view !== 'DISCOVERY' && view !== 'ADMIN' && (
-                            <button onClick={() => setView('DISCOVERY')} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', marginRight: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>New Search</button>
+                            <button onClick={() => setView('DISCOVERY')} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', marginRight: '0.25rem', cursor: 'pointer', fontSize: '0.8rem' }}>New Search</button>
                         )}
 
-                        {/* Global Navigation - Always Visible */}
                         <button
                             onClick={() => setView(view === 'LIBRARY' ? 'DISCOVERY' : 'LIBRARY')}
                             style={{
-                                background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.6)',
+                                background: view === 'LIBRARY' ? 'hsl(var(--accent-primary))' : 'hsla(var(--bg-card)/0.7)',
                                 border: '1px solid var(--border-glass)',
                                 color: view === 'LIBRARY' ? 'white' : 'hsl(var(--text-main))',
-                                padding: '0.4rem 0.8rem', /* Slightly reduced padding */
+                                padding: '0.35rem 0.75rem',
                                 borderRadius: '50px',
                                 cursor: 'pointer',
                                 backdropFilter: 'blur(10px)',
-                                fontSize: '0.85rem',
+                                fontSize: '0.75rem',
                                 fontWeight: 500,
                                 whiteSpace: 'nowrap'
                             }}
                         >
-                            Free Library of Use Cases
+                            Library
                         </button>
-                        {/* My Roadmap Button - Conditional Style based on view */}
                         <button
                             onClick={() => {
                                 if (view === 'ROADMAP') {
                                     setView('DISCOVERY');
                                     return;
                                 }
-                                // Allow anonymous access but nudge for login
                                 setView('ROADMAP');
-                                if (!user) {
-                                    setAuthModal('SIGNUP');
-                                }
+                                if (!user) setAuthModal('SIGNUP');
                             }}
                             style={{
-                                background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.6)',
+                                background: view === 'ROADMAP' ? 'hsl(var(--accent-gold))' : 'hsla(var(--bg-card)/0.7)',
                                 border: '1px solid var(--border-glass)',
                                 color: view === 'ROADMAP' ? 'hsl(var(--bg-dark))' : 'hsl(var(--text-main))',
                                 fontWeight: 'bold',
-                                padding: '0.4rem 0.8rem',
+                                padding: '0.35rem 0.75rem',
                                 borderRadius: '50px',
                                 cursor: 'pointer',
                                 backdropFilter: 'blur(10px)',
-                                fontSize: '0.85rem',
+                                fontSize: '0.75rem',
                                 whiteSpace: 'nowrap'
                             }}
                         >
                             Roadmap
                         </button>
 
-                        {/* Admin Console - Only for Admins */}
                         {user?.role === 'admin' && (
                             <button
                                 onClick={() => setView('ADMIN')}
                                 style={{
-                                    background: view === 'ADMIN' ? 'hsl(var(--accent-secondary))' : 'hsla(var(--bg-card)/0.6)',
+                                    background: view === 'ADMIN' ? 'hsl(var(--accent-secondary))' : 'hsla(var(--bg-card)/0.7)',
                                     border: '1px solid var(--border-glass)',
                                     color: view === 'ADMIN' ? 'white' : 'hsl(var(--text-main))',
                                     fontWeight: 'bold',
-                                    padding: '0.4rem 1rem',
+                                    padding: '0.35rem 0.75rem',
                                     borderRadius: '50px',
                                     cursor: 'pointer',
                                     backdropFilter: 'blur(10px)',
-                                    fontSize: '0.85rem'
+                                    fontSize: '0.75rem'
                                 }}
                             >
-                                <Shield size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                                <Shield size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
                                 Admin
                             </button>
                         )}

@@ -74,7 +74,32 @@ export function DebugConsole() {
     };
 
     return (
-        <div className="admin-panel animate-fade-in" style={{ padding: '2rem', height: 'calc(100vh - 160px)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <div className="admin-panel animate-fade-in responsive-debug-console" style={{
+            padding: '1rem',
+            minHeight: 'calc(100vh - 160px)',
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0
+        }}>
+            <style>{`
+                .responsive-debug-console .debug-grid {
+                    display: grid;
+                    grid-template-columns: 400px 1fr;
+                    gap: 2rem;
+                    height: 100%;
+                    min-width: 0;
+                }
+                @media (max-width: 1024px) {
+                    .responsive-debug-console .debug-grid {
+                        grid-template-columns: 1fr;
+                        grid-template-rows: auto 1fr;
+                        height: auto;
+                    }
+                    .responsive-debug-console {
+                        height: auto !important;
+                    }
+                }
+            `}</style>
             <div className="admin-page-header" style={{ marginBottom: '2rem' }}>
                 <h3 className="admin-page-title">
                     <Terminal size={24} className="text-accent" /> AI Debugger

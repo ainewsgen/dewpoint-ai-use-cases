@@ -585,7 +585,18 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                     >
                         <MonitorStop size={14} /> Log Out
                     </button>
-                    <nav style={{ background: 'hsla(var(--bg-card)/0.5)', padding: '0.25rem', borderRadius: '50px', border: '1px solid var(--border-glass)', display: 'flex' }}>
+                    <nav style={{
+                        background: 'hsla(var(--bg-card)/0.5)',
+                        padding: '0.25rem',
+                        borderRadius: '50px',
+                        border: '1px solid var(--border-glass)',
+                        display: 'flex',
+                        overflowX: 'auto',
+                        whiteSpace: 'nowrap',
+                        maxWidth: '100%',
+                        scrollbarWidth: 'none',
+                        WebkitOverflowScrolling: 'touch'
+                    }}>
                         <button
                             onClick={() => setActiveTab('leads')}
                             style={{

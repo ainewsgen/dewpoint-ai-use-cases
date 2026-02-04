@@ -84,7 +84,7 @@ export function Matrix({ companyData, onUnlock: _onUnlock, isAdmin, onSaveReques
                 <div style={{ display: 'inline-flex', padding: '1rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
                     <Sparkles size={48} className="text-accent" />
                 </div>
-                <h2 className="text-accent" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Opportunity Matrix</h2>
+                <h2 className="text-accent" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', marginBottom: '0.5rem' }}>Free Library of Use Cases</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>
                         Generated for <strong>{companyData.url || "Your Business"}</strong>
@@ -138,7 +138,7 @@ function RecipeCard({ opp, isAdmin, isSaved, onToggleSave }: { opp: Opportunity,
                             </span>
                         )}
                     </div>
-                    <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>
+                    <h3 style={{ fontSize: '1.1rem', lineHeight: '1.3', marginTop: '0.5rem' }}>{opp.title}</h3>
                 </div>
                 {/* Save Icon Button */}
                 <button

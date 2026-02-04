@@ -10,7 +10,7 @@
     "dev": "vite",
     "dev:server": "node --env-file=.env --import tsx/esm --watch server/index.ts",
     "build:server": "(tsc -p tsconfig.server.json || true) && mkdir -p dist/server/db && cp server/db/migrations.sql dist/server/db/",
-    "build": "ls -F node_modules/vite || echo 'VITE NOT FOUND' && rm -rf dist && vite build && npm run build:server",
+    "build": "npm install && rm -rf dist && npx vite build && npm run build:server",
     "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/db/migrate-cli.ts",

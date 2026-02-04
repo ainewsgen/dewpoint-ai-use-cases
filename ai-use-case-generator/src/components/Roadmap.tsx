@@ -30,11 +30,17 @@ export function Roadmap({ isAdmin, user, leads: _leads = [] }: RoadmapProps) {
                 // Logged in: Unlock and sync
                 setIsLocked(false);
                 try {
-                    const res = await fetch(`/api/roadmap/${user.email}`);
+                    const token = localStorage.getItem('dpg_auth_token');
+                    const res = await fetch('/api/roadmap', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
 
                     if (res.ok) {
                         const data = await res.json();
-                        // Backend returns 'leads' object with 'recipes' array
+                        // Backend returns 'roadmap' array of Leads. Each Lead has 'recipes'.
+                        // We need to extract all recipes from all leads.
                         const serverRecipes = data.roadmap.flatMap((l: any) => l.recipes || []);
 
                         // Merge Strategy: Union by Title

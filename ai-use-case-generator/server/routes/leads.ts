@@ -2,31 +2,53 @@ import { Router } from 'express';
 import { db } from '../db';
 import { leads, companies, users } from '../db/schema';
 import { eq, or, isNull } from 'drizzle-orm';
-import { requireAuth, requireAdmin } from '../middleware/auth';
+import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Save Lead (Company + Recipes to Roadmap) - Upsert Logic
 // Save Lead (Company + Recipes to Roadmap) - Upsert Logic
 router.post('/leads', async (req, res) => {
     try {
         const { email, companyData, recipes } = req.body;
         const shadowId = (req as any).shadowId;
+        const authReq = req as any; // Cast to access user from middleware if present (optionalAuth applied globally or check headers)
 
-        // Validation: Need EITHER email OR shadowId
-        if ((!email && !shadowId) || !recipes) {
-            return res.status(400).json({ error: 'Missing required fields (email or shadowId required)' });
-        }
+        // Manual Auth Check (since this is an open endpoint for anon users too)
+        // We prefer req.user if it exists.
 
         let userId: number | null = null;
-        if (email) {
-            // Get user
-            const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
-            if (user.length > 0) {
-                userId = user[0].id;
-            } else {
-                return res.status(404).json({ error: 'User not found. Please login first.' });
+        let userEmail: string | null = null;
+
+        // AUTHENTICATED USER PATH
+        if (authReq.user) {
+            userId = authReq.user.id;
+            userEmail = authReq.user.email;
+            // IGNORE body.email for security - use authenticated email
+        }
+        // ANONYMOUS / SHADOW PATH
+        else {
+            // If body.email is sent but no auth token -> deny if that user exists? 
+            // Phase 3 Audit: Don't allow writing to a registered user's account without a token.
+            if (email) {
+                const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+                if (existingUser.length > 0) {
+                    return res.status(401).json({ error: 'User exists. Please login to save.' });
+                }
+                // If user doesn't exist, we could allow it (creating a lead for a future user? or just fail?)
+                // Compliance: Don't store email without verification.
+                // Strategy: Only allow shadowId for anonymous.
             }
         }
+
+        // Validation: Need EITHER userId OR shadowId
+        if (!userId && !shadowId) {
+            return res.status(400).json({ error: 'Session tracking failed.' });
+        }
+        if (!recipes) {
+            return res.status(400).json({ error: 'Missing recipes' });
+        }
+
 
         const newRecipes = Array.isArray(recipes) ? recipes : [recipes];
 
@@ -58,33 +80,22 @@ router.post('/leads', async (req, res) => {
 
         } else {
             // Create New Lead
-            // 1. Create Company (if data provided, or link to null)
-            // If shadow user, we still want a company record to store their manually entered data (industry, etc)
             let companyId: number;
 
             // Check for existing company for this user/shadow
             let existingCompany: any[] = [];
             if (userId) {
                 existingCompany = await db.select().from(companies).where(eq(companies.userId, userId)).limit(1);
-            } else {
-                // For shadow users, we don't have a shadowId on companies table yet? 
-                // Wait, companies.userId is nullable too. But we didn't add shadowId to companies table.
-                // We should probably rely on leads->company relationship.
-                // For now, always create a new company for a new lead? Or try to reuse?
-                // Without shadowId on companies, we can't easily find a shadow user's company unless we query leads first.
-                // But we are in "Create New Lead" block, so no lead exists.
-                // Thus, create new company.
             }
 
             if (existingCompany.length > 0) {
                 companyId = existingCompany[0].id;
-                // Optionally update company data here if provided
             } else {
                 const company = await db.insert(companies).values({
                     userId: userId, // null for shadow
                     url: companyData?.url || null,
                     industry: companyData?.industry || null,
-                    naicsCode: companyData?.naicsCode || null, // NEW
+                    naicsCode: companyData?.naicsCode || null,
                     role: companyData?.role || null,
                     size: companyData?.size || null,
                     painPoint: companyData?.painPoint || null,
@@ -97,7 +108,7 @@ router.post('/leads', async (req, res) => {
             const lead = await db.insert(leads).values({
                 userId: userId,
                 companyId: companyId,
-                shadowId: shadowId || null,
+                shadowId: !userId ? shadowId : null, // Clear shadow ID if registered
                 recipes: newRecipes,
             }).returning();
 
@@ -110,36 +121,29 @@ router.post('/leads', async (req, res) => {
 });
 
 // Sync/Replace Roadmap (For Deletions/Reordering/Registration Sync)
-router.put('/leads/sync', async (req, res) => {
+// Sync/Replace Roadmap (For Deletions/Reordering/Registration Sync)
+router.put('/leads/sync', requireAuth, async (req: AuthRequest, res) => {
     try {
-        const { email, recipes, companyData } = req.body;
-        const shadowId = (req as any).shadowId;
+        const { recipes, companyData } = req.body;
 
-        console.log(`[Sync] Request for ${email || 'Anonymous'} (Shadow: ${shadowId})`);
+        // SECURE: Use authenticated User ID. Ignore body email.
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: 'Authentication required for sync.' });
+        }
+        const userId = req.user.id;
 
-        // Need email OR shadowId
-        if ((!email && !shadowId) || !recipes) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        // Note: For Shadow Sync during registration, the client should have sent the 'shadowId' 
+        // separately or we detect it.
+        // BUT, complex shadow merging logic is risky. 
+        // Safer approach: Client converts local storage to a standard 'save' call, OR we trust the client to just overwrite.
+        // For simplicity & security: We treat this as "Set my roadmap to X".
+
+        if (!recipes) {
+            return res.status(400).json({ error: 'Missing recipes' });
         }
 
-        let userId: number | null = null;
-        if (email) {
-            const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
-            if (user.length > 0) userId = user[0].id;
-            else return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Check for existing lead
-        let existingLead: any[] = [];
-        if (userId) {
-            existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
-        } else if (shadowId) {
-            existingLead = await db.select().from(leads).where(eq(leads.shadowId, shadowId)).limit(1);
-        }
-
-        // Handle Company Data Logic remains similar...
-        // Simplified Logic: If no lead exists, create new. If exists, update.
-        // We need a companyId.
+        // Check for existing lead for this User
+        let existingLead = await db.select().from(leads).where(eq(leads.userId, userId)).limit(1);
 
         let companyId: number;
 
@@ -149,14 +153,17 @@ router.put('/leads/sync', async (req, res) => {
             if (companyData) {
                 await db.update(companies).set({
                     ...companyData,
-                    userId: userId || undefined
+                    userId: userId
                 }).where(eq(companies.id, companyId));
             }
         } else {
-            // New Company needed
+            // Check for shadow conversion opportunity? 
+            // If the user just registered, they might have a shadow lead. 
+            // However, typical flow is: Register -> Client calls Sync with local data.
+            // So we just create new structures for them.
+
             const newCompany = await db.insert(companies).values({
                 userId: userId,
-                // fallback to whatever is provided or null
                 url: companyData?.url || null,
                 industry: companyData?.industry || null,
                 naicsCode: companyData?.naicsCode || null,
@@ -173,40 +180,18 @@ router.put('/leads/sync', async (req, res) => {
                 .set({
                     recipes: recipes,
                     companyId: companyId,
-                    userId: userId || undefined,
-                    // Ensure shadowId is kept if it was there? Or updated?
-                    // If we are upgrading user -> add user Id.
+                    userId: userId,
                 })
                 .where(eq(leads.id, existingLead[0].id))
                 .returning();
             return res.json({ success: true, lead: updated[0] });
 
         } else {
-            // Check cross-match logic (Shadow -> User)
-            if (userId && shadowId) {
-                const shadowLead = await db.select().from(leads).where(eq(leads.shadowId, shadowId)).limit(1);
-                if (shadowLead.length > 0) {
-                    // MERGE/CONVERT
-                    console.log(`[Sync] Converting Shadow Lead ${shadowLead[0].id} to User ${userId}`);
-                    const shadowCompanyId = shadowLead[0].companyId!;
-                    await db.update(companies).set({ userId: userId }).where(eq(companies.id, shadowCompanyId));
-
-                    const converted = await db.update(leads)
-                        .set({
-                            userId: userId,
-                            recipes: recipes
-                        })
-                        .where(eq(leads.id, shadowLead[0].id))
-                        .returning();
-                    return res.json({ success: true, lead: converted[0], converted: true });
-                }
-            }
-
             // Create New Lead
             const lead = await db.insert(leads).values({
                 userId,
                 companyId,
-                shadowId: shadowId || null,
+                shadowId: null, // Registered users don't need shadowId
                 recipes: recipes
             }).returning();
             return res.json({ success: true, lead: lead[0] });
@@ -219,19 +204,17 @@ router.put('/leads/sync', async (req, res) => {
 });
 
 // Get User's Roadmap
-router.get('/roadmap/:email', async (req, res) => {
+// Get User's Roadmap - SECURE (Authentication Required)
+// Was: /roadmap/:email (IDOR)
+router.get('/roadmap', requireAuth, async (req: AuthRequest, res) => {
     try {
-        const { email } = req.params;
-
-        // Get user
-        const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
-
-        if (user.length === 0) {
-            return res.json({ roadmap: [] });
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: 'Authentication required' });
         }
 
-        // Get all leads for this user
-        const userLeads = await db.select().from(leads).where(eq(leads.userId, user[0].id));
+        // Get all leads for this user (derived from token)
+        const userLeads = await db.select().from(leads).where(eq(leads.userId, userId));
 
         res.json({ roadmap: userLeads });
     } catch (error) {

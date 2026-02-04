@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users, Terminal } from 'lucide-react';
 import { IcpManager } from './admin/IcpManager';
 import { LibraryManager } from './admin/LibraryManager';
+import { DebugConsole } from './admin/DebugConsole';
 
 interface Integration {
     id: number;
@@ -24,7 +25,7 @@ interface IntegrationModalProps {
 }
 
 export function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library'>('leads');
+    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library' | 'debugger'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     // Local state for fetched leads (ignoring props now)
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
@@ -698,6 +699,20 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         >
                             <Sparkles size={18} /> Config
                         </button>
+                        <button
+                            onClick={() => setActiveTab('debugger')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'debugger' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'debugger' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'debugger' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Terminal size={18} /> Debugger
+                        </button>
                     </nav>
                 </div>
             </div>
@@ -772,32 +787,29 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 <Activity size={18} /> System Forecast
                             </h4>
 
-                            {(() => {
-                                const hasActiveIntegration = integrations.some(i => i.enabled);
-                                const budgetExceeded = (usageStats?.spend || 0) >= (usageStats?.limit || 100);
-
-                                // Determine State
-                                let status = 'System (Fallback)';
-                                let color = 'salmon';
-                                let reason = 'Unknown Error';
-                                let bg = 'rgba(250, 128, 114, 0.1)';
-
-                                if (!hasActiveIntegration) {
-                                    status = 'System (Fallback)';
-                                    color = 'orange';
-                                    bg = 'rgba(255, 165, 0, 0.1)';
-                                    reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
-                                } else if (budgetExceeded) {
-                                    status = 'System (Fallback)';
-                                    color = 'salmon';
-                                    bg = 'rgba(250, 128, 114, 0.1)';
-                                    reason = `Daily budget limit ($${usageStats?.limit}) has been reached relative to current spend ($${usageStats?.spend}).`;
-                                } else {
-                                    status = 'AI (Live Generation)';
-                                    color = 'hsl(140, 70%, 40%)';
-                                    bg = 'hsla(140, 70%, 40%, 0.1)';
                                     reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
                                 }
+
+                                return (
+                                    <div style={{ padding: '0.75rem', borderRadius: '8px', background: bg, border: `1px solid ${color}`, color: color, fontSize: '0.9rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+                                            Predicted Mode: {status}
+                                        </div>
+                                        <div style={{ marginTop: '0.25rem', opacity: 0.9 }}>{reason}</div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Debugger Tab */}
+            {activeTab === 'debugger' && <DebugConsole />}
+
+            {/* Leads Tab */}
+            {activeTab === 'leads' && (
 
                                 return (
                                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
@@ -910,69 +922,69 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             </div>
                         </div>
 
-                        {/* Debug Panel for Persistence Issues */}
-                        <div style={{ marginTop: '2rem', padding: '1rem', border: '1px dashed #444', borderRadius: '8px', opacity: 0.7 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <h5 style={{ color: '#888', margin: 0, fontSize: '0.8rem' }}>🛠️ Debug: Integration Persistence</h5>
-                                <button
-                                    onClick={fetchUsageStats}
-                                    className="btn-secondary"
-                                    style={{ padding: '0.15rem 0.5rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center' }}
-                                >
-                                    <RefreshCw size={12} style={{ marginRight: '4px' }} /> Refresh
-                                </button>
-                            </div>
-                            <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#aaa' }}>
-                                <p>DB Count: <span style={{ color: 'white' }}>{(usageStats as any)?.integrationCount ?? '?'}</span></p>
-                                <p>Integration ID: <span style={{ color: 'white' }}>{usageStats?.integrationId || 'Values not found'}</span></p>
-                                <p>Raw Metadata: <span style={{ color: 'white' }}>{JSON.stringify(usageStats?.debugMeta || {})}</span></p>
-                            </div>
-                        </div>
-                    </div>
+                        {/* Debug Panel for Persistence Issues */ }
+    <div style={{ marginTop: '2rem', padding: '1rem', border: '1px dashed #444', borderRadius: '8px', opacity: 0.7 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <h5 style={{ color: '#888', margin: 0, fontSize: '0.8rem' }}>🛠️ Debug: Integration Persistence</h5>
+            <button
+                onClick={fetchUsageStats}
+                className="btn-secondary"
+                style={{ padding: '0.15rem 0.5rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center' }}
+            >
+                <RefreshCw size={12} style={{ marginRight: '4px' }} /> Refresh
+            </button>
+        </div>
+        <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#aaa' }}>
+            <p>DB Count: <span style={{ color: 'white' }}>{(usageStats as any)?.integrationCount ?? '?'}</span></p>
+            <p>Integration ID: <span style={{ color: 'white' }}>{usageStats?.integrationId || 'Values not found'}</span></p>
+            <p>Raw Metadata: <span style={{ color: 'white' }}>{JSON.stringify(usageStats?.debugMeta || {})}</span></p>
+        </div>
+    </div>
+                    </div >
                 )
-            }
+}
 
-            {/* Blueprints & AI Tab */}
-            {
-                activeTab === 'blueprints' && (
-                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-                        <div className="admin-page-header">
-                            <div>
-                                <h3 className="admin-page-title">
-                                    <Sparkles size={24} className="text-accent" /> AI Generation Config
-                                </h3>
-                                <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                                    Manage the system prompt and blueprint templates.
-                                </p>
-                            </div>
-                        </div>
+{/* Blueprints & AI Tab */ }
+{
+    activeTab === 'blueprints' && (
+        <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+            <div className="admin-page-header">
+                <div>
+                    <h3 className="admin-page-title">
+                        <Sparkles size={24} className="text-accent" /> AI Generation Config
+                    </h3>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                        Manage the system prompt and blueprint templates.
+                    </p>
+                </div>
+            </div>
 
-                        <div style={{ marginBottom: '3rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <label className="admin-label" style={{ fontSize: '1rem' }}>System Prompt Template</label>
-                                <span className="status-badge" style={{ fontSize: '0.75rem' }}>Core Logic</span>
-                            </div>
+            <div style={{ marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <label className="admin-label" style={{ fontSize: '1rem' }}>System Prompt Template</label>
+                    <span className="status-badge" style={{ fontSize: '0.75rem' }}>Core Logic</span>
+                </div>
 
-                            <textarea
-                                value={systemPrompt}
-                                onChange={(e) => setSystemPrompt(e.target.value)}
-                                placeholder="Loading system prompt..."
-                                className="admin-textarea"
-                                style={{
-                                    minHeight: '400px',
-                                    fontFamily: 'monospace',
-                                    fontSize: '0.9rem',
-                                    lineHeight: '1.6',
-                                    background: '#1e293b',
-                                    color: '#e2e8f0',
-                                    border: '1px solid #334155'
-                                }}
-                            />
+                <textarea
+                    value={systemPrompt}
+                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    placeholder="Loading system prompt..."
+                    className="admin-textarea"
+                    style={{
+                        minHeight: '400px',
+                        fontFamily: 'monospace',
+                        fontSize: '0.9rem',
+                        lineHeight: '1.6',
+                        background: '#1e293b',
+                        color: '#e2e8f0',
+                        border: '1px solid #334155'
+                    }}
+                />
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', gap: '1rem' }}>
-                                <button className="btn-secondary" onClick={() => {
-                                    if (confirm("Reset to default prompt?")) {
-                                        setSystemPrompt(`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', gap: '1rem' }}>
+                    <button className="btn-secondary" onClick={() => {
+                        if (confirm("Reset to default prompt?")) {
+                            setSystemPrompt(`You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
 
 User Profile:
 - Company URL: {{url}}
@@ -998,1129 +1010,1129 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 10. **Tech Stack Details**: List of specific tools used + their role (e.g., "OpenAI: Reasoning").
 11. **Difficulty**: Implementation effort (Low, Med, High).
 12. **Upsell**: A potential service retainer or expansion opportunity.`);
-                                    }
-                                }}>
-                                    <RefreshCw size={16} /> Reset Default
-                                </button>
-                                <button className="btn-primary" onClick={async () => {
-                                    try {
-                                        const res = await fetch('/api/admin/config/system-prompt', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                                            },
-                                            body: JSON.stringify({ prompt: systemPrompt })
-                                        });
-                                        if (res.ok) {
-                                            alert("System Prompt Saved Successfully!");
-                                        } else {
-                                            alert("Failed to save prompt");
-                                        }
-                                    } catch (e) {
-                                        alert("Error saving prompt: " + e);
-                                    }
-                                }}>
-                                    <Save size={16} /> Save Configuration
-                                </button>
+                        }
+                    }}>
+                        <RefreshCw size={16} /> Reset Default
+                    </button>
+                    <button className="btn-primary" onClick={async () => {
+                        try {
+                            const res = await fetch('/api/admin/config/system-prompt', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify({ prompt: systemPrompt })
+                            });
+                            if (res.ok) {
+                                alert("System Prompt Saved Successfully!");
+                            } else {
+                                alert("Failed to save prompt");
+                            }
+                        } catch (e) {
+                            alert("Error saving prompt: " + e);
+                        }
+                    }}>
+                        <Save size={16} /> Save Configuration
+                    </button>
+                </div>
+            </div>
+
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600 }}>
+                <Database size={20} /> Managed Blueprints
+            </h3>
+
+            {/* Mock List of Core Blueprints */}
+            <div style={{ display: 'grid', gap: '1rem' }}>
+                {['The Silent Assistant', 'The Invoice Watchdog', 'The Omni-Channel Nurture', 'The Project Pulse'].map((name, i) => (
+                    <div key={i} className="admin-list-item" style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '1rem 1.5rem',
+                        background: 'white',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-glass)',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{
+                                width: '32px', height: '32px', borderRadius: '50%',
+                                background: i % 2 === 0 ? 'hsla(var(--accent-primary)/0.1)' : 'hsla(var(--accent-gold)/0.1)',
+                                color: i % 2 === 0 ? 'hsl(var(--accent-primary))' : 'hsl(var(--accent-gold))',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+                            }}>
+                                {i + 1}
                             </div>
+                            <span style={{ fontWeight: 600, fontSize: '1rem' }}>{name}</span>
                         </div>
-
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600 }}>
-                            <Database size={20} /> Managed Blueprints
-                        </h3>
-
-                        {/* Mock List of Core Blueprints */}
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {['The Silent Assistant', 'The Invoice Watchdog', 'The Omni-Channel Nurture', 'The Project Pulse'].map((name, i) => (
-                                <div key={i} className="admin-list-item" style={{
-                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: '1rem 1.5rem',
-                                    background: 'white',
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--border-glass)',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div style={{
-                                            width: '32px', height: '32px', borderRadius: '50%',
-                                            background: i % 2 === 0 ? 'hsla(var(--accent-primary)/0.1)' : 'hsla(var(--accent-gold)/0.1)',
-                                            color: i % 2 === 0 ? 'hsl(var(--accent-primary))' : 'hsl(var(--accent-gold))',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-                                        }}>
-                                            {i + 1}
-                                        </div>
-                                        <span style={{ fontWeight: 600, fontSize: '1rem' }}>{name}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                        <span className={`status-badge ${i % 2 === 0 ? 'info' : 'warning'}`}>{i % 2 === 0 ? 'Core' : 'Advanced'}</span>
-                                        <button className="btn-secondary btn-sm" title="Edit Template" onClick={() => handleEditBlueprint(name)}>
-                                            <Edit size={14} /> Edit
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <span className={`status-badge ${i % 2 === 0 ? 'info' : 'warning'}`}>{i % 2 === 0 ? 'Core' : 'Advanced'}</span>
+                            <button className="btn-secondary btn-sm" title="Edit Template" onClick={() => handleEditBlueprint(name)}>
+                                <Edit size={14} /> Edit
+                            </button>
                         </div>
                     </div>
-                )
-            }
+                ))}
+            </div>
+        </div>
+    )
+}
 
-            {/* Integrations Tab */}
+{/* Integrations Tab */ }
 
-            {
-                activeTab === 'cms' && (
-                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-                        <div className="admin-page-header">
-                            <div>
-                                <h3 className="admin-page-title">
-                                    <Megaphone size={24} className="text-accent" /> Landing Page Announcement
-                                </h3>
-                                <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                                    Display a system-wide message on the onboarding page.
-                                </p>
-                            </div>
-                            <div className={`status-badge ${cmsStatus === 'published' ? 'success' : 'neutral'}`} style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
-                                {cmsStatus === 'published' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-                                {cmsStatus === 'published' ? 'Live' : 'Draft'}
-                            </div>
-                        </div>
+{
+    activeTab === 'cms' && (
+        <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+            <div className="admin-page-header">
+                <div>
+                    <h3 className="admin-page-title">
+                        <Megaphone size={24} className="text-accent" /> Landing Page Announcement
+                    </h3>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                        Display a system-wide message on the onboarding page.
+                    </p>
+                </div>
+                <div className={`status-badge ${cmsStatus === 'published' ? 'success' : 'neutral'}`} style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                    {cmsStatus === 'published' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                    {cmsStatus === 'published' ? 'Live' : 'Draft'}
+                </div>
+            </div>
 
-                        {isEditingCms ? (
-                            <div className="animate-fade-in" style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-                                <label className="admin-label">Announcement Text</label>
-                                <textarea
-                                    value={announcement}
-                                    onChange={(e) => setAnnouncement(e.target.value)}
-                                    placeholder="e.g., 'System Maintenance: Saturday 2am' or 'Welcome to the Beta!'"
-                                    className="admin-textarea"
-                                    style={{
-                                        minHeight: '150px',
-                                        marginBottom: '1.5rem'
-                                    }}
-                                />
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
-                                    <button onClick={() => setIsEditingCms(false)} className="btn-ghost">
-                                        Cancel
-                                    </button>
-                                    <button onClick={handleSaveDraft} className="btn-secondary">
-                                        <Save size={18} /> Save Draft
-                                    </button>
-                                    <button onClick={handlePublish} className="btn-primary">
-                                        <Globe size={18} /> Publish Now
-                                    </button>
-                                </div>
-                            </div>
+            {isEditingCms ? (
+                <div className="animate-fade-in" style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                    <label className="admin-label">Announcement Text</label>
+                    <textarea
+                        value={announcement}
+                        onChange={(e) => setAnnouncement(e.target.value)}
+                        placeholder="e.g., 'System Maintenance: Saturday 2am' or 'Welcome to the Beta!'"
+                        className="admin-textarea"
+                        style={{
+                            minHeight: '150px',
+                            marginBottom: '1.5rem'
+                        }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+                        <button onClick={() => setIsEditingCms(false)} className="btn-ghost">
+                            Cancel
+                        </button>
+                        <button onClick={handleSaveDraft} className="btn-secondary">
+                            <Save size={18} /> Save Draft
+                        </button>
+                        <button onClick={handlePublish} className="btn-primary">
+                            <Globe size={18} /> Publish Now
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className="animate-fade-in">
+                    <div style={{
+                        padding: '2rem',
+                        background: 'linear-gradient(to bottom, #ffffff, #f8fafc)',
+                        borderRadius: '12px',
+                        marginBottom: '1.5rem',
+                        minHeight: '120px',
+                        border: '1px solid var(--border-glass)',
+                        display: 'flex', alignItems: announcement ? 'flex-start' : 'center',
+                        justifyContent: announcement ? 'flex-start' : 'center',
+                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                    }}>
+                        {announcement ? (
+                            <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', color: 'hsl(var(--text-main))' }}>{announcement}</p>
                         ) : (
-                            <div className="animate-fade-in">
-                                <div style={{
-                                    padding: '2rem',
-                                    background: 'linear-gradient(to bottom, #ffffff, #f8fafc)',
-                                    borderRadius: '12px',
-                                    marginBottom: '1.5rem',
-                                    minHeight: '120px',
-                                    border: '1px solid var(--border-glass)',
-                                    display: 'flex', alignItems: announcement ? 'flex-start' : 'center',
-                                    justifyContent: announcement ? 'flex-start' : 'center',
-                                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
-                                }}>
-                                    {announcement ? (
-                                        <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', color: 'hsl(var(--text-main))' }}>{announcement}</p>
-                                    ) : (
-                                        <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No announcement set.</p>
-                                    )}
-                                </div>
-
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button
-                                        onClick={handleDeleteMessage}
-                                        style={{ color: 'salmon', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}
-                                    >
-                                        <Trash size={16} /> Delete Message
-                                    </button>
-
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        {cmsStatus === 'published' && (
-                                            <button onClick={handleUnpublish} className="btn-secondary">
-                                                Unpublish
-                                            </button>
-                                        )}
-                                        {cmsStatus === 'draft' && announcement && (
-                                            <button onClick={handlePublish} className="btn-primary">
-                                                Publish
-                                            </button>
-                                        )}
-                                        <button onClick={() => setIsEditingCms(true)} className="btn-secondary">
-                                            <Edit size={16} /> Edit Message
-                                        </button>
-                                    </div>
-                                </div>
-                                {showSaveConfirm && <p className="animate-fade-in" style={{ textAlign: 'right', marginTop: '0.5rem', color: 'hsl(140, 70%, 40%)', fontSize: '0.9rem', fontWeight: 500 }}>Changes saved!</p>}
-                            </div>
+                            <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No announcement set.</p>
                         )}
                     </div>
-                )
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <button
+                            onClick={handleDeleteMessage}
+                            style={{ color: 'salmon', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}
+                        >
+                            <Trash size={16} /> Delete Message
+                        </button>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            {cmsStatus === 'published' && (
+                                <button onClick={handleUnpublish} className="btn-secondary">
+                                    Unpublish
+                                </button>
+                            )}
+                            {cmsStatus === 'draft' && announcement && (
+                                <button onClick={handlePublish} className="btn-primary">
+                                    Publish
+                                </button>
+                            )}
+                            <button onClick={() => setIsEditingCms(true)} className="btn-secondary">
+                                <Edit size={16} /> Edit Message
+                            </button>
+                        </div>
+                    </div>
+                    {showSaveConfirm && <p className="animate-fade-in" style={{ textAlign: 'right', marginTop: '0.5rem', color: 'hsl(140, 70%, 40%)', fontSize: '0.9rem', fontWeight: 500 }}>Changes saved!</p>}
+                </div>
+            )}
+        </div>
+    )
+}
+
+{/* Logic for Grouping Leads */ }
+{
+    activeTab === 'leads' && (() => {
+        if (isLoadingLeads) {
+            return (
+                <div className="admin-panel" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <div className="spinner" style={{ marginBottom: '1rem' }} />
+                    <p>Loading leads...</p>
+                </div>
+            );
+        }
+
+        if (leadsError) {
+            return (
+                <div className="admin-panel" style={{ padding: '2rem', textAlign: 'center', borderColor: 'salmon' }}>
+                    <h3 style={{ color: 'salmon', marginBottom: '1rem' }}>Error Loading Leads</h3>
+                    <p style={{ color: '#ccc' }}>{leadsError}</p>
+                    <button onClick={fetchLeads} className="btn-secondary" style={{ marginTop: '1rem' }}>Try Again</button>
+                </div>
+            );
+        }
+
+        // Group duplicates by Email (or URL if no email)
+        const uniqueUsers = adminLeads.reduce((acc: any, row: any) => {
+            // Logic Change: Registered users grouped by User ID/Email.
+            // Anonymous users grouped by Shadow ID -> URL -> Lead ID
+            const isRegistered = !!row.user?.id;
+            const leadShadowId = row.lead?.shadowId;
+
+            let key;
+            if (isRegistered) {
+                key = row.user.email || row.company?.url || 'unknown_user';
+            } else {
+                if (leadShadowId) {
+                    key = `shadow_${leadShadowId}`;
+                } else if (row.company?.url) {
+                    key = `url_${row.company.url}`;
+                } else {
+                    key = row.id ? `anon_${row.id}` : `anon_unknown_${Math.random()}`;
+                }
             }
 
-            {/* Logic for Grouping Leads */}
-            {
-                activeTab === 'leads' && (() => {
-                    if (isLoadingLeads) {
-                        return (
-                            <div className="admin-panel" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                <div className="spinner" style={{ marginBottom: '1rem' }} />
-                                <p>Loading leads...</p>
-                            </div>
-                        );
-                    }
+            if (!acc[key]) {
+                acc[key] = {
+                    ...row,
+                    allRecipes: row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [],
+                    interactionCount: 1,
+                    groupingMethod: isRegistered ? 'user' : (leadShadowId ? 'shadow' : 'url')
+                };
+            } else {
+                const newRecipes = row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [];
+                acc[key].allRecipes.push(...newRecipes);
+                acc[key].interactionCount += 1;
+            }
+            return acc;
+        }, {} as Record<string, any>);
 
-                    if (leadsError) {
-                        return (
-                            <div className="admin-panel" style={{ padding: '2rem', textAlign: 'center', borderColor: 'salmon' }}>
-                                <h3 style={{ color: 'salmon', marginBottom: '1rem' }}>Error Loading Leads</h3>
-                                <p style={{ color: '#ccc' }}>{leadsError}</p>
-                                <button onClick={fetchLeads} className="btn-secondary" style={{ marginTop: '1rem' }}>Try Again</button>
-                            </div>
-                        );
-                    }
+        const userList = Object.values(uniqueUsers);
+        // Use 'any' cast to avoid TS errors for now during UI polish
+        const activeUser = userList.find((u: any) => u.id === selectedLead) as any;
 
-                    // Group duplicates by Email (or URL if no email)
-                    const uniqueUsers = adminLeads.reduce((acc: any, row: any) => {
-                        // Logic Change: Registered users grouped by User ID/Email.
-                        // Anonymous users grouped by Shadow ID -> URL -> Lead ID
-                        const isRegistered = !!row.user?.id;
-                        const leadShadowId = row.lead?.shadowId;
-
-                        let key;
-                        if (isRegistered) {
-                            key = row.user.email || row.company?.url || 'unknown_user';
-                        } else {
-                            if (leadShadowId) {
-                                key = `shadow_${leadShadowId}`;
-                            } else if (row.company?.url) {
-                                key = `url_${row.company.url}`;
-                            } else {
-                                key = row.id ? `anon_${row.id}` : `anon_unknown_${Math.random()}`;
-                            }
-                        }
-
-                        if (!acc[key]) {
-                            acc[key] = {
-                                ...row,
-                                allRecipes: row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [],
-                                interactionCount: 1,
-                                groupingMethod: isRegistered ? 'user' : (leadShadowId ? 'shadow' : 'url')
-                            };
-                        } else {
-                            const newRecipes = row.recipes ? (Array.isArray(row.recipes) ? row.recipes : [row.recipes]) : [];
-                            acc[key].allRecipes.push(...newRecipes);
-                            acc[key].interactionCount += 1;
-                        }
-                        return acc;
-                    }, {} as Record<string, any>);
-
-                    const userList = Object.values(uniqueUsers);
-                    // Use 'any' cast to avoid TS errors for now during UI polish
-                    const activeUser = userList.find((u: any) => u.id === selectedLead) as any;
-
-                    return (
-                        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '2rem', height: 'calc(100vh - 140px)' }}>
-                            {/* Sidebar List */}
-                            <div className="admin-panel" style={{ padding: '0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-glass)', background: '#f8fafc' }}>
-                                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        Registered Users ({userList.length})
-                                    </h3>
+        return (
+            <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '2rem', height: 'calc(100vh - 140px)' }}>
+                {/* Sidebar List */}
+                <div className="admin-panel" style={{ padding: '0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-glass)', background: '#f8fafc' }}>
+                        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Registered Users ({userList.length})
+                        </h3>
+                    </div>
+                    <div style={{ overflowY: 'auto', flex: 1, padding: '0.5rem' }}>
+                        {userList.length === 0 && <p style={{ padding: '1rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>No users found.</p>}
+                        {userList.map((user: any) => (
+                            <div
+                                key={user.id}
+                                onClick={() => {
+                                    setSelectedLead(user.id);
+                                }}
+                                className={`admin-list-item ${selectedLead === user.id ? 'active' : ''}`}
+                                style={{
+                                    padding: '1rem',
+                                    cursor: 'pointer',
+                                    borderRadius: '8px',
+                                    marginBottom: '0.25rem',
+                                    border: selectedLead === user.id ? '1px solid hsl(var(--accent-primary))' : '1px solid transparent',
+                                    background: selectedLead === user.id ? 'hsla(var(--accent-primary)/0.05)' : 'transparent'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: selectedLead === user.id ? 'hsl(var(--accent-primary))' : 'hsl(var(--text-main))' }}>
+                                        {user.user?.name || user.company?.url || 'Anonymous'}
+                                    </h4>
+                                    {user.allRecipes.length > 0 && <span className="badge" style={{ fontSize: '0.7rem' }}>{user.allRecipes.length}</span>}
                                 </div>
-                                <div style={{ overflowY: 'auto', flex: 1, padding: '0.5rem' }}>
-                                    {userList.length === 0 && <p style={{ padding: '1rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>No users found.</p>}
-                                    {userList.map((user: any) => (
-                                        <div
-                                            key={user.id}
-                                            onClick={() => {
-                                                setSelectedLead(user.id);
-                                            }}
-                                            className={`admin-list-item ${selectedLead === user.id ? 'active' : ''}`}
-                                            style={{
-                                                padding: '1rem',
-                                                cursor: 'pointer',
-                                                borderRadius: '8px',
-                                                marginBottom: '0.25rem',
-                                                border: selectedLead === user.id ? '1px solid hsl(var(--accent-primary))' : '1px solid transparent',
-                                                background: selectedLead === user.id ? 'hsla(var(--accent-primary)/0.05)' : 'transparent'
-                                            }}
+
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {user.user?.email || (user.groupingMethod === 'shadow' ? `ID: ${user.lead?.shadowId?.slice(0, 8)}...` : (user.company?.url || 'No Contact Info'))}
+                                </p>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{user.company?.role || 'Visitor'}</span>
+                                    <div style={{ display: 'flex', gap: '0.25rem', opacity: 0.6 }}>
+                                        <button
+                                            onClick={(e) => openEditUser(user, e)}
+                                            className="btn-ghost"
+                                            style={{ padding: '2px', height: '20px', width: '20px' }}
+                                            title="Edit"
                                         >
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: selectedLead === user.id ? 'hsl(var(--accent-primary))' : 'hsl(var(--text-main))' }}>
-                                                    {user.user?.name || user.company?.url || 'Anonymous'}
-                                                </h4>
-                                                {user.allRecipes.length > 0 && <span className="badge" style={{ fontSize: '0.7rem' }}>{user.allRecipes.length}</span>}
-                                            </div>
-
-                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {user.user?.email || (user.groupingMethod === 'shadow' ? `ID: ${user.lead?.shadowId?.slice(0, 8)}...` : (user.company?.url || 'No Contact Info'))}
-                                            </p>
-
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{user.company?.role || 'Visitor'}</span>
-                                                <div style={{ display: 'flex', gap: '0.25rem', opacity: 0.6 }}>
-                                                    <button
-                                                        onClick={(e) => openEditUser(user, e)}
-                                                        className="btn-ghost"
-                                                        style={{ padding: '2px', height: '20px', width: '20px' }}
-                                                        title="Edit"
-                                                    >
-                                                        <Edit size={12} />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteLead(user.id);
-                                                        }}
-                                                        className="btn-ghost user-delete-btn"
-                                                        style={{ padding: '2px', height: '20px', width: '20px', color: 'salmon' }}
-                                                        title="Delete"
-                                                    >
-                                                        <Trash size={12} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                            <Edit size={12} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteLead(user.id);
+                                            }}
+                                            className="btn-ghost user-delete-btn"
+                                            style={{ padding: '2px', height: '20px', width: '20px', color: 'salmon' }}
+                                            title="Delete"
+                                        >
+                                            <Trash size={12} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                </div>
 
-                            {/* Main Detail View */}
-                            <div className="admin-panel animate-fade-in" style={{ padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                                {activeUser ? (
-                                    <div className="animate-fade-in">
-                                        <div style={{ borderBottom: '1px solid var(--border-glass)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                <div>
-                                                    <h1 style={{ marginBottom: '0.5rem', fontSize: '1.75rem', color: 'hsl(var(--text-main))' }}>
-                                                        {activeUser.user?.name || activeUser.company?.url || "Anonymous User"}
-                                                    </h1>
-                                                    {activeUser.user?.email && (
-                                                        <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem', fontWeight: 500 }}>{activeUser.user.email}</p>
-                                                    )}
+                {/* Main Detail View */}
+                <div className="admin-panel animate-fade-in" style={{ padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    {activeUser ? (
+                        <div className="animate-fade-in">
+                            <div style={{ borderBottom: '1px solid var(--border-glass)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div>
+                                        <h1 style={{ marginBottom: '0.5rem', fontSize: '1.75rem', color: 'hsl(var(--text-main))' }}>
+                                            {activeUser.user?.name || activeUser.company?.url || "Anonymous User"}
+                                        </h1>
+                                        {activeUser.user?.email && (
+                                            <p style={{ color: 'hsl(var(--accent-primary))', fontSize: '1.1rem', fontWeight: 500 }}>{activeUser.user.email}</p>
+                                        )}
 
-                                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                                                        {activeUser.company?.url && (
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
-                                                                <Globe size={12} /> {activeUser.company.url}
-                                                            </span>
-                                                        )}
+                                        <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                            {activeUser.company?.url && (
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
+                                                    <Globe size={12} /> {activeUser.company.url}
+                                                </span>
+                                            )}
 
-                                                        {activeUser.company?.scannerSource === 'AI' ? (
-                                                            <span className="status-badge info" style={{ fontSize: '0.75rem' }}>
-                                                                <Sparkles size={10} /> AI Enhanced
-                                                            </span>
-                                                        ) : (
-                                                            <span className="status-badge" style={{ fontSize: '0.75rem' }}>
-                                                                ⚡ System
-                                                            </span>
-                                                        )}
+                                            {activeUser.company?.scannerSource === 'AI' ? (
+                                                <span className="status-badge info" style={{ fontSize: '0.75rem' }}>
+                                                    <Sparkles size={10} /> AI Enhanced
+                                                </span>
+                                            ) : (
+                                                <span className="status-badge" style={{ fontSize: '0.75rem' }}>
+                                                    ⚡ System
+                                                </span>
+                                            )}
 
-                                                        {activeUser.company?.naicsCode && (
-                                                            <span style={{ fontSize: '0.75rem', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '4px' }}>
-                                                                NAICS: {activeUser.company.naicsCode}
-                                                            </span>
-                                                        )}
+                                            {activeUser.company?.naicsCode && (
+                                                <span style={{ fontSize: '0.75rem', border: '1px solid var(--border-glass)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '4px' }}>
+                                                    NAICS: {activeUser.company.naicsCode}
+                                                </span>
+                                            )}
 
-                                                        {activeUser.lead?.id && (
-                                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Lead #{activeUser.lead.id}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                                    <button onClick={(e) => openEditUser(activeUser, e)} className="btn-secondary">
-                                                        <Edit size={16} /> Edit Profile
-                                                    </button>
-                                                    {activeUser.user && (
-                                                        <button onClick={(e) => handleResetPassword(activeUser.user.id, e)} className="btn-secondary">
-                                                            <Key size={16} /> Reset PWD
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Company Details Grid */}
-                                            {activeUser.company && (
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1.5rem', marginTop: '2rem', background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-                                                    <div>
-                                                        <label className="admin-label">Role</label>
-                                                        <p style={{ fontWeight: 500 }}>{activeUser.company.role || 'N/A'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="admin-label">Company Size</label>
-                                                        <p style={{ fontWeight: 500 }}>{activeUser.company.size || 'N/A'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="admin-label">Industry</label>
-                                                        <p style={{ fontWeight: 500 }}>{activeUser.company.industry || 'Not specified'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="admin-label">Pain Point</label>
-                                                        <p className="truncate-2" title={activeUser.company.painPoint || ''} style={{ fontSize: '0.9rem' }}>"{activeUser.company.painPoint || 'N/A'}"</p>
-                                                    </div>
-
-                                                    {activeUser.company.description && (
-                                                        <div style={{ gridColumn: 'span 4' }}>
-                                                            <label className="admin-label">Analyzed Summary</label>
-                                                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-main)', marginTop: '0.25rem' }}>{activeUser.company.description}</p>
-                                                        </div>
-                                                    )}
-
-                                                    {activeUser.company.stack && Array.isArray(activeUser.company.stack) && activeUser.company.stack.length > 0 && (
-                                                        <div style={{ gridColumn: 'span 4' }}>
-                                                            <label className="admin-label">Detected Tech Stack</label>
-                                                            <div className="chips-grid" style={{ gap: '0.5rem', marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap' }}>
-                                                                {activeUser.company.stack.map((t: string) => (
-                                                                    <span key={t} style={{ background: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid var(--border-glass)', fontWeight: 500, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{t}</span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                            {activeUser.lead?.id && (
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Lead #{activeUser.lead.id}</span>
                                             )}
                                         </div>
-
-                                        <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem' }}>
-                                            <Database size={20} className="text-accent" /> Unlocked Blueprints <span className="badge" style={{ fontSize: '0.8rem' }}>{activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes?.length || 0}</span>
-                                        </h3>
-                                        <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                            {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
-                                                <div key={idx} className="admin-card" style={{ padding: '0', overflow: 'hidden' }}>
-                                                    <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#f8fafc' }}>
-                                                        <div>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                                                                <h4 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700, color: 'hsl(var(--text-main))' }}>{r.title}</h4>
-                                                                <span className="badge" style={{ background: 'hsl(var(--accent-primary))', color: 'white' }}>{r.department}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                                                {r.industry && <span>{r.industry}</span>}
-                                                                <span>•</span>
-                                                                <span>{r.generation_metadata?.source || 'System'}</span>
-                                                                {r.generation_metadata?.fallback_reason && (
-                                                                    <span style={{ color: 'salmon', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                        <AlertCircle size={10} /> Fallback
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                if (!confirm(`Are you sure you want to delete "${r.title}"?`)) return;
-                                                                try {
-                                                                    const res = await fetch(`/api/admin/leads/${activeUser.id}/recipes`, {
-                                                                        method: 'DELETE',
-                                                                        headers: { 'Content-Type': 'application/json' },
-                                                                        body: JSON.stringify({ title: r.title })
-                                                                    });
-                                                                    if (res.ok) {
-                                                                        fetchLeads();
-                                                                    } else {
-                                                                        alert("Failed to delete recipe");
-                                                                    }
-                                                                } catch (err) {
-                                                                    alert("Error deleting recipe: " + err);
-                                                                }
-                                                            }}
-                                                            className="btn-danger-icon"
-                                                            title="Delete Blueprint"
-                                                        >
-                                                            <Trash size={16} />
-                                                        </button>
-                                                    </div>
-
-                                                    <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
-                                                        {/* Public View */}
-                                                        <div>
-                                                            <h5 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1rem', letterSpacing: '0.05em', fontWeight: 700 }}>Public View</h5>
-                                                            <div style={{ marginBottom: '1rem' }}>
-                                                                <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Problem</strong>
-                                                                <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{r.public_view?.problem || 'N/A'}</p>
-                                                            </div>
-                                                            <div style={{ marginBottom: '1rem' }}>
-                                                                <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Solution</strong>
-                                                                <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{r.public_view?.solution_narrative || 'N/A'}</p>
-                                                            </div>
-                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                                <div>
-                                                                    <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Value Prop</strong>
-                                                                    <p style={{ fontSize: '0.9rem', margin: 0 }}>{r.public_view?.value_proposition || 'N/A'}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>ROI</strong>
-                                                                    <p style={{ fontSize: '0.9rem', margin: 0, color: 'hsl(140, 70%, 40%)', fontWeight: 600 }}>{r.public_view?.roi_estimate || 'N/A'}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Admin View / Technical */}
-                                                        <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem' }}>
-                                                            <h5 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'hsl(var(--accent-primary))', marginBottom: '1rem', letterSpacing: '0.05em', fontWeight: 700 }}>Technical Details</h5>
-
-                                                            <div style={{ marginBottom: '1rem' }}>
-                                                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Difficulty</label>
-                                                                <span className={`status-badge ${r.admin_view?.implementation_difficulty === 'Low' ? 'success' : r.admin_view?.implementation_difficulty === 'High' ? 'warning' : 'info'}`}>
-                                                                    {r.admin_view?.implementation_difficulty || 'Unknown'}
-                                                                </span>
-                                                            </div>
-
-                                                            <div style={{ marginBottom: '1rem' }}>
-                                                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Upsell Opportunity</label>
-                                                                <p style={{ margin: 0, fontWeight: 500, color: 'hsl(var(--accent-primary))' }}>{r.admin_view?.upsell_opportunity || 'N/A'}</p>
-                                                            </div>
-
-                                                            <div>
-                                                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
-                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                                                                    {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : []).map((t: string) => ({ tool: t }))).slice(0, 5).map((detail: any, i: number) => (
-                                                                        <span key={i} style={{ fontSize: '0.75rem', background: 'white', border: '1px solid var(--border-glass)', padding: '2px 6px', borderRadius: '4px' }}>
-                                                                            {detail.tool}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
                                     </div>
-                                ) : (
-                                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                                        <div style={{ background: '#f1f5f9', padding: '2rem', borderRadius: '50%', marginBottom: '1.5rem' }}>
-                                            <User size={48} style={{ opacity: 0.3 }} />
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        <button onClick={(e) => openEditUser(activeUser, e)} className="btn-secondary">
+                                            <Edit size={16} /> Edit Profile
+                                        </button>
+                                        {activeUser.user && (
+                                            <button onClick={(e) => handleResetPassword(activeUser.user.id, e)} className="btn-secondary">
+                                                <Key size={16} /> Reset PWD
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Company Details Grid */}
+                                {activeUser.company && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1.5rem', marginTop: '2rem', background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                                        <div>
+                                            <label className="admin-label">Role</label>
+                                            <p style={{ fontWeight: 500 }}>{activeUser.company.role || 'N/A'}</p>
                                         </div>
-                                        <p style={{ fontSize: '1.1rem', fontWeight: 500 }}>Select a user to view their activity history.</p>
-                                        <p style={{ fontSize: '0.9rem' }}>Choose from the list on the left.</p>
+                                        <div>
+                                            <label className="admin-label">Company Size</label>
+                                            <p style={{ fontWeight: 500 }}>{activeUser.company.size || 'N/A'}</p>
+                                        </div>
+                                        <div>
+                                            <label className="admin-label">Industry</label>
+                                            <p style={{ fontWeight: 500 }}>{activeUser.company.industry || 'Not specified'}</p>
+                                        </div>
+                                        <div>
+                                            <label className="admin-label">Pain Point</label>
+                                            <p className="truncate-2" title={activeUser.company.painPoint || ''} style={{ fontSize: '0.9rem' }}>"{activeUser.company.painPoint || 'N/A'}"</p>
+                                        </div>
+
+                                        {activeUser.company.description && (
+                                            <div style={{ gridColumn: 'span 4' }}>
+                                                <label className="admin-label">Analyzed Summary</label>
+                                                <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-main)', marginTop: '0.25rem' }}>{activeUser.company.description}</p>
+                                            </div>
+                                        )}
+
+                                        {activeUser.company.stack && Array.isArray(activeUser.company.stack) && activeUser.company.stack.length > 0 && (
+                                            <div style={{ gridColumn: 'span 4' }}>
+                                                <label className="admin-label">Detected Tech Stack</label>
+                                                <div className="chips-grid" style={{ gap: '0.5rem', marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap' }}>
+                                                    {activeUser.company.stack.map((t: string) => (
+                                                        <span key={t} style={{ background: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', border: '1px solid var(--border-glass)', fontWeight: 500, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{t}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    );
-                })()
-            }
 
-            {/* Blueprint Editor Modal */}
-            {
-                editingBlueprint && (
-                    <div className="admin-modal-overlay" onClick={() => setEditingBlueprint(null)}>
-                        <div
-                            className="admin-modal-content animate-scale-in"
-                            style={{ maxWidth: '850px' }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="admin-modal-header">
-                                <h3>
-                                    <Sparkles size={24} style={{ marginRight: '0.75rem', verticalAlign: 'middle', color: 'hsl(var(--accent-primary))' }} />
-                                    Refine Logic Blueprint
-                                </h3>
-                                <button
-                                    onClick={() => setEditingBlueprint(null)}
-                                    className="admin-btn-close"
-                                    aria-label="Close modal"
-                                >
-                                    <X size={24} />
-                                </button>
-                            </div>
+                            <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem' }}>
+                                <Database size={20} className="text-accent" /> Unlocked Blueprints <span className="badge" style={{ fontSize: '0.8rem' }}>{activeUser.allRecipes ? activeUser.allRecipes.length : activeUser.recipes?.length || 0}</span>
+                            </h3>
+                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                {(activeUser.allRecipes || activeUser.recipes).map((r: any, idx: number) => (
+                                    <div key={idx} className="admin-card" style={{ padding: '0', overflow: 'hidden' }}>
+                                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#f8fafc' }}>
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                                                    <h4 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700, color: 'hsl(var(--text-main))' }}>{r.title}</h4>
+                                                    <span className="badge" style={{ background: 'hsl(var(--accent-primary))', color: 'white' }}>{r.department}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                    {r.industry && <span>{r.industry}</span>}
+                                                    <span>•</span>
+                                                    <span>{r.generation_metadata?.source || 'System'}</span>
+                                                    {r.generation_metadata?.fallback_reason && (
+                                                        <span style={{ color: 'salmon', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <AlertCircle size={10} /> Fallback
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    if (!confirm(`Are you sure you want to delete "${r.title}"?`)) return;
+                                                    try {
+                                                        const res = await fetch(`/api/admin/leads/${activeUser.id}/recipes`, {
+                                                            method: 'DELETE',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ title: r.title })
+                                                        });
+                                                        if (res.ok) {
+                                                            fetchLeads();
+                                                        } else {
+                                                            alert("Failed to delete recipe");
+                                                        }
+                                                    } catch (err) {
+                                                        alert("Error deleting recipe: " + err);
+                                                    }
+                                                }}
+                                                className="btn-danger-icon"
+                                                title="Delete Blueprint"
+                                            >
+                                                <Trash size={16} />
+                                            </button>
+                                        </div>
 
-                            <div className="admin-modal-body">
-                                <div className="admin-form-grid">
-                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label htmlFor="bp-title" className="admin-label">Blueprint Title</label>
-                                        <input
-                                            id="bp-title"
-                                            className="admin-input"
-                                            value={editingBlueprint.title}
-                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, title: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="bp-department" className="admin-label">Target Department</label>
-                                        <input
-                                            id="bp-department"
-                                            className="admin-input"
-                                            value={editingBlueprint.department}
-                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, department: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="bp-roi" className="admin-label">Estimated ROI / Savings</label>
-                                        <input
-                                            id="bp-roi"
-                                            className="admin-input"
-                                            value={editingBlueprint.public_view?.roi_estimate || ''}
-                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, roi_estimate: e.target.value } })}
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label htmlFor="bp-problem" className="admin-label">Problem Statement</label>
-                                        <textarea
-                                            id="bp-problem"
-                                            className="admin-textarea"
-                                            rows={2}
-                                            value={editingBlueprint.public_view?.problem || ''}
-                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, problem: e.target.value } })}
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label htmlFor="bp-solution" className="admin-label">Solution Narrative</label>
-                                        <textarea
-                                            id="bp-solution"
-                                            className="admin-textarea"
-                                            rows={3}
-                                            value={editingBlueprint.public_view?.solution_narrative || ''}
-                                            onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, solution_narrative: e.target.value } })}
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label htmlFor="bp-walkthrough" className="admin-label">Implementation Steps (One per line)</label>
-                                        <textarea
-                                            id="bp-walkthrough"
-                                            className="admin-textarea"
-                                            rows={5}
-                                            value={editingBlueprint.public_view?.walkthrough_steps?.join('\n') || ''}
-                                            onChange={e => {
-                                                const steps = e.target.value.split('\n');
-                                                setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, walkthrough_steps: steps } })
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label className="admin-label">Integration Stack Mapping</label>
-                                        <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-                                            {editingBlueprint.admin_view?.stack_details?.map((detail, idx) => (
-                                                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                                        <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+                                            {/* Public View */}
+                                            <div>
+                                                <h5 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1rem', letterSpacing: '0.05em', fontWeight: 700 }}>Public View</h5>
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Problem</strong>
+                                                    <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{r.public_view?.problem || 'N/A'}</p>
+                                                </div>
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Solution</strong>
+                                                    <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{r.public_view?.solution_narrative || 'N/A'}</p>
+                                                </div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                                     <div>
-                                                        <label className="admin-label" style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.6 }}>Logic Tool</label>
-                                                        <input value={detail.tool} readOnly className="admin-input" style={{ background: '#f1f5f9', color: '#64748b' }} />
+                                                        <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>Value Prop</strong>
+                                                        <p style={{ fontSize: '0.9rem', margin: 0 }}>{r.public_view?.value_proposition || 'N/A'}</p>
                                                     </div>
                                                     <div>
-                                                        <label className="admin-label" style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.6 }}>Agentic Role / Workflow</label>
-                                                        <input
-                                                            className="admin-input"
-                                                            value={detail.role}
-                                                            onChange={(e) => {
-                                                                const newDetails = [...(editingBlueprint.admin_view.stack_details || [])];
-                                                                newDetails[idx].role = e.target.value;
-                                                                setEditingBlueprint({ ...editingBlueprint, admin_view: { ...editingBlueprint.admin_view, stack_details: newDetails } });
-                                                            }}
-                                                        />
+                                                        <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '0.25rem' }}>ROI</strong>
+                                                        <p style={{ fontSize: '0.9rem', margin: 0, color: 'hsl(140, 70%, 40%)', fontWeight: 600 }}>{r.public_view?.roi_estimate || 'N/A'}</p>
                                                     </div>
                                                 </div>
-                                            ))}
-                                            {(!editingBlueprint.admin_view?.stack_details || editingBlueprint.admin_view.stack_details.length === 0) && (
-                                                <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>No stack mapping available.</p>
-                                            )}
+                                            </div>
+
+                                            {/* Admin View / Technical */}
+                                            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem' }}>
+                                                <h5 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'hsl(var(--accent-primary))', marginBottom: '1rem', letterSpacing: '0.05em', fontWeight: 700 }}>Technical Details</h5>
+
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Difficulty</label>
+                                                    <span className={`status-badge ${r.admin_view?.implementation_difficulty === 'Low' ? 'success' : r.admin_view?.implementation_difficulty === 'High' ? 'warning' : 'info'}`}>
+                                                        {r.admin_view?.implementation_difficulty || 'Unknown'}
+                                                    </span>
+                                                </div>
+
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Upsell Opportunity</label>
+                                                    <p style={{ margin: 0, fontWeight: 500, color: 'hsl(var(--accent-primary))' }}>{r.admin_view?.upsell_opportunity || 'N/A'}</p>
+                                                </div>
+
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Tech Stack</label>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                                                        {(r.admin_view?.stack_details || (Array.isArray(r.admin_view?.tech_stack) ? r.admin_view.tech_stack : []).map((t: string) => ({ tool: t }))).slice(0, 5).map((detail: any, i: number) => (
+                                                            <span key={i} style={{ fontSize: '0.75rem', background: 'white', border: '1px solid var(--border-glass)', padding: '2px 6px', borderRadius: '4px' }}>
+                                                                {detail.tool}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
-                                    <button onClick={() => setEditingBlueprint(null)} className="admin-btn-secondary">Discard changes</button>
-                                    <button onClick={handleSaveBlueprint} className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
-                                        <Save size={18} style={{ marginRight: '0.5rem' }} /> Update Blueprint
-                                    </button>
-                                </div>
-
-                                <div style={{
-                                    borderTop: '1px solid #f1f5f9',
-                                    paddingTop: '1rem',
-                                    textAlign: 'center',
-                                    fontSize: '0.75rem',
-                                    color: '#94a3b8',
-                                    lineHeight: '1.4'
-                                }}>
-                                    <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
-                                        Authorized Use Only
-                                    </p>
-                                    <p>
-                                        This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
-                                    </p>
-                                </div>
+                                ))}
                             </div>
                         </div>
-                    </div>
-                )
-            }
-
-            {/* Edit Lead/User Modal */}
-            {
-                editingUser && (
-                    <div className="admin-modal-overlay" onClick={() => setEditingUser(null)}>
-                        <div
-                            className="admin-modal-content animate-scale-in"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="admin-modal-header">
-                                <div>
-                                    <h3>Lead Intelligence Profile</h3>
-                                    <p style={{ color: 'var(--admin-accent)', fontSize: '0.875rem', fontWeight: 600, marginTop: '0.25rem' }}>
-                                        {editForm.name || 'Anonymous Prospect'} • {editForm.url || 'No URL'}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => setEditingUser(null)}
-                                    className="admin-btn-close"
-                                    aria-label="Close modal"
-                                >
-                                    <X size={24} />
-                                </button>
+                    ) : (
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                            <div style={{ background: '#f1f5f9', padding: '2rem', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                                <User size={48} style={{ opacity: 0.3 }} />
                             </div>
+                            <p style={{ fontSize: '1.1rem', fontWeight: 500 }}>Select a user to view their activity history.</p>
+                            <p style={{ fontSize: '0.9rem' }}>Choose from the list on the left.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    })()
+}
 
-                            <div className="admin-modal-body">
-                                <div className="admin-form-divider" data-label="Identity & Contact"></div>
-                                <div className="admin-form-grid">
-                                    <div className="admin-form-group">
-                                        <label htmlFor="user-name" className="admin-label">Full Name</label>
-                                        <div className="input-with-icon">
-                                            <User size={18} />
+{/* Blueprint Editor Modal */ }
+{
+    editingBlueprint && (
+        <div className="admin-modal-overlay" onClick={() => setEditingBlueprint(null)}>
+            <div
+                className="admin-modal-content animate-scale-in"
+                style={{ maxWidth: '850px' }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="admin-modal-header">
+                    <h3>
+                        <Sparkles size={24} style={{ marginRight: '0.75rem', verticalAlign: 'middle', color: 'hsl(var(--accent-primary))' }} />
+                        Refine Logic Blueprint
+                    </h3>
+                    <button
+                        onClick={() => setEditingBlueprint(null)}
+                        className="admin-btn-close"
+                        aria-label="Close modal"
+                    >
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="admin-modal-body">
+                    <div className="admin-form-grid">
+                        <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                            <label htmlFor="bp-title" className="admin-label">Blueprint Title</label>
+                            <input
+                                id="bp-title"
+                                className="admin-input"
+                                value={editingBlueprint.title}
+                                onChange={(e) => setEditingBlueprint({ ...editingBlueprint, title: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="bp-department" className="admin-label">Target Department</label>
+                            <input
+                                id="bp-department"
+                                className="admin-input"
+                                value={editingBlueprint.department}
+                                onChange={(e) => setEditingBlueprint({ ...editingBlueprint, department: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="bp-roi" className="admin-label">Estimated ROI / Savings</label>
+                            <input
+                                id="bp-roi"
+                                className="admin-input"
+                                value={editingBlueprint.public_view?.roi_estimate || ''}
+                                onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, roi_estimate: e.target.value } })}
+                            />
+                        </div>
+
+                        <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                            <label htmlFor="bp-problem" className="admin-label">Problem Statement</label>
+                            <textarea
+                                id="bp-problem"
+                                className="admin-textarea"
+                                rows={2}
+                                value={editingBlueprint.public_view?.problem || ''}
+                                onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, problem: e.target.value } })}
+                            />
+                        </div>
+
+                        <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                            <label htmlFor="bp-solution" className="admin-label">Solution Narrative</label>
+                            <textarea
+                                id="bp-solution"
+                                className="admin-textarea"
+                                rows={3}
+                                value={editingBlueprint.public_view?.solution_narrative || ''}
+                                onChange={(e) => setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, solution_narrative: e.target.value } })}
+                            />
+                        </div>
+
+                        <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                            <label htmlFor="bp-walkthrough" className="admin-label">Implementation Steps (One per line)</label>
+                            <textarea
+                                id="bp-walkthrough"
+                                className="admin-textarea"
+                                rows={5}
+                                value={editingBlueprint.public_view?.walkthrough_steps?.join('\n') || ''}
+                                onChange={e => {
+                                    const steps = e.target.value.split('\n');
+                                    setEditingBlueprint({ ...editingBlueprint, public_view: { ...editingBlueprint.public_view, walkthrough_steps: steps } })
+                                }}
+                            />
+                        </div>
+
+                        <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                            <label className="admin-label">Integration Stack Mapping</label>
+                            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                                {editingBlueprint.admin_view?.stack_details?.map((detail, idx) => (
+                                    <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                                        <div>
+                                            <label className="admin-label" style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.6 }}>Logic Tool</label>
+                                            <input value={detail.tool} readOnly className="admin-input" style={{ background: '#f1f5f9', color: '#64748b' }} />
+                                        </div>
+                                        <div>
+                                            <label className="admin-label" style={{ fontSize: '0.7rem', marginBottom: '0.25rem', opacity: 0.6 }}>Agentic Role / Workflow</label>
                                             <input
-                                                id="user-name"
-                                                type="text"
                                                 className="admin-input"
-                                                value={editForm.name || ''}
-                                                onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                                placeholder="e.g. John Doe"
+                                                value={detail.role}
+                                                onChange={(e) => {
+                                                    const newDetails = [...(editingBlueprint.admin_view.stack_details || [])];
+                                                    newDetails[idx].role = e.target.value;
+                                                    setEditingBlueprint({ ...editingBlueprint, admin_view: { ...editingBlueprint.admin_view, stack_details: newDetails } });
+                                                }}
                                             />
                                         </div>
                                     </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="company-url" className="admin-label">Company URL</label>
-                                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                            <div className="input-with-icon" style={{ flex: 1 }}>
-                                                <Globe size={18} />
-                                                <input
-                                                    id="company-url"
-                                                    type="text"
-                                                    className="admin-input"
-                                                    value={editForm.url || ''}
-                                                    onChange={e => setEditForm({ ...editForm, url: e.target.value })}
-                                                    placeholder="example.com"
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={handleScan}
-                                                disabled={isScanning || !editForm.url}
-                                                className="admin-btn-secondary"
-                                                style={{ height: '52px', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                title="Scan website to auto-fill fields"
-                                                aria-label="Scan website"
-                                            >
-                                                {isScanning ? <RefreshCw size={18} className="spin" /> : <Sparkles size={18} />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="admin-form-divider" data-label="Firmographic Intelligence"></div>
-                                <div className="admin-form-grid">
-                                    <div className="admin-form-group">
-                                        <label htmlFor="industry" className="admin-label">Primary Industry</label>
-                                        <input
-                                            id="industry"
-                                            type="text"
-                                            className="admin-input"
-                                            value={editForm.industry || ''}
-                                            onChange={e => setEditForm({ ...editForm, industry: e.target.value })}
-                                            placeholder="e.g. Technology"
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="user-role" className="admin-label">Stakeholder Role</label>
-                                        <input
-                                            id="user-role"
-                                            type="text"
-                                            className="admin-input"
-                                            value={editForm.role || ''}
-                                            onChange={e => setEditForm({ ...editForm, role: e.target.value })}
-                                            placeholder="e.g. CTO / Decision Maker"
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="company-size" className="admin-label">Operational Scale</label>
-                                        <select
-                                            id="company-size"
-                                            className="admin-select"
-                                            value={editForm.size || ''}
-                                            onChange={e => setEditForm({ ...editForm, size: e.target.value })}
-                                        >
-                                            <option value="">Select Scale</option>
-                                            <option value="1-10">Startup (1-10)</option>
-                                            <option value="11-50">Emerging (11-50)</option>
-                                            <option value="51-200">Scale-up (51-200)</option>
-                                            <option value="201-500">Mid-Market (201-500)</option>
-                                            <option value="501-1000">Enterprise (501-1000)</option>
-                                            <option value="1000+">Global (1000+)</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="naics-code" className="admin-label">NAICS Classification</label>
-                                        <input
-                                            id="naics-code"
-                                            type="text"
-                                            className="admin-input"
-                                            value={editForm.naicsCode || ''}
-                                            onChange={e => setEditForm({ ...editForm, naicsCode: e.target.value })}
-                                            placeholder="e.g. 541511"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="admin-form-divider" data-label="Strategic Context"></div>
-                                <div className="admin-form-grid">
-                                    <div className="admin-form-group">
-                                        <label htmlFor="scanner-source" className="admin-label">Intelligence Source</label>
-                                        <select
-                                            id="scanner-source"
-                                            className="admin-select"
-                                            value={editForm.scannerSource || 'System'}
-                                            onChange={e => setEditForm({ ...editForm, scannerSource: e.target.value })}
-                                        >
-                                            <option value="System">System / Manual</option>
-                                            <option value="AI">AI Scanner (GPT-4o Optimized)</option>
-                                        </select>
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="tech-stack" className="admin-label">Tech Stack Inventory</label>
-                                        <input
-                                            id="tech-stack"
-                                            type="text"
-                                            className="admin-input"
-                                            value={Array.isArray(editForm.stack) ? editForm.stack.join(', ') : (editForm.stack || '')}
-                                            onChange={e => {
-                                                const val = e.target.value;
-                                                setEditForm({ ...editForm, stack: val.split(',').map(s => s.trim()) });
-                                            }}
-                                            placeholder="e.g. AWS, React, Postgres..."
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label htmlFor="pain-point" className="admin-label">Primary Friction Point (Pain Point)</label>
-                                    <textarea
-                                        id="pain-point"
-                                        className="admin-textarea"
-                                        value={editForm.painPoint || ''}
-                                        onChange={e => setEditForm({ ...editForm, painPoint: e.target.value })}
-                                        placeholder="Detailed description of the business challenge..."
-                                    />
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label htmlFor="description" className="admin-label">Corporate Mission / Description</label>
-                                    <textarea
-                                        id="description"
-                                        className="admin-textarea"
-                                        value={editForm.description || ''}
-                                        onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                                        placeholder="Summary of company activities and goals..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
-                                    <button type="button" onClick={() => setEditingUser(null)} className="admin-btn-secondary">Discard Changes</button>
-                                    <button
-                                        onClick={saveEditUser}
-                                        className="admin-btn-primary"
-                                    >
-                                        <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} /> Commit Profiles Updates
-                                    </button>
-                                </div>
-
-                                <div style={{
-                                    borderTop: '1px solid #f1f5f9',
-                                    paddingTop: '1rem',
-                                    textAlign: 'center',
-                                    fontSize: '0.75rem',
-                                    color: '#94a3b8',
-                                    lineHeight: '1.4'
-                                }}>
-                                    <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
-                                        Authorized Use Only
-                                    </p>
-                                    <p>
-                                        This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-            {
-                activeTab === 'integrations' && (
-                    <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3>Connected Tools & APIs</h3>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button onClick={() => {
-                                    setCurrentIntegration({
-                                        id: 0, name: 'OpenAI', authType: 'api_key', baseUrl: '', enabled: true,
-                                    });
-                                    setIsEditingIntegration(true);
-                                }} className="btn-primary" style={{ background: 'hsl(var(--accent-primary))' }}>
-                                    <Bot size={16} /> Connect OpenAI
-                                </button>
-                                <button onClick={() => {
-                                    setCurrentIntegration(null);
-                                    setIsEditingIntegration(true);
-                                }} className="btn-secondary">
-                                    <Plus size={16} /> Add Custom
-                                </button>
-                            </div>
-                        </div>
-
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
-                                    <th style={{ padding: '1rem' }}>Name</th>
-                                    <th style={{ padding: '1rem' }}>Type</th>
-                                    <th style={{ padding: '1rem' }}>Base URL</th>
-                                    <th style={{ padding: '1rem' }}>Status</th>
-                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {integrations.map(i => (
-                                    <tr key={i.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1rem' }}>{i.name}</td>
-                                        <td style={{ padding: '1rem' }}>{i.authType === 'api_key' ? 'API Key' : 'OAuth'}</td>
-                                        <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
-                                                {i.enabled ? 'Active' : 'Disabled'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                            <button
-                                                onClick={() => handleTestConnection(i.id)}
-                                                disabled={testingId === i.id}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    color: 'var(--text-muted)',
-                                                    cursor: 'pointer',
-                                                    marginRight: '1rem'
-                                                }}
-                                                title="Test Connection"
-                                            >
-                                                <RefreshCw size={16} className={testingId === i.id ? "spin" : ""} />
-                                            </button>
-                                            <button onClick={() => openEditIntegration(i)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
-                                                <Edit size={16} />
-                                            </button>
-                                            <button onClick={() => handleDeleteIntegration(i.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
-                                                <Trash size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )
-            }
-            {/* Users Tab - Real User Management */}
-            {
-                activeTab === 'users' && (
-                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-                        <div className="admin-page-header">
-                            <div>
-                                <h3 className="admin-page-title">
-                                    <Users size={24} className="text-accent" /> Registered Users <span className="status-badge" style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>{users.length}</span>
-                                </h3>
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button onClick={fetchUsers} className="btn-secondary" title="Refresh List">
-                                    <RefreshCw size={16} />
-                                </button>
-                                <button onClick={() => openEditUserModal()} className="btn-primary">
-                                    <Plus size={18} /> Add User
-                                </button>
+                                {(!editingBlueprint.admin_view?.stack_details || editingBlueprint.admin_view.stack_details.length === 0) && (
+                                    <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>No stack mapping available.</p>
+                                )}
                             </div>
                         </div>
-
-                        {/* Debug Raw State */}
-                        {(users.length === 0 || fetchError) && (
-                            <div style={{ padding: '1rem', background: 'rgba(255,100,100,0.1)', border: '1px solid salmon', borderRadius: '8px', marginBottom: '1rem' }}>
-                                <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ Debug info:</p>
-                                <pre style={{ fontSize: '0.7rem', color: '#ccc' }}>
-                                    Active Tab: {activeTab}{'\n'}
-                                    Users State Array Length: {users.length}{'\n'}
-                                    Fetch Error: {fetchError || 'None'}
-                                </pre>
-                            </div>
-                        )}
-
-                        <div className="admin-table-container">
-                            <table className="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th style={{ textAlign: 'right' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users.map(u => (
-                                        <tr key={u.id}>
-                                            <td style={{ fontWeight: 500 }}>{u.name || '-'}</td>
-                                            <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
-                                            <td>
-                                                <span className={`status-badge ${u.role === 'admin' ? 'warning' : 'neutral'}`}>
-                                                    {u.role}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={`status-badge ${u.isActive ? 'success' : 'error'}`}>
-                                                    {u.isActive ? 'Active' : 'Inactive'}
-                                                </span>
-                                            </td>
-                                            <td style={{ textAlign: 'right' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                                                    <button onClick={() => openEditUserModal(u)} className="btn-ghost" title="Edit User">
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    <button onClick={() => handleResetPassword(u.id)} className="btn-ghost" title="Reset Password">
-                                                        <Key size={16} />
-                                                    </button>
-                                                    <button onClick={() => handleDeleteUserReal(u.id)} className="btn-ghost user-delete-btn" title="Delete User" style={{ color: 'salmon' }}>
-                                                        <Trash size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
-                )
-            }
+                </div>
 
-            {/* Edit/Create User Modal */}
-            {
-                isEditingRealUser && (
-                    <div className="admin-modal-overlay" onClick={() => setIsEditingRealUser(false)}>
-                        <div
-                            className="admin-modal-content animate-scale-in"
-                            style={{ maxWidth: '600px' }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="admin-modal-header">
-                                <h3>{currentRealUser ? 'Edit User Record' : 'Create New User'}</h3>
-                                <button
-                                    onClick={() => setIsEditingRealUser(false)}
-                                    className="admin-btn-close"
-                                    aria-label="Close modal"
-                                >
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleSaveUser}>
-                                <div className="admin-modal-body">
-                                    <div className="admin-form-group">
-                                        <label htmlFor="user-email" className="admin-label">Email Address</label>
-                                        <input
-                                            id="user-email"
-                                            type="email"
-                                            className="admin-input"
-                                            required
-                                            value={userEditForm.email}
-                                            onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
-                                            placeholder="user@example.com"
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="user-display-name" className="admin-label">Full Name</label>
-                                        <input
-                                            id="user-display-name"
-                                            type="text"
-                                            className="admin-input"
-                                            value={userEditForm.name}
-                                            onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
-                                            placeholder="Enter user's full name"
-                                        />
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="user-role-select" className="admin-label">System Role</label>
-                                        <select
-                                            id="user-role-select"
-                                            className="admin-select"
-                                            value={userEditForm.role}
-                                            onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
-                                        >
-                                            <option value="user">Standard User</option>
-                                            <option value="admin">Administrator</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="admin-form-group">
-                                        <label htmlFor="user-password" className="admin-label">
-                                            {currentRealUser ? 'Update Password (leave blank to keep)' : 'Initial Password'}
-                                        </label>
-                                        <input
-                                            id="user-password"
-                                            type="password"
-                                            className="admin-input"
-                                            required={!currentRealUser}
-                                            value={userEditForm.password}
-                                            onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
-                                            placeholder={currentRealUser ? "••••••••" : "Enter temporary password"}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="admin-modal-footer">
-                                    <button type="button" onClick={() => setIsEditingRealUser(false)} className="admin-btn-secondary">Cancel</button>
-                                    <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
-                                        {currentRealUser ? 'Apply Changes' : 'Generate User'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
+                        <button onClick={() => setEditingBlueprint(null)} className="admin-btn-secondary">Discard changes</button>
+                        <button onClick={handleSaveBlueprint} className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
+                            <Save size={18} style={{ marginRight: '0.5rem' }} /> Update Blueprint
+                        </button>
                     </div>
-                )
-            }
 
-            {activeTab === 'icps' && <IcpManager />}
-            {activeTab === 'library' && <LibraryManager />}
-
-            {/* Integration Modal */}
-            {
-                isEditingIntegration && (
-                    <IntegrationModal
-                        integration={currentIntegration || undefined}
-                        onClose={() => setIsEditingIntegration(false)}
-                        onSave={handleSaveIntegration}
-                    />
-                )
-            }
+                    <div style={{
+                        borderTop: '1px solid #f1f5f9',
+                        paddingTop: '1rem',
+                        textAlign: 'center',
+                        fontSize: '0.75rem',
+                        color: '#94a3b8',
+                        lineHeight: '1.4'
+                    }}>
+                        <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                            Authorized Use Only
+                        </p>
+                        <p>
+                            This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
+    )
+}
+
+{/* Edit Lead/User Modal */ }
+{
+    editingUser && (
+        <div className="admin-modal-overlay" onClick={() => setEditingUser(null)}>
+            <div
+                className="admin-modal-content animate-scale-in"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="admin-modal-header">
+                    <div>
+                        <h3>Lead Intelligence Profile</h3>
+                        <p style={{ color: 'var(--admin-accent)', fontSize: '0.875rem', fontWeight: 600, marginTop: '0.25rem' }}>
+                            {editForm.name || 'Anonymous Prospect'} • {editForm.url || 'No URL'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setEditingUser(null)}
+                        className="admin-btn-close"
+                        aria-label="Close modal"
+                    >
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="admin-modal-body">
+                    <div className="admin-form-divider" data-label="Identity & Contact"></div>
+                    <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                            <label htmlFor="user-name" className="admin-label">Full Name</label>
+                            <div className="input-with-icon">
+                                <User size={18} />
+                                <input
+                                    id="user-name"
+                                    type="text"
+                                    className="admin-input"
+                                    value={editForm.name || ''}
+                                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                    placeholder="e.g. John Doe"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="company-url" className="admin-label">Company URL</label>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <div className="input-with-icon" style={{ flex: 1 }}>
+                                    <Globe size={18} />
+                                    <input
+                                        id="company-url"
+                                        type="text"
+                                        className="admin-input"
+                                        value={editForm.url || ''}
+                                        onChange={e => setEditForm({ ...editForm, url: e.target.value })}
+                                        placeholder="example.com"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleScan}
+                                    disabled={isScanning || !editForm.url}
+                                    className="admin-btn-secondary"
+                                    style={{ height: '52px', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    title="Scan website to auto-fill fields"
+                                    aria-label="Scan website"
+                                >
+                                    {isScanning ? <RefreshCw size={18} className="spin" /> : <Sparkles size={18} />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="admin-form-divider" data-label="Firmographic Intelligence"></div>
+                    <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                            <label htmlFor="industry" className="admin-label">Primary Industry</label>
+                            <input
+                                id="industry"
+                                type="text"
+                                className="admin-input"
+                                value={editForm.industry || ''}
+                                onChange={e => setEditForm({ ...editForm, industry: e.target.value })}
+                                placeholder="e.g. Technology"
+                            />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="user-role" className="admin-label">Stakeholder Role</label>
+                            <input
+                                id="user-role"
+                                type="text"
+                                className="admin-input"
+                                value={editForm.role || ''}
+                                onChange={e => setEditForm({ ...editForm, role: e.target.value })}
+                                placeholder="e.g. CTO / Decision Maker"
+                            />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="company-size" className="admin-label">Operational Scale</label>
+                            <select
+                                id="company-size"
+                                className="admin-select"
+                                value={editForm.size || ''}
+                                onChange={e => setEditForm({ ...editForm, size: e.target.value })}
+                            >
+                                <option value="">Select Scale</option>
+                                <option value="1-10">Startup (1-10)</option>
+                                <option value="11-50">Emerging (11-50)</option>
+                                <option value="51-200">Scale-up (51-200)</option>
+                                <option value="201-500">Mid-Market (201-500)</option>
+                                <option value="501-1000">Enterprise (501-1000)</option>
+                                <option value="1000+">Global (1000+)</option>
+                            </select>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="naics-code" className="admin-label">NAICS Classification</label>
+                            <input
+                                id="naics-code"
+                                type="text"
+                                className="admin-input"
+                                value={editForm.naicsCode || ''}
+                                onChange={e => setEditForm({ ...editForm, naicsCode: e.target.value })}
+                                placeholder="e.g. 541511"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="admin-form-divider" data-label="Strategic Context"></div>
+                    <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                            <label htmlFor="scanner-source" className="admin-label">Intelligence Source</label>
+                            <select
+                                id="scanner-source"
+                                className="admin-select"
+                                value={editForm.scannerSource || 'System'}
+                                onChange={e => setEditForm({ ...editForm, scannerSource: e.target.value })}
+                            >
+                                <option value="System">System / Manual</option>
+                                <option value="AI">AI Scanner (GPT-4o Optimized)</option>
+                            </select>
+                        </div>
+                        <div className="admin-form-group">
+                            <label htmlFor="tech-stack" className="admin-label">Tech Stack Inventory</label>
+                            <input
+                                id="tech-stack"
+                                type="text"
+                                className="admin-input"
+                                value={Array.isArray(editForm.stack) ? editForm.stack.join(', ') : (editForm.stack || '')}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    setEditForm({ ...editForm, stack: val.split(',').map(s => s.trim()) });
+                                }}
+                                placeholder="e.g. AWS, React, Postgres..."
+                            />
+                        </div>
+                    </div>
+
+                    <div className="admin-form-group">
+                        <label htmlFor="pain-point" className="admin-label">Primary Friction Point (Pain Point)</label>
+                        <textarea
+                            id="pain-point"
+                            className="admin-textarea"
+                            value={editForm.painPoint || ''}
+                            onChange={e => setEditForm({ ...editForm, painPoint: e.target.value })}
+                            placeholder="Detailed description of the business challenge..."
+                        />
+                    </div>
+
+                    <div className="admin-form-group">
+                        <label htmlFor="description" className="admin-label">Corporate Mission / Description</label>
+                        <textarea
+                            id="description"
+                            className="admin-textarea"
+                            value={editForm.description || ''}
+                            onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                            placeholder="Summary of company activities and goals..."
+                        />
+                    </div>
+                </div>
+
+                <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
+                        <button type="button" onClick={() => setEditingUser(null)} className="admin-btn-secondary">Discard Changes</button>
+                        <button
+                            onClick={saveEditUser}
+                            className="admin-btn-primary"
+                        >
+                            <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} /> Commit Profiles Updates
+                        </button>
+                    </div>
+
+                    <div style={{
+                        borderTop: '1px solid #f1f5f9',
+                        paddingTop: '1rem',
+                        textAlign: 'center',
+                        fontSize: '0.75rem',
+                        color: '#94a3b8',
+                        lineHeight: '1.4'
+                    }}>
+                        <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                            Authorized Use Only
+                        </p>
+                        <p>
+                            This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+{
+    activeTab === 'integrations' && (
+        <div className="glass-panel" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h3>Connected Tools & APIs</h3>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => {
+                        setCurrentIntegration({
+                            id: 0, name: 'OpenAI', authType: 'api_key', baseUrl: '', enabled: true,
+                        });
+                        setIsEditingIntegration(true);
+                    }} className="btn-primary" style={{ background: 'hsl(var(--accent-primary))' }}>
+                        <Bot size={16} /> Connect OpenAI
+                    </button>
+                    <button onClick={() => {
+                        setCurrentIntegration(null);
+                        setIsEditingIntegration(true);
+                    }} className="btn-secondary">
+                        <Plus size={16} /> Add Custom
+                    </button>
+                </div>
+            </div>
+
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left' }}>
+                        <th style={{ padding: '1rem' }}>Name</th>
+                        <th style={{ padding: '1rem' }}>Type</th>
+                        <th style={{ padding: '1rem' }}>Base URL</th>
+                        <th style={{ padding: '1rem' }}>Status</th>
+                        <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {integrations.map(i => (
+                        <tr key={i.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '1rem' }}>{i.name}</td>
+                            <td style={{ padding: '1rem' }}>{i.authType === 'api_key' ? 'API Key' : 'OAuth'}</td>
+                            <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
+                            <td style={{ padding: '1rem' }}>
+                                <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
+                                    {i.enabled ? 'Active' : 'Disabled'}
+                                </span>
+                            </td>
+                            <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                <button
+                                    onClick={() => handleTestConnection(i.id)}
+                                    disabled={testingId === i.id}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: 'var(--text-muted)',
+                                        cursor: 'pointer',
+                                        marginRight: '1rem'
+                                    }}
+                                    title="Test Connection"
+                                >
+                                    <RefreshCw size={16} className={testingId === i.id ? "spin" : ""} />
+                                </button>
+                                <button onClick={() => openEditIntegration(i)} style={{ background: 'none', border: 'none', color: 'hsl(var(--accent-primary))', cursor: 'pointer', marginRight: '1rem' }}>
+                                    <Edit size={16} />
+                                </button>
+                                <button onClick={() => handleDeleteIntegration(i.id)} style={{ background: 'none', border: 'none', color: 'salmon', cursor: 'pointer' }}>
+                                    <Trash size={16} />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    )
+}
+{/* Users Tab - Real User Management */ }
+{
+    activeTab === 'users' && (
+        <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+            <div className="admin-page-header">
+                <div>
+                    <h3 className="admin-page-title">
+                        <Users size={24} className="text-accent" /> Registered Users <span className="status-badge" style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>{users.length}</span>
+                    </h3>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={fetchUsers} className="btn-secondary" title="Refresh List">
+                        <RefreshCw size={16} />
+                    </button>
+                    <button onClick={() => openEditUserModal()} className="btn-primary">
+                        <Plus size={18} /> Add User
+                    </button>
+                </div>
+            </div>
+
+            {/* Debug Raw State */}
+            {(users.length === 0 || fetchError) && (
+                <div style={{ padding: '1rem', background: 'rgba(255,100,100,0.1)', border: '1px solid salmon', borderRadius: '8px', marginBottom: '1rem' }}>
+                    <p style={{ color: 'salmon', marginBottom: '0.5rem' }}>⚠️ Debug info:</p>
+                    <pre style={{ fontSize: '0.7rem', color: '#ccc' }}>
+                        Active Tab: {activeTab}{'\n'}
+                        Users State Array Length: {users.length}{'\n'}
+                        Fetch Error: {fetchError || 'None'}
+                    </pre>
+                </div>
+            )}
+
+            <div className="admin-table-container">
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th style={{ textAlign: 'right' }}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(u => (
+                            <tr key={u.id}>
+                                <td style={{ fontWeight: 500 }}>{u.name || '-'}</td>
+                                <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
+                                <td>
+                                    <span className={`status-badge ${u.role === 'admin' ? 'warning' : 'neutral'}`}>
+                                        {u.role}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span className={`status-badge ${u.isActive ? 'success' : 'error'}`}>
+                                        {u.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                </td>
+                                <td style={{ textAlign: 'right' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                        <button onClick={() => openEditUserModal(u)} className="btn-ghost" title="Edit User">
+                                            <Edit size={16} />
+                                        </button>
+                                        <button onClick={() => handleResetPassword(u.id)} className="btn-ghost" title="Reset Password">
+                                            <Key size={16} />
+                                        </button>
+                                        <button onClick={() => handleDeleteUserReal(u.id)} className="btn-ghost user-delete-btn" title="Delete User" style={{ color: 'salmon' }}>
+                                            <Trash size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
+}
+
+{/* Edit/Create User Modal */ }
+{
+    isEditingRealUser && (
+        <div className="admin-modal-overlay" onClick={() => setIsEditingRealUser(false)}>
+            <div
+                className="admin-modal-content animate-scale-in"
+                style={{ maxWidth: '600px' }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="admin-modal-header">
+                    <h3>{currentRealUser ? 'Edit User Record' : 'Create New User'}</h3>
+                    <button
+                        onClick={() => setIsEditingRealUser(false)}
+                        className="admin-btn-close"
+                        aria-label="Close modal"
+                    >
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSaveUser}>
+                    <div className="admin-modal-body">
+                        <div className="admin-form-group">
+                            <label htmlFor="user-email" className="admin-label">Email Address</label>
+                            <input
+                                id="user-email"
+                                type="email"
+                                className="admin-input"
+                                required
+                                value={userEditForm.email}
+                                onChange={e => setUserEditForm({ ...userEditForm, email: e.target.value })}
+                                placeholder="user@example.com"
+                            />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="user-display-name" className="admin-label">Full Name</label>
+                            <input
+                                id="user-display-name"
+                                type="text"
+                                className="admin-input"
+                                value={userEditForm.name}
+                                onChange={e => setUserEditForm({ ...userEditForm, name: e.target.value })}
+                                placeholder="Enter user's full name"
+                            />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="user-role-select" className="admin-label">System Role</label>
+                            <select
+                                id="user-role-select"
+                                className="admin-select"
+                                value={userEditForm.role}
+                                onChange={e => setUserEditForm({ ...userEditForm, role: e.target.value })}
+                            >
+                                <option value="user">Standard User</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label htmlFor="user-password" className="admin-label">
+                                {currentRealUser ? 'Update Password (leave blank to keep)' : 'Initial Password'}
+                            </label>
+                            <input
+                                id="user-password"
+                                type="password"
+                                className="admin-input"
+                                required={!currentRealUser}
+                                value={userEditForm.password}
+                                onChange={e => setUserEditForm({ ...userEditForm, password: e.target.value })}
+                                placeholder={currentRealUser ? "••••••••" : "Enter temporary password"}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="admin-modal-footer">
+                        <button type="button" onClick={() => setIsEditingRealUser(false)} className="admin-btn-secondary">Cancel</button>
+                        <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2.5rem' }}>
+                            {currentRealUser ? 'Apply Changes' : 'Generate User'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+}
+
+{ activeTab === 'icps' && <IcpManager /> }
+{ activeTab === 'library' && <LibraryManager /> }
+
+{/* Integration Modal */ }
+{
+    isEditingIntegration && (
+        <IntegrationModal
+            integration={currentIntegration || undefined}
+            onClose={() => setIsEditingIntegration(false)}
+            onSave={handleSaveIntegration}
+        />
+    )
+}
+        </div >
     );
 };
 

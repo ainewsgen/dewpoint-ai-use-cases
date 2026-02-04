@@ -255,4 +255,175 @@ CRITICAL INSTRUCTIONS:
     }
 });
 
+// DEBUG GENERATION ENDPOINT (Admin Only)
+router.post('/admin/generate-debug', requireAuth, requireAuth, async (req, res) => {
+    const trace: any[] = [];
+    const log = (step: string, details: any = null) => {
+        trace.push({ timestamp: new Date().toISOString(), step, details });
+        console.log(`[DebugGenerate] ${step}`);
+    };
+
+    try {
+        log("Starting Debug Generation Request");
+        const { companyData, promptDetails } = req.body;
+
+        if (!companyData || !companyData.painPoint) {
+            log("Error: Missing companyData");
+            return res.status(400).json({ error: "Missing company data", trace });
+        }
+
+        log("Input Data Received", { companyData, promptDetails });
+
+        // 0. Industry ICP Context
+        let icpContext = "";
+        let targetType = companyData.icpType || 'dewpoint';
+
+        if (companyData.industry) {
+            if (companyData.industry.toLowerCase().includes('general') || companyData.industry === 'Cross-Industry') {
+                log("Industry check: Using Generic Context (Explicit)");
+                icpContext = buildGenericContext();
+            } else {
+                log(`Looking up ICP for: ${companyData.industry} (${targetType})`);
+                const icpMatch = await db.select().from(industryIcps)
+                    .where(and(
+                        ilike(industryIcps.industry, companyData.industry),
+                        eq(industryIcps.icpType, targetType)
+                    ))
+                    .limit(1);
+
+                if (icpMatch.length > 0) {
+                    log("ICP Found", { industry: icpMatch[0].industry });
+                    icpContext = buildIcpContext(icpMatch[0], targetType);
+                } else {
+                    log("ICP Not Found - Using Generic Fallback");
+                    icpContext = buildGenericContext();
+                }
+            }
+        } else {
+            log("No Industry provided - Using Generic Context");
+            icpContext = buildGenericContext();
+        }
+
+        // 1. Prepare Prompt
+        const defaultSystemPrompt = `You are an expert Solutions Architect. Analyze the following user profile to design high-impact automation solutions.
+${icpContext}
+
+User Profile:
+- Industry: {{industry}}
+- Role: {{role}}
+- Tech Stack: {{stack}}
+- Primary Pain Point: {{painPoint}}
+- Website Summary: {{description}}
+- Deep Site Analysis: {{pageContext}}
+
+Generate 3 custom automation blueprints in JSON format...`;
+
+        let systemPrompt = promptDetails?.systemPromptOverride || defaultSystemPrompt;
+        if (!systemPrompt.toLowerCase().includes('json')) {
+            systemPrompt += " \n\nIMPORTANT: You must output strictly valid JSON.";
+        }
+
+        const replacements: Record<string, string> = {
+            '{{role}}': companyData.role,
+            '{{industry}}': companyData.industry || 'General',
+            '{{painPoint}}': companyData.painPoint,
+            '{{stack}}': Array.isArray(companyData.stack) ? companyData.stack.join(', ') : companyData.stack || '',
+            '{{url}}': companyData.url || '',
+            '{{size}}': companyData.size || '',
+            '{{description}}': companyData.description || 'N/A',
+            '{{pageContext}}': companyData.context ? JSON.stringify(companyData.context, null, 2) : 'No deep context available.'
+        };
+
+        Object.entries(replacements).forEach(([key, value]) => {
+            systemPrompt = systemPrompt.replace(new RegExp(key, 'g'), value);
+        });
+
+        log("System Prompt Prepared", { systemPrompt });
+
+        // 2. Integration Selection
+        log("Fetching Integrations...");
+        const integrationsList = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true))
+            .orderBy(integrations.priority);
+
+        const sortedIntegrations = integrationsList
+            .filter(i => (i.apiKey || i.apiSecret))
+            .sort((a, b) => {
+                const pA = a.priority || 999;
+                const pB = b.priority || 999;
+                return (pA === 0 ? 999 : pA) - (pB === 0 ? 999 : pB);
+            });
+
+        log(`Found ${sortedIntegrations.length} candidate integrations`, sortedIntegrations.map(i => i.name));
+
+        // 3. Execution Loop
+        let successResult = null;
+        let usedModelId = '';
+
+        for (const activeInt of sortedIntegrations) {
+            try {
+                log(`Attempting Integration: ${activeInt.name}`);
+                const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
+
+                if (!apiKey) {
+                    log(`Skipping ${activeInt.name}: No API key after decryption`);
+                    continue;
+                }
+
+                const metadata = activeInt.metadata as any || {};
+                const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
+                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-4o');
+
+                log(`Configuration`, { provider, modelId });
+
+                const aiParams = {
+                    systemPrompt,
+                    userContext: JSON.stringify(companyData),
+                    model: modelId,
+                    apiKey
+                };
+
+                let result;
+                const startTime = Date.now();
+                if (provider === 'gemini') {
+                    result = await GeminiService.generateJSON(aiParams);
+                } else {
+                    result = await OpenAIService.generateJSON(aiParams);
+                }
+                const duration = Date.now() - startTime;
+
+                log(`Success! (${duration}ms)`, { resultSummary: JSON.stringify(result).substring(0, 100) + '...' });
+                successResult = result;
+                usedModelId = modelId;
+                break;
+            } catch (err: any) {
+                log(`Integration Failed: ${activeInt.name}`, { error: err.message, stack: err.stack });
+            }
+        }
+
+        if (!successResult) {
+            log("All Integrations Failed. Falling back to System.");
+            const fallback = SystemCapabilityService.generateFallback(companyData.industry, companyData.role);
+            return res.json({
+                success: false,
+                message: "All integrations failed, used fallback.",
+                blueprints: fallback,
+                trace
+            });
+        }
+
+        // Return Debug Info + Result
+        res.json({
+            success: true,
+            message: "AI Generation Successful",
+            blueprints: successResult.blueprints || successResult.opportunities || successResult,
+            trace
+        });
+
+    } catch (error: any) {
+        log("Fatal Handler Error", error.message);
+        res.status(500).json({ error: error.message, trace });
+    }
+});
+
 export default router;

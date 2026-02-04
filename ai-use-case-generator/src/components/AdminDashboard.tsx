@@ -2136,8 +2136,42 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     const metadata = (integration?.metadata as any) || {};
     const [provider, setProvider] = useState<string>(metadata.provider || 'openai');
     const [model, setModel] = useState<string>(metadata.model || '');
+    const [availableModels, setAvailableModels] = useState<string[]>([]);
 
     const [isTesting, setIsTesting] = useState(false);
+
+    const handleFetchModels = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/admin/integrations/fetch-models', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    id: integration?.id,
+                    apiKey,
+                    provider
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.models && data.models.length > 0) {
+                    setAvailableModels(data.models);
+                    if (!model) setModel(data.models[0]);
+                    alert(`Found ${data.models.length} models.`);
+                } else {
+                    alert("No models found. Check API Key or permissions.");
+                }
+            } else {
+                const text = await res.text();
+                alert(`Failed to fetch models: ${text}`);
+            }
+        } catch (error) {
+            alert(`Error fetching models: ${error}`);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -2168,7 +2202,8 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                     baseUrl,
                     apiKey,
                     provider,
-                    name
+                    name,
+                    model
                 })
             });
             if (res.ok) {
@@ -2299,15 +2334,52 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                                         </select>
                                     </div>
                                     <div className="admin-form-group">
-                                        <label htmlFor="model-name" className="admin-label">Model Identifier</label>
-                                        <input
-                                            id="model-name"
-                                            type="text"
-                                            className="admin-input"
-                                            value={model}
-                                            onChange={e => setModel(e.target.value)}
-                                            placeholder="e.g. gpt-4o, claude-3-5-sonnet"
-                                        />
+                                        <label htmlFor="model-name" className="admin-label">
+                                            Model Identifier
+                                            {availableModels.length > 0 && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: 'hsl(140, 70%, 40%)' }}>({availableModels.length} fetched)</span>}
+                                        </label>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            {availableModels.length > 0 ? (
+                                                <select
+                                                    className="admin-select"
+                                                    value={availableModels.includes(model) ? model : 'custom'}
+                                                    onChange={e => {
+                                                        if (e.target.value === 'custom') setModel('');
+                                                        else setModel(e.target.value);
+                                                    }}
+                                                >
+                                                    {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                                    <option value="custom">Manual Entry...</option>
+                                                </select>
+                                            ) : (
+                                                <input
+                                                    id="model-name"
+                                                    type="text"
+                                                    className="admin-input"
+                                                    value={model}
+                                                    onChange={e => setModel(e.target.value)}
+                                                    placeholder="e.g. gemini-pro, gpt-4o"
+                                                />
+                                            )}
+                                            <button
+                                                onClick={handleFetchModels}
+                                                className="admin-btn-secondary"
+                                                title="Fetch Available Models"
+                                                style={{ padding: '0 0.8rem' }}
+                                            >
+                                                <RefreshCw size={18} />
+                                            </button>
+                                        </div>
+                                        {availableModels.length > 0 && !availableModels.includes(model) && (
+                                            <input
+                                                type="text"
+                                                className="admin-input"
+                                                value={model}
+                                                onChange={e => setModel(e.target.value)}
+                                                placeholder="Enter custom model ID"
+                                                style={{ marginTop: '0.5rem' }}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </>

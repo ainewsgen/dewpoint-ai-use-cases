@@ -182,14 +182,36 @@ router.delete('/integrations/:id', requireAuth, async (req: AuthRequest, res) =>
     }
 });
 
+// Fetch Models Route
+router.post('/admin/integrations/fetch-models', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+        const { id, apiKey } = req.body;
+        let effectiveKey = apiKey;
+
+        if (id) {
+            const [int] = await db.select().from(integrations).where(eq(integrations.id, id));
+            if (int && int.apiKey) effectiveKey = decrypt(int.apiKey);
+        }
+
+        if (!effectiveKey) return res.status(400).json({ error: "No API Key provided" });
+
+        const models = await GeminiService.listModels(effectiveKey);
+        res.json({ models });
+    } catch (error: any) {
+        console.error("Fetch Models Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // NEW: Consolidated Admin Test Route (Matches Frontend)
 router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
-        const { id, provider, name, apiKey, baseUrl } = req.body;
+        const { id, provider, name, apiKey, baseUrl, model } = req.body;
 
         let effectiveProvider = provider;
         let effectiveName = name;
         let effectiveKey = apiKey;
+        let effectiveModel = model;
 
         // 1. Fetch from DB if ID provided (for list-view tests)
         if (id) {
@@ -198,6 +220,9 @@ router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: A
                 if (!effectiveProvider) effectiveProvider = int.provider;
                 if (!effectiveName) effectiveName = int.name;
                 if (!effectiveKey && int.apiKey) effectiveKey = decrypt(int.apiKey);
+                if (!effectiveModel && int.metadata && (int.metadata as any).model) {
+                    effectiveModel = (int.metadata as any).model;
+                }
             }
         }
 
@@ -219,9 +244,9 @@ router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: A
                     apiKey: effectiveKey,
                     systemPrompt: "You are a connection tester.",
                     userContext: "Return { \"status\": \"ok\" } JSON object. No markdown.",
-                    model: "gemini-pro" // Stable model for connection test
+                    model: effectiveModel || "gemini-pro" // Use selected model or default
                 });
-                return res.json({ success: true, message: 'Successfully connected to Google Gemini!' });
+                return res.json({ success: true, message: `Successfully connected to Gemini (${effectiveModel || 'default'})!` });
             } catch (err: any) {
                 console.error("Gemini Test Fail:", err);
                 return res.status(400).json({ error: 'Gemini Connection Failed', details: err.message });
@@ -233,7 +258,7 @@ router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: A
                     apiKey: effectiveKey,
                     systemPrompt: "You are a connection tester.",
                     userContext: "Return { \"status\": \"ok\" } JSON.",
-                    model: "gpt-3.5-turbo"
+                    model: effectiveModel || "gpt-3.5-turbo"
                 });
                 return res.json({ success: true, message: 'Successfully connected to OpenAI!' });
             } catch (err: any) {

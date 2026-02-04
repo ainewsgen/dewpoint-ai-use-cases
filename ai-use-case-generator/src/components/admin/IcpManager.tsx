@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Search, Edit, RefreshCw, Save, X, Target } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, RefreshCw, Save, Target } from 'lucide-react';
 
 interface IcpRecord {
     id: number;
@@ -14,6 +14,7 @@ interface IcpRecord {
     communities?: any;
     techSignals?: string[];
     rowColor?: string;
+    promptInstructions?: string;
 }
 
 export function IcpManager() {

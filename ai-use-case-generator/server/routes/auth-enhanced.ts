@@ -9,7 +9,11 @@ import type { AuthRequest } from '../middleware/auth.js';
 import { logger } from '../utils/logger.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+    throw new Error('CRITICAL: JWT_SECRET must be set in production!');
+}
+const ACTUAL_SECRET = JWT_SECRET || 'dev-secret-fallback';
 const SALT_ROUNDS = 10;
 
 // Signup
@@ -42,7 +46,7 @@ router.post('/signup', async (req, res) => {
         // Generate JWT
         const token = jwt.sign(
             { id: newUser.id, email: newUser.email, role: newUser.role },
-            JWT_SECRET,
+            ACTUAL_SECRET as string,
             { expiresIn: '24h' }
         );
 
@@ -50,6 +54,7 @@ router.post('/signup', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
         });
 
@@ -101,7 +106,7 @@ router.post('/login', async (req, res) => {
         // Generate JWT
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            JWT_SECRET,
+            ACTUAL_SECRET as string,
             { expiresIn: '24h' }
         );
 
@@ -109,6 +114,7 @@ router.post('/login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000,
         });
 
@@ -141,7 +147,7 @@ router.get('/me', async (req: AuthRequest, res) => {
             return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET) as { id: number; email: string; role: string };
+        const decoded = jwt.verify(token, ACTUAL_SECRET as string) as { id: number; email: string; role: string };
 
         const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
 
@@ -175,7 +181,7 @@ router.post('/request-reset', async (req, res) => {
         }
 
         // Generate reset token
-        const resetToken = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
+        const resetToken = jwt.sign({ id: user.id }, ACTUAL_SECRET as string, { expiresIn: '1h' });
         const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
         await db.update(users)

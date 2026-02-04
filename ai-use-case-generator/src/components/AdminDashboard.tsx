@@ -2316,75 +2316,73 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             </div>
                         </div>
 
-                        {(name.toLowerCase().includes('openai') || name.toLowerCase().includes('anthropic') || name.toLowerCase().includes('google') || name.toLowerCase().includes('gemini') || name.toLowerCase().includes('llm')) && (
-                            <>
-                                <div className="admin-form-divider" data-label="Model Parameters"></div>
-                                <div className="admin-form-grid">
-                                    <div className="admin-form-group">
-                                        <label htmlFor="model-provider" className="admin-label">Provider</label>
+
+                        <div className="admin-form-divider" data-label="Model Parameters"></div>
+                        <div className="admin-form-grid">
+                            <div className="admin-form-group">
+                                <label htmlFor="model-provider" className="admin-label">Provider</label>
+                                <select
+                                    id="model-provider"
+                                    className="admin-select"
+                                    value={provider}
+                                    onChange={e => setProvider(e.target.value)}
+                                >
+                                    <option value="openai">OpenAI</option>
+                                    <option value="anthropic">Anthropic</option>
+                                    <option value="google">Google Gemini</option>
+                                    <option value="azure">Azure Cognitive</option>
+                                </select>
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="model-name" className="admin-label">
+                                    Model Identifier
+                                    {availableModels.length > 0 && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: 'hsl(140, 70%, 40%)' }}>({availableModels.length} fetched)</span>}
+                                </label>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    {availableModels.length > 0 ? (
                                         <select
-                                            id="model-provider"
                                             className="admin-select"
-                                            value={provider}
-                                            onChange={e => setProvider(e.target.value)}
+                                            value={availableModels.includes(model) ? model : 'custom'}
+                                            onChange={e => {
+                                                if (e.target.value === 'custom') setModel('');
+                                                else setModel(e.target.value);
+                                            }}
                                         >
-                                            <option value="openai">OpenAI</option>
-                                            <option value="anthropic">Anthropic</option>
-                                            <option value="google">Google Gemini</option>
-                                            <option value="azure">Azure Cognitive</option>
+                                            {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                            <option value="custom">Manual Entry...</option>
                                         </select>
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="model-name" className="admin-label">
-                                            Model Identifier
-                                            {availableModels.length > 0 && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: 'hsl(140, 70%, 40%)' }}>({availableModels.length} fetched)</span>}
-                                        </label>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            {availableModels.length > 0 ? (
-                                                <select
-                                                    className="admin-select"
-                                                    value={availableModels.includes(model) ? model : 'custom'}
-                                                    onChange={e => {
-                                                        if (e.target.value === 'custom') setModel('');
-                                                        else setModel(e.target.value);
-                                                    }}
-                                                >
-                                                    {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
-                                                    <option value="custom">Manual Entry...</option>
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    id="model-name"
-                                                    type="text"
-                                                    className="admin-input"
-                                                    value={model}
-                                                    onChange={e => setModel(e.target.value)}
-                                                    placeholder="e.g. gemini-pro, gpt-4o"
-                                                />
-                                            )}
-                                            <button
-                                                onClick={handleFetchModels}
-                                                className="admin-btn-secondary"
-                                                title="Fetch Available Models"
-                                                style={{ padding: '0 0.8rem' }}
-                                            >
-                                                <RefreshCw size={18} />
-                                            </button>
-                                        </div>
-                                        {availableModels.length > 0 && !availableModels.includes(model) && (
-                                            <input
-                                                type="text"
-                                                className="admin-input"
-                                                value={model}
-                                                onChange={e => setModel(e.target.value)}
-                                                placeholder="Enter custom model ID"
-                                                style={{ marginTop: '0.5rem' }}
-                                            />
-                                        )}
-                                    </div>
+                                    ) : (
+                                        <input
+                                            id="model-name"
+                                            type="text"
+                                            className="admin-input"
+                                            value={model}
+                                            onChange={e => setModel(e.target.value)}
+                                            placeholder="e.g. gemini-pro, gpt-4o"
+                                        />
+                                    )}
+                                    <button
+                                        onClick={handleFetchModels}
+                                        className="admin-btn-secondary"
+                                        title="Fetch Available Models"
+                                        style={{ padding: '0 0.8rem' }}
+                                    >
+                                        <RefreshCw size={18} />
+                                    </button>
                                 </div>
-                            </>
-                        )}
+                                {availableModels.length > 0 && !availableModels.includes(model) && (
+                                    <input
+                                        type="text"
+                                        className="admin-input"
+                                        value={model}
+                                        onChange={e => setModel(e.target.value)}
+                                        placeholder="Enter custom model ID"
+                                        style={{ marginTop: '0.5rem' }}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
 
                         <div className="admin-form-group" style={{ marginTop: '1rem' }}>
                             <label className="checkbox-container admin-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>

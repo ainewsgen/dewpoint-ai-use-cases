@@ -55,7 +55,7 @@ export function DebugConsole() {
 
         } catch (err: any) {
             setError(err.message);
-            setTrace(prev => [...prev, { step: "Network/Client Error", details: err.message }]);
+            setTrace(prev => [...prev, { timestamp: new Date().toISOString(), step: "Network/Client Error", details: err.message }]);
         } finally {
             setIsLoading(false);
         }
@@ -143,7 +143,7 @@ export function DebugConsole() {
                     </div>
 
                     {/* RIGHT: Trace Log (Wider) */}
-                    <div className="glass-panel" style={{ padding: '0', borderRadius: '12px', border: '1px solid var(--border-glass)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 'fit-content', minHeight: '600px' }}>
+                    <div className="glass-panel" style={{ padding: '0', borderRadius: '12px', border: '1px solid var(--border-glass)', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
                         <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--border-glass)' }}>
                             <h4>Execution Trace</h4>
                         </div>
@@ -158,9 +158,11 @@ export function DebugConsole() {
                                     <div key={idx} style={{ marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
                                         <div
                                             onClick={() => setExpandedStep(expandedStep === idx ? null : idx)}
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: step.message?.includes('Error') ? 'salmon' : 'inherit' }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: (step.step || '').includes('Error') ? 'salmon' : 'inherit' }}
                                         >
-                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{step.timestamp.split('T')[1].split('.')[0]}</span>
+                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                                                {step.timestamp ? step.timestamp.split('T')[1].split('.')[0] : ''}
+                                            </span>
                                             {step.details ? (expandedStep === idx ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <span style={{ width: 14 }}></span>}
                                             <span style={{ fontWeight: 500 }}>{step.step}</span>
                                         </div>

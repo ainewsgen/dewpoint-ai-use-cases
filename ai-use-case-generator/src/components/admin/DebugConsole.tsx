@@ -61,8 +61,20 @@ export function DebugConsole() {
         }
     };
 
+    // Safe time formatter to prevent crashes on malformed timestamps
+    const formatTime = (isoString?: string) => {
+        if (!isoString) return '';
+        try {
+            const parts = isoString.split('T');
+            if (parts.length < 2) return '';
+            return parts[1].split('.')[0];
+        } catch (e) {
+            return '';
+        }
+    };
+
     return (
-        <div className="admin-panel animate-fade-in" style={{ padding: '2rem', height: 'calc(100vh - 160px)', display: 'flex', flexDirection: 'column' }}>
+        <div className="admin-panel animate-fade-in" style={{ padding: '2rem', height: 'calc(100vh - 160px)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
             <div className="admin-page-header" style={{ marginBottom: '2rem' }}>
                 <h3 className="admin-page-title">
                     <Terminal size={24} className="text-accent" /> AI Debugger
@@ -70,9 +82,9 @@ export function DebugConsole() {
                 <p style={{ color: 'var(--text-muted)' }}>Trace request execution, inspect system prompts, and identify failure points.</p>
             </div>
 
-            <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
                 {/* Result & Trace Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', height: '100%' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', height: '100%', minWidth: 0 }}>
                     {/* LEFT: Controls */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
                         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
@@ -113,7 +125,7 @@ export function DebugConsole() {
                                     style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}
                                 >
                                     {isLoading ? <Activity className="animate-spin" size={18} /> : <Play size={18} />}
-                                    Run diagnostic
+                                    {isLoading ? 'Running Diagnostic...' : 'Run diagnostic'}
                                 </button>
                             </div>
                         </div>
@@ -125,7 +137,7 @@ export function DebugConsole() {
                                     <CheckCircle size={18} /> Generation Success
                                 </h4>
                                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <pre style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#eee', margin: 0 }}>
+                                    <pre style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#eee', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                                         {JSON.stringify(result, null, 2)}
                                     </pre>
                                 </div>
@@ -143,43 +155,46 @@ export function DebugConsole() {
                     </div>
 
                     {/* RIGHT: Trace Log (Hero position) */}
-                    <div className="glass-panel" style={{ padding: '0', borderRadius: '12px', border: '1px solid var(--border-glass)', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.1)' }}>
+                    <div className="glass-panel" style={{ padding: '0', borderRadius: '12px', border: '1px solid var(--border-glass)', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.1)', minWidth: 0, height: '100%' }}>
                         <div style={{ padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h4 style={{ fontSize: '1rem', fontWeight: 600 }}>Execution Trace</h4>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{trace.length} steps captured</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{(trace || []).length} steps captured</span>
                         </div>
 
-                        <div className="custom-scrollbar" style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.9rem' }}>
-                            {trace.length === 0 ? (
+                        <div className="custom-scrollbar" style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.9rem', minHeight: 0 }}>
+                            {(!trace || trace.length === 0) ? (
                                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
                                     <Terminal size={48} style={{ marginBottom: '1rem' }} />
-                                    <p>Run a diagnostic to view step-by-step logs</p>
+                                    <p>{isLoading ? 'Intercepting execution steps...' : 'Run a diagnostic to view step-by-step logs'}</p>
                                 </div>
                             ) : (
-                                trace.map((step, idx) => (
-                                    <div key={idx} style={{ marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem' }}>
-                                        <div
-                                            onClick={() => setExpandedStep(expandedStep === idx ? null : idx)}
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', color: (step.step || '').includes('Error') ? 'salmon' : 'inherit' }}
-                                        >
-                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', minWidth: '80px' }}>
-                                                {step.timestamp ? step.timestamp.split('T')[1].split('.')[0] : ''}
-                                            </span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                {step.details ? (expandedStep === idx ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <span style={{ width: 14 }}></span>}
-                                                <span style={{ fontWeight: 600, color: expandedStep === idx ? 'hsl(var(--accent-primary))' : 'inherit' }}>{step.step}</span>
+                                trace.map((step, idx) => {
+                                    if (!step) return null;
+                                    return (
+                                        <div key={idx} style={{ marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.75rem' }}>
+                                            <div
+                                                onClick={() => setExpandedStep(expandedStep === idx ? null : idx)}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', color: (step.step || '').includes('Error') ? 'salmon' : 'inherit' }}
+                                            >
+                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', minWidth: '80px' }}>
+                                                    {formatTime(step.timestamp)}
+                                                </span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    {step.details ? (expandedStep === idx ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <span style={{ width: 14 }}></span>}
+                                                    <span style={{ fontWeight: 600, color: expandedStep === idx ? 'hsl(var(--accent-primary))' : 'inherit' }}>{step.step || 'Log Entry'}</span>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {expandedStep === idx && step.details && (
-                                            <div className="animate-fade-in" style={{ marginTop: '0.75rem', marginLeft: '6rem', background: 'rgba(0,0,0,0.4)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
-                                                <pre style={{ margin: 0, color: '#ccc', fontSize: '0.8rem', lineHeight: '1.5' }}>
-                                                    {typeof step.details === 'string' ? step.details : JSON.stringify(step.details, null, 2)}
-                                                </pre>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))
+                                            {expandedStep === idx && step.details && (
+                                                <div className="animate-fade-in" style={{ marginTop: '0.75rem', marginLeft: '6rem', background: 'rgba(0,0,0,0.4)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}>
+                                                    <pre style={{ margin: 0, color: '#ccc', fontSize: '0.8rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                                                        {typeof step.details === 'string' ? step.details : JSON.stringify(step.details, null, 2)}
+                                                    </pre>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     </div>

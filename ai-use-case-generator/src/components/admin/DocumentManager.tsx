@@ -83,7 +83,7 @@ export function DocumentManager() {
         }
 
         try {
-            const token = localStorage.getItem('dpg_auth_token');
+            const token = localStorage.getItem('token');
             const res = await fetch('/api/admin/documents', {
                 method: 'POST',
                 headers: {
@@ -107,7 +107,7 @@ export function DocumentManager() {
 
     const togglePublish = async (id: number, currentStatus: boolean) => {
         try {
-            const token = localStorage.getItem('dpg_auth_token');
+            const token = localStorage.getItem('token');
             await fetch(`/api/admin/documents/${id}`, {
                 method: 'PATCH',
                 headers: {
@@ -126,7 +126,7 @@ export function DocumentManager() {
         if (!confirm("Are you sure you want to delete this document?")) return;
 
         try {
-            const token = localStorage.getItem('dpg_auth_token');
+            const token = localStorage.getItem('token');
             await fetch(`/api/admin/documents/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }

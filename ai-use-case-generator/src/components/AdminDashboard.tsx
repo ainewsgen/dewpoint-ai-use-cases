@@ -610,7 +610,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         <button
                             onClick={() => setActiveTab('leads')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'leads' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'leads' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -619,12 +619,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <Zap size={18} /> Leads
+                            <Zap size={16} /> Leads
                         </button>
                         <button
                             onClick={() => setActiveTab('icps')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'icps' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'icps' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -633,12 +633,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <Layers size={18} /> ICPs
+                            <Layers size={16} /> ICPs
                         </button>
                         <button
                             onClick={() => setActiveTab('cms')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'cms' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'cms' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -647,12 +647,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <FileText size={18} /> CMS
+                            <FileText size={16} /> CMS
                         </button>
                         <button
                             onClick={() => setActiveTab('users')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'users' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'users' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -661,12 +661,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <CheckCircle size={18} /> Users
+                            <CheckCircle size={16} /> Users
                         </button>
                         <button
                             onClick={() => setActiveTab('integrations')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'integrations' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'integrations' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -675,12 +675,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <Database size={18} /> Integrations
+                            <Database size={16} /> Integrations
                         </button>
                         <button
                             onClick={() => setActiveTab('observability')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'observability' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'observability' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -689,13 +689,13 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <Activity size={18} /> Observability
+                            <Activity size={16} /> Observability
                         </button>
 
                         <button
                             onClick={() => setActiveTab('library')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'library' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'library' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -704,12 +704,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <BookOpen size={18} /> Library
+                            <BookOpen size={16} /> Library
                         </button>
                         <button
                             onClick={() => setActiveTab('blueprints')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'blueprints' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'blueprints' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -718,12 +718,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <Sparkles size={18} /> Config
+                            <Sparkles size={16} /> Config
                         </button>
                         <button
                             onClick={() => setActiveTab('debugger')}
                             style={{
-                                padding: '0.75rem 1rem',
+                                padding: '0.6rem 0.75rem',
                                 background: activeTab === 'debugger' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
                                 border: 'none',
                                 borderBottom: activeTab === 'debugger' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
@@ -732,7 +732,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <Terminal size={18} /> Debugger
+                            <Terminal size={16} /> Debugger
                         </button>
                         <button
                             onClick={() => setActiveTab('documents')}
@@ -746,7 +746,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}
                         >
-                            <FileText size={18} /> Documents
+                            <FileText size={16} /> Documents
                         </button>
                     </nav>
                 </div>

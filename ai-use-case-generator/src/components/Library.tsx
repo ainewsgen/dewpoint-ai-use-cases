@@ -34,28 +34,36 @@ export function Library({ isAdmin, onSaveRequest, user }: LibraryProps) {
                 }
 
                 // 2. Map Database Use Cases to Opportunity objects
-                const formattedStatic: Opportunity[] = staticCases.map(sc => ({
-                    id: sc.id,
-                    title: sc.title,
-                    department: "General",
-                    industry: sc.industry,
-                    public_view: {
-                        problem: sc.description,
-                        solution_narrative: sc.description,
-                        value_proposition: "Verified Use Case",
-                        roi_estimate: sc.roiEstimate,
-                        detailed_explanation: sc.description,
-                        example_scenario: `Industry: ${sc.industry}. Difficulty: ${sc.difficulty}`,
-                        walkthrough_steps: []
-                    },
-                    admin_view: {
-                        tech_stack: sc.tags || [],
-                        implementation_difficulty: sc.difficulty as any,
-                        workflow_steps: "Refer to documentation.",
-                        upsell_opportunity: "Consultation"
-                    },
-                    generation_metadata: { source: 'System', model: 'Static Library' }
-                }));
+                const formattedStatic: Opportunity[] = staticCases.map(sc => {
+                    // Start with the rich data if available
+                    const base = sc.data || {};
+
+                    return {
+                        ...base,
+                        id: sc.id, // Ensure ID is from the library record
+                        title: sc.title, // Prefer top-level metadata
+                        department: base.department || "General", // Fallback to "General" only if missing
+                        industry: sc.industry || base.industry,
+                        public_view: {
+                            ...(base.public_view || {}),
+                            problem: sc.description, // Ensure description matches library view
+                            solution_narrative: sc.description,
+                            value_proposition: base.public_view?.value_proposition || "Verified Use Case",
+                            roi_estimate: sc.roiEstimate || base.public_view?.roi_estimate || "N/A",
+                            detailed_explanation: base.public_view?.detailed_explanation || sc.description,
+                            example_scenario: base.public_view?.example_scenario || `Industry: ${sc.industry}. Difficulty: ${sc.difficulty}`,
+                            walkthrough_steps: base.public_view?.walkthrough_steps || []
+                        },
+                        admin_view: {
+                            ...(base.admin_view || {}),
+                            tech_stack: sc.tags || base.admin_view?.tech_stack || [],
+                            implementation_difficulty: (sc.difficulty as any) || base.admin_view?.implementation_difficulty,
+                            workflow_steps: base.admin_view?.workflow_steps || "Refer to documentation.",
+                            upsell_opportunity: base.admin_view?.upsell_opportunity || "Consultation"
+                        },
+                        generation_metadata: base.generation_metadata || { source: 'System', model: 'Static Library' }
+                    };
+                });
 
                 setLibRecipes(formattedStatic);
             } catch (err) {
@@ -178,11 +186,13 @@ function LibraryCard({ opp, isAdmin, isSaved, onToggle, onDelete }: { opp: Oppor
         <div className="glass-panel recipe-card">
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{opp.department}</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>
-                            <span style={{ opacity: 0.5, margin: '0 0.5rem' }}>|</span>
-                            Industry: {opp.industry || 'General'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                        <span className={`badge ${opp.public_view.roi_estimate.includes('$') ? 'cost' : 'eff'}`} style={{ fontSize: '0.7rem', padding: '0.2rem 0.6rem' }}>
+                            {opp.department || 'General'}
+                        </span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ opacity: 0.3 }}>|</span>
+                            {opp.industry || 'General'}
                         </span>
                     </div>
                     <h3 style={{ fontSize: '1.25rem', lineHeight: '1.3' }}>{opp.title}</h3>

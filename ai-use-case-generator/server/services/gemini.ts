@@ -6,7 +6,7 @@ export class GeminiService {
     static async generateJSON(params: AIRequestParams): Promise<any> {
         const genAI = new GoogleGenerativeAI(params.apiKey);
         const model = genAI.getGenerativeModel({
-            model: params.model || 'gemini-1.5-flash-001',
+            model: params.model || 'gemini-pro',
             generationConfig: { responseMimeType: "application/json" }
         });
 

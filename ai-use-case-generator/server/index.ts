@@ -60,6 +60,13 @@ app.use((req, res, next) => {
 import { shadowTracking } from './middleware/shadow';
 app.use(shadowTracking);
 
+app.use((req, res, next) => {
+    if (req.path.includes('integrations')) {
+        console.log(`[DEBUG] ${req.method} ${req.path}`);
+    }
+    next();
+});
+
 // Health Check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', version: 'v3.23', timestamp: new Date().toISOString() });
@@ -83,8 +90,8 @@ app.use('/api/auth', authEnhancedRoutes); // Enhanced auth with JWT
 app.use('/api/auth', authRoutes); // Legacy auth routes (if needed)
 app.use('/api', leadsRoutes);
 app.use('/api', cmsRoutes);
+app.use('/api', integrationsRoutes); // Enhanced integrations - Moved up
 app.use('/api/admin', usersRoutes); // User management
-app.use('/api', integrationsRoutes); // Enhanced integrations
 app.use('/api', scanRoutes); // Server-side scanning
 app.use('/api', generateRoutes); // AI Generation
 app.use('/api/admin', usageRoutes); // Observability & Usage Stats

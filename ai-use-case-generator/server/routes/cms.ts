@@ -72,49 +72,6 @@ router.post('/admin/cms', async (req, res) => {
     }
 });
 
-// Get All Integrations
-router.get('/integrations', async (req, res) => {
-    try {
-        const allIntegrations = await db.select().from(integrations).where(eq(integrations.enabled, true));
-        res.json({ integrations: allIntegrations });
-    } catch (error) {
-        console.error('Get integrations error:', error);
-        res.status(500).json({ error: 'Failed to get integrations' });
-    }
-});
-
-// Add Integration (Admin)
-router.post('/admin/integrations', async (req, res) => {
-    try {
-        const { name } = req.body;
-
-        if (!name) {
-            return res.status(400).json({ error: 'Name is required' });
-        }
-
-        const integration = await db.insert(integrations)
-            .values({ name, enabled: true })
-            .returning();
-
-        res.json({ integration: integration[0] });
-    } catch (error) {
-        console.error('Add integration error:', error);
-        res.status(500).json({ error: 'Failed to add integration' });
-    }
-});
-
-// Delete Integration (Admin)
-router.delete('/admin/integrations/:id', async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-
-        await db.delete(integrations).where(eq(integrations.id, id));
-
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Delete integration error:', error);
-        res.status(500).json({ error: 'Failed to delete integration' });
-    }
-});
+// CMS content management ends here
 
 export default router;

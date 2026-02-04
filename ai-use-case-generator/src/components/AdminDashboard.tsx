@@ -349,11 +349,17 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     const handleTestConnection = async (id: number) => {
         setTestingId(id);
         try {
-            const res = await fetch(`/api/integrations/${id}/test`, { method: 'POST' });
+            const res = await fetch('/api/admin/integrations/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
             if (res.ok) {
-                alert('Connection Successful! ✅');
+                const data = await res.json();
+                alert(data.message || 'Connection Successful! ✅');
             } else {
-                alert('Connection Failed ❌');
+                const data = await res.json();
+                alert(`Connection Failed: ${data.details || data.error || 'Unknown Error'} ❌`);
             }
         } catch (error) {
             alert('Connection Error');
@@ -2160,7 +2166,9 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                     id: integration?.id,
                     authType,
                     baseUrl,
-                    apiKey
+                    apiKey,
+                    provider,
+                    name
                 })
             });
             if (res.ok) {

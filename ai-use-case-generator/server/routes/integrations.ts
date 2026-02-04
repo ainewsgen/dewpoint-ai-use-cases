@@ -5,6 +5,7 @@ import { eq, and } from 'drizzle-orm';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import { encrypt, decrypt } from '../utils/encryption';
 import { OpenAIService } from '../services/openai';
+import { GeminiService } from '../services/gemini';
 
 const router = Router();
 
@@ -181,62 +182,60 @@ router.delete('/integrations/:id', requireAuth, async (req: AuthRequest, res) =>
     }
 });
 
-// Test integration connection (placeholder)
-router.post('/integrations/:id/test', requireAuth, async (req: AuthRequest, res) => {
+// NEW: Consolidated Admin Test Route (Matches Frontend)
+router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
-        const userId = req.user!.id;
-        const integrationId = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
+        const { id, provider, name, apiKey, baseUrl } = req.body;
 
-        // Ensure user owns this integration OR is admin
-        const isAdmin = req.user!.role === 'admin';
-        const query = isAdmin
-            ? eq(integrations.id, integrationId)
-            : and(eq(integrations.id, integrationId), eq(integrations.userId, userId));
+        // 1. Identify Provider
+        let effectiveProvider = provider || (name?.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
 
-        const [integration] = await db.select().from(integrations).where(query);
-
-        if (!integration) {
-            return res.status(404).json({ error: 'Integration not found' });
+        // 2. Get API Key
+        let effectiveKey = apiKey;
+        if (id && !effectiveKey) {
+            const [int] = await db.select().from(integrations).where(eq(integrations.id, id));
+            if (int && int.apiKey) {
+                effectiveKey = decrypt(int.apiKey);
+            }
         }
 
-        // Real API Test
-        if (integration.provider === 'openai' || integration.name.toLowerCase().includes('openai')) {
-            if (!integration.apiKey) {
-                return res.status(400).json({ error: 'No API Key configured' });
+        if (!effectiveKey) {
+            return res.status(400).json({ error: 'No API Key provided for test' });
+        }
+
+        // 3. Perform Test
+        if (effectiveProvider === 'gemini') {
+            try {
+                // Gemini Handshake - simple JSON response check
+                await GeminiService.generateJSON({
+                    apiKey: effectiveKey,
+                    systemPrompt: "You are a connection tester.",
+                    userContext: "Return { \"status\": \"ok\" } JSON object. No markdown.",
+                    model: "gemini-1.5-flash" // Faster/cheaper for test
+                });
+                return res.json({ success: true, message: 'Successfully connected to Google Gemini!' });
+            } catch (err: any) {
+                console.error("Gemini Test Fail:", err);
+                return res.status(400).json({ error: 'Gemini Connection Failed', details: err.message });
             }
-
-            const decryptedKey = decrypt(integration.apiKey);
-
-            // minimal test call
+        } else {
+            // Default to OpenAI
             try {
                 await OpenAIService.generateJSON({
-                    apiKey: decryptedKey,
+                    apiKey: effectiveKey,
                     systemPrompt: "You are a connection tester.",
                     userContext: "Return { \"status\": \"ok\" } JSON.",
-                    model: "gpt-3.5-turbo" // Cheap model for testing
+                    model: "gpt-3.5-turbo"
                 });
-
-                return res.json({
-                    success: true,
-                    message: 'Successfully connected to OpenAI!',
-                });
-            } catch (apiError: any) {
-                console.error("OpenAI Test Error:", apiError);
-                return res.status(400).json({
-                    error: 'OpenAI Connection Failed',
-                    details: apiError.message
-                });
+                return res.json({ success: true, message: 'Successfully connected to OpenAI!' });
+            } catch (err: any) {
+                console.error("OpenAI Test Fail:", err);
+                return res.status(400).json({ error: 'OpenAI Connection Failed', details: err.message });
             }
         }
-
-        // Fallback for other providers (not implemented yet)
-        res.json({
-            success: true,
-            message: 'Connection configuration saved (Test skipped for this provider type)',
-        });
-    } catch (error) {
-        console.error('Test integration error:', error);
-        res.status(500).json({ error: 'Failed to test integration' });
+    } catch (error: any) {
+        console.error('Unified test error:', error);
+        res.status(500).json({ error: `Server error during test: ${error.message}` });
     }
 });
 

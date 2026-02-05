@@ -2,7 +2,7 @@
 
 **Live App:** https://dewpoint-strategy-app.onrender.com  
 **Repository:** ainewsgen/dewpoint-ai-use-cases  
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-05
 
 A full-stack lead generation tool that creates personalized AI automation "recipe cards" for businesses based on their industry, pain points, and tech stack.
 
@@ -15,6 +15,7 @@ A full-stack lead generation tool that creates personalized AI automation "recip
 - Scan company website or manually enter context
 - Get 5 AI-generated implementation blueprints
 - Save favorites to personal roadmap (requires registration)
+- **New: Export personalized AI Strategy Roadmap as PDF**
 
 **For DewPoint (Admin):**
 - Capture qualified leads with complete company profiles
@@ -24,6 +25,7 @@ A full-stack lead generation tool that creates personalized AI automation "recip
 - **New: Strategic Document Management** (Whitepapers, Guides, ROI Reports)
 - **New: AI-Generated Content Summaries** (Automatic descriptions for resource uploads)
 - **New: Resource Analytics** (Track document downloads per lead)
+- **New: Professional PDF Export** (Generate high-impact roadmap documents)
 - Configure AI providers and monitor system health
 
 ---
@@ -244,6 +246,9 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Professional PDF Roadmap Export**: Integrated print-optimized strategy document generation.
+- ✅ **Robust AI Usage Logging**: Enhanced observability with cost-precision tracking and anonymous `shadowId` capture.
+- ✅ **Outcome-Based Taxonomy Sync**: Standardized AI prompts and fallback recipes with strategic naming (Sentinel, Catalyst, etc.).
 - ✅ **Admin Dashboard Restoration**: Fixed structural JSX corruption and resolved narrowing/linting errors.
 - ✅ **Per-Integration Budget Limits**: Implemented independent daily limit tracking and enforcement for multiple AI providers.
 - ✅ **System Mode Prediction**: Real-time health diagnostic in the Observability tab (AI Live vs. System Fallback).
@@ -274,9 +279,9 @@ b067374 - feat: save onboarding data after registration
 ### Known Limitations
 
 - Email system is placeholder only (password reset not functional)
-- No CSV/PDF export for leads
+- No CSV export for leads (PDF Roadmap for users implemented)
 - No recipe editing for admin
-- No detailed analytics per user
+- No advanced analytics per user
 
 ---
 

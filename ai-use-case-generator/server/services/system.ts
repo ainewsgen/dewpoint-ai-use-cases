@@ -4,92 +4,92 @@ export class SystemCapabilityService {
         // Return a generic, high-quality template that works for any industry
         return [
             {
-                title: "Automated Inquiry Response System",
-                department: "Customer Service/Sales",
+                title: "Lead Conversion Scout",
+                department: "Sales/Growth",
                 industry: industry || "General",
                 public_view: {
-                    problem: "Missed calls and delayed email responses lead to lost opportunities and lower customer satisfaction.",
-                    solution_narrative: "Implement an intelligent auto-response system that instantly acknowledges inquiries, answers FAQs, and routes complex issues to the right team member.",
-                    value_proposition: "Capture 100% of leads 24/7 without increasing headcount.",
-                    roi_estimate: "Recapture 15-20% of lost leads; save 10+ hours/week on manual triage.",
-                    detailed_explanation: "This system uses rule-based logic to categorize incoming messages. Common queries (hours, pricing, location) are answered immediately. High-value leads are flagged for priority follow-up.",
-                    example_scenario: "A customer emails at 8 PM asking for a quote. The system replies instantly with a pricing guide and a link to book a consultation.",
+                    problem: "Delayed or inconsistent responses to inbound inquiries lead to missed revenue and poor brand perception.",
+                    solution_narrative: "An intelligent, 24/7 engagement layer that instantly qualifies leads, handles initial friction points, and delivers value-first responses.",
+                    value_proposition: "Eliminate response latency and capture 100% of pipeline intent.",
+                    roi_estimate: "15-22% increase in discovery call conversion; saves 12+ hours/week of manual triage.",
+                    detailed_explanation: "This solution bridges the gap between 'interest' and 'intent'. By providing immediate, relevant answers to FAQs and dynamic routing for high-value prospects, it ensures your sales team only focuses on qualified opportunities.",
+                    example_scenario: "A prospect visits at 9 PM on a Sunday. Instead of waiting for Monday morning, they receive a tailored PDF summary and a link to book a priority meeting.",
                     walkthrough_steps: [
-                        "Audit current inquiry channels (email, phone, form).",
-                        "Draft standard responses for top 5 FAQs.",
-                        "Configure auto-responder rules in email/CRM.",
-                        "Test routing logic with sample inquiries."
+                        "Map high-intent friction points and top 10 FAQs.",
+                        "Configure the intelligent response logic and value-add asset delivery.",
+                        "Integrate with existing CRM or notification stack.",
+                        "Activate the conversion layer and monitor velocity increase."
                     ]
                 },
                 admin_view: {
-                    tech_stack: ["CRM (HubSpot/Salesforce)", "Email Automation", "Zapier"],
+                    tech_stack: ["CRM Integration", "Asset Delivery API", "Workflow Engine"],
                     implementation_difficulty: "Low",
-                    workflow_steps: "Trigger: New Email -> Boolean Check: Is FAQ? -> Yes: Send Template / No: Notify Admin.",
-                    upsell_opportunity: "CRM Integration & Custom Workflow Design"
+                    workflow_steps: "Inquiry -> Context Extraction -> Value Asset Match -> Instant Response / Team Notify.",
+                    upsell_opportunity: "Multi-channel Lead Nurturing & Enrichment"
                 },
                 generation_metadata: {
                     source: "System (Fallback)",
-                    model: "static-template-v1",
+                    model: "static-template-v3",
                     timestamp: new Date().toISOString()
                 }
             },
             {
-                title: "Client Onboarding Streamline",
-                department: "Operations",
+                title: "Stakeholder Trust Synchronizer",
+                department: "Operations/CS",
                 industry: industry || "General",
                 public_view: {
-                    problem: "Manual onboarding is slow, prone to errors, and creates a poor first impression for new clients.",
-                    solution_narrative: "Digitize the onboarding flow with a unified portal or automated email sequence that collects documents, signs contracts, and welcomes the client.",
-                    value_proposition: "Reduce onboarding time by 50% and ensure compliance.",
-                    roi_estimate: "Save $500+ per client in administrative labor.",
-                    detailed_explanation: "Replace paper forms and scattered emails with a structured digital process. Triggers automatically send reminders for missing information.",
-                    example_scenario: "New client signs proposal. System automatically sends welcome packet, contract for e-signature, and intake form.",
+                    problem: "Manual, fragmented onboarding processes create 'dead zones' where clients lose momentum and trust.",
+                    solution_narrative: "A unified, automated delivery system that orchestrates information gathering, contract execution, and value-realization milestones.",
+                    value_proposition: "Accelerate time-to-value and solidify professional brand authority.",
+                    roi_estimate: "45% reduction in onboarding cycle time; reduces churn risk by 30% in the first 90 days.",
+                    detailed_explanation: "Replace manual follow-ups with a proactive synchronization engine. This system ensures every stakeholder knows exactly where they are in the process, reducing friction and administrative overhead.",
+                    example_scenario: "Contract is signed. Instantly, the Slack channel is created, the intake portal is populated, and the client receives their first 'Quick Win' milestone.",
                     walkthrough_steps: [
-                        "Map out the current onboarding checklist.",
-                        "Digitize forms using a tool like JotForm or Typeform.",
-                        "Set up an email sequence to deliver forms.",
-                        "Automate file storage for completed docs."
+                        "Audit documentation requirements and milestone dependencies.",
+                        "Automate the information gathering and contract execution loop.",
+                        "Setup real-time visibility for all stakeholders.",
+                        "Launch the synchronized experience and track time-to-value."
                     ]
                 },
                 admin_view: {
-                    tech_stack: ["DocuSign/PandaDoc", "Project Management Tool", "Form Builder"],
+                    tech_stack: ["E-Signature Provider", "Project API", "Client Portal Wrapper"],
                     implementation_difficulty: "Med",
-                    workflow_steps: "Proposal Signed -> Send Contracts -> Send Intake Forms -> Create Project Folder.",
-                    upsell_opportunity: "Full Client Portal Development"
+                    workflow_steps: "Signature -> Create Workspace -> Dispatch Intake -> Notify CS Manager.",
+                    upsell_opportunity: "Complete Digital Client Portal Implementation"
                 },
                 generation_metadata: {
                     source: "System (Fallback)",
-                    model: "static-template-v1",
+                    model: "static-template-v3",
                     timestamp: new Date().toISOString()
                 }
             },
             {
-                title: "Review Generation Engine",
-                department: "Marketing",
+                title: "Brand Sentiment Sentinel",
+                department: "Marketing/PR",
                 industry: industry || "General",
                 public_view: {
-                    problem: "Lack of recent positive reviews hurts local SEO and trust.",
-                    solution_narrative: "Automate the request for reviews immediately after a successful service delivery or purchase.",
-                    value_proposition: "Boost Google ranking and conversion rates automatically.",
-                    roi_estimate: "Increase organic traffic by 10-15% within 3 months.",
-                    detailed_explanation: "Trigger an SMS or Email request 24 hours after job completion. Direct satisfied customers to Google/Yelp; intercept unsatisfied ones for feedback.",
-                    example_scenario: "Job marked 'Complete' in field app. System waits 24 hours, then texts client: 'How did we do?' with a link.",
+                    problem: "Invisible client dissatisfaction and a lack of public validation hinder organic growth and professional credibility.",
+                    solution_narrative: "A proactive feedback and trust-building automation that surfaces positive advocacy while intercepting negative friction privately.",
+                    value_proposition: "Build a self-sustaining engine of trust and search authority.",
+                    roi_estimate: "12-18% increase in organic leads via improved social proof and SEO velocity.",
+                    detailed_explanation: "Don't leave your reputation to chance. This sentinel monitors customer success signals and automatically requests validation at the peak of satisfaction, ensuring your public profile reflects your actual performance.",
+                    example_scenario: "A client reaches a project milestone or positive result. The sentinel detects the 'win' and asks for a professional endorsement via a one-click process.",
                     walkthrough_steps: [
-                        "Identify the 'Success Trigger' in your process.",
-                        "Draft a polite, low-friction review request.",
-                        "Set up the automation trigger.",
-                        "Monitor new reviews and respond weekly."
+                        "Define 'Moment of Delight' triggers across the client journey.",
+                        "Draft professional, high-conversion validation requests.",
+                        "Setup the sentinel to monitor success signals.",
+                        "Analyze sentiment trends and manage public trust signals."
                     ]
                 },
                 admin_view: {
-                    tech_stack: ["SMS Marketing Tool", "Reputation Management Software"],
+                    tech_stack: ["Messaging API", "Reputation Monitoring", "Sentiment Webhooks"],
                     implementation_difficulty: "Low",
-                    workflow_steps: "Job Closed -> Wait 24h -> Send Request -> If 5-star, thank; If <4, alert manager.",
-                    upsell_opportunity: "Reputation Management Retainer"
+                    workflow_steps: "Success Signal -> Wait Period -> Dispatch Request -> Triage Sentiment.",
+                    upsell_opportunity: "Ongoing Reputation Management & PR Strategy"
                 },
                 generation_metadata: {
                     source: "System (Fallback)",
-                    model: "static-template-v1",
+                    model: "static-template-v3",
                     timestamp: new Date().toISOString()
                 }
             }

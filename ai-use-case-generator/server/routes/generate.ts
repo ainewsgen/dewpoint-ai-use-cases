@@ -76,12 +76,13 @@ User Profile:
 - Website Summary: {{description}}
 - Deep Site Analysis: {{pageContext}}
 
-Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title, Department, Industry (specific to the use case or general), Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.
+Generate 3 custom automation blueprints in JSON format. Each blueprint MUST include: Title (Outcome-Based, e.g., "Cognitive Load Eliminator"), Department, Industry, Problem, Solution Narrative, Value Proposition, ROI Estimate, Deep Dive, Example Scenario, Walkthrough Steps, Tech Stack Details, Difficulty, and Upsell.
 
 CRITICAL INSTRUCTIONS:
-1. "Problem": Describe the specific operational bottleneck or pain point in 1-2 sentences. Do NOT mention the solution here.
-2. "Solution Narrative": Describe the automation workflow and how it solves the problem. Do NOT repeat the problem statement. Focus on the 'How'.
-3. Use the "Deep Site Analysis" key signals and text to find specific "dormant data" opportunities or "competitor gaps" (e.g. if they lack online booking, suggest an AI scheduler).`;
+1. "Title": Use strategic, outcome-focused titles. Avoid generic names like "Email Automation". Use terms like "Shield", "Sentinel", "Catalyst", "Synchronizer", "Eliminator", "Agent", "Scribe".
+2. "Problem": Describe the specific operational bottleneck or pain point in 1-2 sentences. Do NOT mention the solution here.
+3. "Solution Narrative": Describe the automation workflow and how it solves the problem. Do NOT repeat the problem statement. Focus on the 'How'.
+4. Use the "Deep Site Analysis" key signals and text to find specific "dormant data" opportunities or "competitor gaps".`;
 
         // 1. Prepare Prompt (Simple Injection for Phase 1)
         let systemPrompt = promptDetails?.systemPromptOverride || defaultSystemPrompt;
@@ -173,11 +174,13 @@ CRITICAL INSTRUCTIONS:
                 usedProvider = provider;
 
                 // Log Usage
-                const promptTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(JSON.stringify(companyData).length / 4);
+                const promptTokens = Math.ceil((systemPrompt.length + JSON.stringify(companyData).length) / 4);
                 const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
                 const userIdForLogging = (req as AuthRequest).user?.id || null;
-                const shadowId = (req as any).shadowId;
-                UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, usedModelId, activeInt.id, shadowId).catch(err => console.error("Usage Log Error:", err));
+                const reqShadowId = req.shadowId || (req as any).shadowId;
+
+                UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, usedModelId, activeInt.id, reqShadowId)
+                    .catch(err => console.error("[Generate] Usage Log Error:", err));
 
                 break; // Exit loop on success
             } catch (err: any) {

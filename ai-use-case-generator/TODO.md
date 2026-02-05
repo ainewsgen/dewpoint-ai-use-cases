@@ -11,6 +11,7 @@
     - [ ] Configure SMTP/SendGrid/Postmark integration
 - [ ] **Lead & Analytics Export**
     - [ ] Add CSV export button for Leads table
+    - [x] Implement professional PDF export for User Roadmaps
     - [ ] Export document download analytics to spreadsheet
 
 ## 🛠️ Medium Priority

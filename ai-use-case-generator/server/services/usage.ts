@@ -54,6 +54,8 @@ export class UsageService {
      * Logs usage and cost to the DB, linked to a specific integration.
      */
     static async logUsage(userId: number | null, promptTokens: number, completionTokens: number, model: string, integrationId: number, shadowId?: string) {
+        console.log(`[Usage] Attempting to log usage for ${userId ? `User ${userId}` : `Shadow ${shadowId || 'Anon'}`} via ${model} (Int: ${integrationId})`);
+
         let inputRate = this.GPT4O_INPUT;
         let outputRate = this.GPT4O_OUTPUT;
 
@@ -70,92 +72,96 @@ export class UsageService {
             outputRate = this.GEMINI_PRO_OUTPUT;
         }
 
-        const cost = (promptTokens * inputRate) + (completionTokens * outputRate);
+        const costValue = (promptTokens * inputRate) + (completionTokens * outputRate);
+        const costStr = costValue.toFixed(6);
 
         try {
-            await db.insert(apiUsage).values({
+            const values = {
                 userId,
                 integrationId,
                 shadowId: shadowId || null,
                 model,
                 promptTokens,
                 completionTokens,
-                totalCost: cost.toFixed(6),
+                totalCost: costStr,
                 timestamp: new Date()
-            });
+            };
+
+            await db.insert(apiUsage).values(values);
+
             const userLabel = userId ? `User ${userId}` : `Anon (Shadow: ${shadowId || 'none'})`;
-            console.log(`[Usage] Logged: $${cost.toFixed(6)} (${promptTokens}in/${completionTokens}out) for ${userLabel} via ${model} (Int: ${integrationId})`);
+            console.log(`[Usage] SUCCESS: Logged $${costStr} (${promptTokens}in/${completionTokens}out) for ${userLabel} via ${model} (Int: ${integrationId})`);
         } catch (e) {
-            console.error("Failed to insert api_usage log:", e);
+            console.error("[Usage] ERROR: Failed to insert api_usage record:", e);
         }
     }
-
+}
     /**
      * Get usage stats for the dashboard.
      */
     static async getDailyStats() {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-        // Fetch spending per integration for better dashboard context (Daily)
-        const statsByIntegration = await db.select({
-            integrationId: apiUsage.integrationId,
-            totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
-            requestCount: sql<number>`count(*)`
-        })
-            .from(apiUsage)
-            .where(gte(apiUsage.timestamp, startOfDay))
-            .groupBy(apiUsage.integrationId);
+    // Fetch spending per integration for better dashboard context (Daily)
+    const statsByIntegration = await db.select({
+        integrationId: apiUsage.integrationId,
+        totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
+        requestCount: sql<number>`count(*)`
+    })
+        .from(apiUsage)
+        .where(gte(apiUsage.timestamp, startOfDay))
+        .groupBy(apiUsage.integrationId);
 
-        // Fetch MTD spending per integration
-        const mtdStatsByIntegration = await db.select({
-            integrationId: apiUsage.integrationId,
-            totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
-            requestCount: sql<number>`count(*)`
-        })
-            .from(apiUsage)
-            .where(gte(apiUsage.timestamp, startOfMonth))
-            .groupBy(apiUsage.integrationId);
+    // Fetch MTD spending per integration
+    const mtdStatsByIntegration = await db.select({
+        integrationId: apiUsage.integrationId,
+        totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
+        requestCount: sql<number>`count(*)`
+    })
+        .from(apiUsage)
+        .where(gte(apiUsage.timestamp, startOfMonth))
+        .groupBy(apiUsage.integrationId);
 
-        const allIntegrations = await db.select().from(integrations);
+    const allIntegrations = await db.select().from(integrations);
 
-        // Map stats to integration names and limits
-        const detailedStats = allIntegrations.map(int => {
-            const stat = statsByIntegration.find(s => s.integrationId === int.id);
-            const mtdStat = mtdStatsByIntegration.find(s => s.integrationId === int.id);
-            const metaLimit = (int.metadata as any)?.daily_limit_usd;
-            const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
-
-            return {
-                id: int.id,
-                name: int.name,
-                spend: parseFloat(String(stat?.totalSpend || 0)),
-                requests: parseInt(String(stat?.requestCount || 0), 10),
-                mtdSpend: parseFloat(String(mtdStat?.totalSpend || 0)),
-                mtdRequests: parseInt(String(mtdStat?.requestCount || 0), 10),
-                limit
-            };
-        });
-
-        // Global Totals
-        const totalSpend = detailedStats.reduce((sum, s) => sum + s.spend, 0);
-        const totalRequests = detailedStats.reduce((sum, s) => sum + s.requests, 0);
-        const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
-        const totalMtdSpend = detailedStats.reduce((sum, s) => sum + s.mtdSpend, 0);
-        const totalMtdRequests = detailedStats.reduce((sum, s) => sum + s.mtdRequests, 0);
+    // Map stats to integration names and limits
+    const detailedStats = allIntegrations.map(int => {
+        const stat = statsByIntegration.find(s => s.integrationId === int.id);
+        const mtdStat = mtdStatsByIntegration.find(s => s.integrationId === int.id);
+        const metaLimit = (int.metadata as any)?.daily_limit_usd;
+        const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
 
         return {
-            spend: totalSpend,
-            requests: totalRequests,
-            limit: totalLimit,
-            mtdSpend: totalMtdSpend,
-            mtdRequests: totalMtdRequests,
-            detailed: detailedStats,
-            integrationCount: allIntegrations.length
+            id: int.id,
+            name: int.name,
+            spend: parseFloat(String(stat?.totalSpend || 0)),
+            requests: parseInt(String(stat?.requestCount || 0), 10),
+            mtdSpend: parseFloat(String(mtdStat?.totalSpend || 0)),
+            mtdRequests: parseInt(String(mtdStat?.requestCount || 0), 10),
+            limit
         };
-    }
+    });
+
+    // Global Totals
+    const totalSpend = detailedStats.reduce((sum, s) => sum + s.spend, 0);
+    const totalRequests = detailedStats.reduce((sum, s) => sum + s.requests, 0);
+    const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
+    const totalMtdSpend = detailedStats.reduce((sum, s) => sum + s.mtdSpend, 0);
+    const totalMtdRequests = detailedStats.reduce((sum, s) => sum + s.mtdRequests, 0);
+
+    return {
+        spend: totalSpend,
+        requests: totalRequests,
+        limit: totalLimit,
+        mtdSpend: totalMtdSpend,
+        mtdRequests: totalMtdRequests,
+        detailed: detailedStats,
+        integrationCount: allIntegrations.length
+    };
+}
 }

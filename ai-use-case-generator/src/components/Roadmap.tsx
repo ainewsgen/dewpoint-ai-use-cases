@@ -147,6 +147,10 @@ export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: Roadmap
         sortedRecipes.reverse();
     }
 
+    const handleExportPDF = () => {
+        window.print();
+    };
+
     if (isLocked) {
         return (
             <div className="container animate-fade-in" style={{ paddingTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -181,9 +185,20 @@ export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: Roadmap
                     Your curated list of high-impact AI strategies.
                 </p>
 
+                <div style={{ marginTop: '2rem' }} data-no-print="true">
+                    <button
+                        onClick={handleExportPDF}
+                        disabled={savedRecipes.length === 0}
+                        className="btn-primary"
+                        style={{ background: 'hsl(var(--accent-primary))', gap: '0.75rem', opacity: savedRecipes.length === 0 ? 0.5 : 1 }}
+                    >
+                        <Download size={18} /> Export Strategy Roadmap (PDF)
+                    </button>
+                </div>
+
                 {/* Anonymous Signup Nudge */}
                 {!user?.email && savedRecipes.length > 0 && (
-                    <div style={{
+                    <div className="signup-nudger" style={{
                         marginTop: '1.5rem',
                         background: 'rgba(255, 255, 255, 0.05)',
                         border: '1px solid var(--border-glass)',
@@ -194,7 +209,7 @@ export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: Roadmap
                         gap: '1rem',
                         maxWidth: '600px',
                         textAlign: 'left'
-                    }}>
+                    }} data-no-print="true">
                         <div style={{ flex: 1 }}>
                             <strong style={{ display: 'block', color: 'hsl(var(--accent-gold))', marginBottom: '0.25rem' }}>
                                 Temporary Roadmap
@@ -232,7 +247,7 @@ export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: Roadmap
             </div>
 
             {/* Resources & Guides Section */}
-            <div style={{ marginTop: '5rem', borderTop: '1px solid var(--border-glass)', paddingTop: '4rem' }}>
+            <div className="strategic-resources" style={{ marginTop: '5rem', borderTop: '1px solid var(--border-glass)', paddingTop: '4rem' }} data-no-print="true">
                 <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
                     <div style={{ display: 'inline-flex', padding: '0.75rem', background: 'hsla(var(--accent-primary)/0.1)', borderRadius: '12px', marginBottom: '1rem' }}>
                         <BookOpen size={32} className="text-accent" />

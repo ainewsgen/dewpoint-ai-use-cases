@@ -729,3 +729,90 @@ h5 {
     font-weight: 700;
     color: var(--admin-text-label);
 }
+
+/* =========================================
+   PRINT STYLES (Professional PDF Export)
+   ========================================= */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 11pt;
+    }
+
+    nav,
+    footer,
+    .btn-primary,
+    .btn-secondary,
+    .btn-ghost,
+    .btn-danger-icon,
+    .admin-list-item button,
+    button {
+        display: none !important;
+    }
+
+    .container {
+        padding: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Hide background elements */
+    .glass-panel {
+        background: white !important;
+        border: 1px solid #eee !important;
+        box-shadow: none !important;
+    }
+
+    /* Hide non-essential roadmap sections */
+    header div {
+        display: none !important;
+    }
+
+    header p {
+        color: #666 !important;
+    }
+
+    .roadmap-grid {
+        display: block !important;
+        gap: 0 !important;
+    }
+
+    .recipe-card {
+        page-break-inside: avoid;
+        margin-bottom: 2rem !important;
+        border: 1px solid #ccc !important;
+        padding: 1.5rem !important;
+        background: white !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .recipe-card h3 {
+        color: #000 !important;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Hide technical stack details if too messy for high-level PDF? 
+       Actually user wants them, but let's make them clean. */
+    .badge {
+        background: #f0f0f0 !important;
+        color: black !important;
+        border: 1px solid #ccc !important;
+    }
+
+    /* Hide specific sections from PDF */
+    [data-no-print="true"],
+    .strategic-resources,
+    .signup-nudger {
+        display: none !important;
+    }
+
+    /* Ensure Deep Dive and other long text is readable */
+    p {
+        orphans: 3;
+        widows: 3;
+    }
+}

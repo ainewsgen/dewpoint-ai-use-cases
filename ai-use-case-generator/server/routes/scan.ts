@@ -148,7 +148,9 @@ router.post('/scan-url', async (req, res) => {
                     // 2. Log Usage
                     const promptTokens = Math.ceil(systemPrompt.length / 4);
                     const completionTokens = Math.ceil(JSON.stringify(aiAnalysis).length / 4);
-                    UsageService.logUsage(null, promptTokens, completionTokens, modelId, activeInt.id).catch(err => console.error("Scan Usage Log Error:", err));
+                    const reqShadowId = (req as any).shadowId;
+                    UsageService.logUsage(null, promptTokens, completionTokens, modelId, activeInt.id, reqShadowId)
+                        .catch(err => console.error("[Scan] Usage Log Error:", err));
                 }
             } catch (err) {
                 console.warn("[Scan] AI analysis failed, falling back to heuristics:", err);

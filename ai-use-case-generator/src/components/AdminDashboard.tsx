@@ -38,7 +38,25 @@ export function AdminDashboard() {
         limit: number;
         mtdSpend?: number;
         mtdRequests?: number;
-        detailed?: { id: number; name: string; spend: number; requests: number; mtdSpend: number; mtdRequests: number; limit: number }[]
+        lifetimeSpend?: number;
+        lifetimeRequests?: number;
+        detailed?: {
+            id: number;
+            name: string;
+            spend: number;
+            requests: number;
+            mtdSpend: number;
+            mtdRequests: number;
+            lifetimeSpend: number;
+            lifetimeRequests: number;
+            limit: number;
+        }[];
+        debug?: {
+            startOfDay: string;
+            startOfMonth: string;
+            rowsToday: number;
+            totalRows: number;
+        };
     } | null>(null);
     const [isUpdatingLimit, setIsUpdatingLimit] = useState(false);
 
@@ -901,13 +919,19 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>Today</div>
                                 </div>
                                 <div style={{ borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                                    <div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Month-to-Date</div>
-                                        <div style={{ fontWeight: 600 }}>{usageStats?.mtdRequests || 0} reqs</div>
-                                    </div>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>MTD Spend</div>
                                         <div style={{ fontWeight: 700 }}>${usageStats?.mtdSpend?.toFixed(2) || '0.00'}</div>
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: '1px solid rgba(0,0,0,0.05)', marginTop: '0.75rem', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Lifetime Reqs</div>
+                                        <div style={{ fontWeight: 600 }}>{usageStats?.lifetimeRequests || 0}</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Lifetime Spend</div>
+                                        <div style={{ fontWeight: 700 }}>${usageStats?.lifetimeSpend?.toFixed(2) || '0.00'}</div>
                                     </div>
                                 </div>
                                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
@@ -974,13 +998,14 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                 <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 600 }}>Daily Usage</th>
                                                 <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Today ($)</th>
                                                 <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>MTD ($)</th>
+                                                <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Life ($)</th>
                                                 <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Limit ($)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {!usageStats?.detailed || usageStats.detailed.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No integration usage data yet.</td>
+                                                    <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No integration usage data yet.</td>
                                                 </tr>
                                             ) : usageStats.detailed.map(int => (
                                                 <tr key={int.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
@@ -1000,6 +1025,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                                     </td>
                                                     <td style={{ textAlign: 'right', padding: '1rem', fontWeight: 700 }}>${int.spend?.toFixed(4)}</td>
                                                     <td style={{ textAlign: 'right', padding: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>${int.mtdSpend?.toFixed(2)}</td>
+                                                    <td style={{ textAlign: 'right', padding: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>${int.lifetimeSpend?.toFixed(2)}</td>
                                                     <td style={{ textAlign: 'right', padding: '1rem', color: 'var(--text-muted)' }}>
                                                         ${int.limit?.toFixed(2)}
                                                         <button
@@ -1031,6 +1057,18 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
 
                             {/* System Mode Prediction */}
                             {renderSystemModePrediction()}
+
+                            {/* Internal Diagnostics */}
+                            {usageStats?.debug && (
+                                <div style={{ marginTop: '1rem', padding: '1rem', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.75rem', color: '#64748b' }}>
+                                    <div style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                        <Terminal size={12} /> SYSTEM DIAGNOSTIC (INTERNAL)
+                                    </div>
+                                    <div>UTC Day Start: {usageStats.debug.startOfDay}</div>
+                                    <div>UTC Month Start: {usageStats.debug.startOfMonth}</div>
+                                    <div>Daily Result Sets: {usageStats.debug.rowsToday} | Total Records Found: {usageStats.debug.totalRows}</div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )

@@ -100,14 +100,19 @@ export class UsageService {
      * Get usage stats for the dashboard.
      */
     static async getDailyStats() {
-        // Use UTC Boundaries to match DB timestamps
         const now = new Date();
         const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
         const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
 
         console.log(`[UsageStats] Calculating for Day: ${startOfDay.toISOString()} | Month: ${startOfMonth.toISOString()}`);
 
-        // 1. Fetch Global Daily Totals (Directly, to catch records with missing integrationId)
+        // 1. Fetch Global Lifetime Totals (The "Truth")
+        const lifetimeGlobal = await db.select({
+            totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
+            requestCount: sql<number>`count(*)`
+        }).from(apiUsage);
+
+        // 2. Fetch Global Daily Totals
         const dailyGlobal = await db.select({
             totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
             requestCount: sql<number>`count(*)`
@@ -115,7 +120,7 @@ export class UsageService {
             .from(apiUsage)
             .where(gte(apiUsage.timestamp, startOfDay));
 
-        // 2. Fetch Global MTD Totals
+        // 3. Fetch Global MTD Totals
         const mtdGlobal = await db.select({
             totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
             requestCount: sql<number>`count(*)`
@@ -123,7 +128,7 @@ export class UsageService {
             .from(apiUsage)
             .where(gte(apiUsage.timestamp, startOfMonth));
 
-        // 3. Fetch spending per integration (Daily breakdown)
+        // 4. Breakdown by Integration (Daily)
         const statsByIntegration = await db.select({
             integrationId: apiUsage.integrationId,
             totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
@@ -133,7 +138,7 @@ export class UsageService {
             .where(gte(apiUsage.timestamp, startOfDay))
             .groupBy(apiUsage.integrationId);
 
-        // 4. Fetch MTD spending per integration
+        // 5. Breakdown by Integration (MTD)
         const mtdStatsByIntegration = await db.select({
             integrationId: apiUsage.integrationId,
             totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
@@ -143,12 +148,23 @@ export class UsageService {
             .where(gte(apiUsage.timestamp, startOfMonth))
             .groupBy(apiUsage.integrationId);
 
+        // 6. Breakdown by Integration (Lifetime)
+        const lifetimeStatsByIntegration = await db.select({
+            integrationId: apiUsage.integrationId,
+            totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
+            requestCount: sql<number>`count(*)`
+        })
+            .from(apiUsage)
+            .groupBy(apiUsage.integrationId);
+
         const allIntegrations = await db.select().from(integrations);
 
         // Map stats to integration names and limits
         const detailedStats = allIntegrations.map(int => {
             const stat = statsByIntegration.find(s => s.integrationId === int.id);
             const mtdStat = mtdStatsByIntegration.find(s => s.integrationId === int.id);
+            const lifeStat = lifetimeStatsByIntegration.find(s => s.integrationId === int.id);
+
             const metaLimit = (int.metadata as any)?.daily_limit_usd;
             const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
 
@@ -159,6 +175,8 @@ export class UsageService {
                 requests: parseInt(String(stat?.requestCount || 0), 10),
                 mtdSpend: parseFloat(String(mtdStat?.totalSpend || 0)),
                 mtdRequests: parseInt(String(mtdStat?.requestCount || 0), 10),
+                lifetimeSpend: parseFloat(String(lifeStat?.totalSpend || 0)),
+                lifetimeRequests: parseInt(String(lifeStat?.requestCount || 0), 10),
                 limit
             };
         });
@@ -167,8 +185,9 @@ export class UsageService {
         const requests = parseInt(String(dailyGlobal[0]?.requestCount || 0), 10);
         const mtdSpend = parseFloat(String(mtdGlobal[0]?.totalSpend || 0));
         const mtdRequests = parseInt(String(mtdGlobal[0]?.requestCount || 0), 10);
+        const lifetimeSpend = parseFloat(String(lifetimeGlobal[0]?.totalSpend || 0));
+        const lifetimeRequests = parseInt(String(lifetimeGlobal[0]?.requestCount || 0), 10);
 
-        // totalLimit is still derived from integrations
         const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
 
         console.log(`[UsageStats] Final Results - Day: $${spend}, MTD: $${mtdSpend}, Reqs: ${requests}`);
@@ -179,8 +198,16 @@ export class UsageService {
             limit: totalLimit,
             mtdSpend,
             mtdRequests,
+            lifetimeSpend,
+            lifetimeRequests,
             detailed: detailedStats,
-            integrationCount: allIntegrations.length
+            integrationCount: allIntegrations.length,
+            debug: {
+                startOfDay: startOfDay.toISOString(),
+                startOfMonth: startOfMonth.toISOString(),
+                rowsToday: statsByIntegration.length,
+                totalRows: lifetimeGlobal[0].requestCount
+            }
         };
     }
 }

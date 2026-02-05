@@ -249,6 +249,9 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Standardized Usage Statistics**: Fixed zero-spend reporting by aligning all calculations to UTC and implementing "Global Sums" to ensure 100% data capture regardless of integration mapping.
+- ✅ **Lifetime Observability**: The Admin Dashboard now tracks and displays **Lifetime Spend** and **Requests** for the entire system and individual AI providers.
+- ✅ **System Diagnostic Console**: Added an internal diagnostic block at the bottom of the Observability tab to monitor UTC boundaries and raw record health.
 - ✅ **Advanced Analytics Dashboard**: Interactive panel for conversion funnels and marketing intelligence.
 - ✅ **CSV Lead Export**: Secure data extraction for CRM and sales integration.
 - ✅ **Acquisition Tracking**: Granular event logging for onboarding and export intent.

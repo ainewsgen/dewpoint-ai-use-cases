@@ -140,10 +140,9 @@ VITE_API_URL=http://localhost:5000
     - Automated AI descriptions for all uploads
 
 ### Budget Control ✅
-- Set daily spending limit (default: $5.00)
-- Hard limit blocks requests when exceeded
-- Real-time spend tracking
-- Resets at midnight UTC
+- ✅ Set daily spending limit (default: $5.00)
+- ✅ Hard limit blocks requests when exceeded
+- ✅ Real-time spend tracking (Resets daily at midnight UTC)
 
 ### Usage Tracking ✅
 - Logs all AI requests (authenticated + anonymous)
@@ -249,7 +248,8 @@ Fallback to Templates (if AI fails)
 - ✅ **AI Content Generation**: Automatic description generation for uploaded resources via Gemini.
 - ✅ **Download Analytics**: Tracking and reporting on lead engagement with strategic resources.
 - ✅ **Mobile Polishing**: Optimized UI for tablets and smartphones (card grids, typography).
-- ✅ **Global UI Spacing Fix**: Implemented a robust centralized layout wrapper to resolve navigation obstructions across all devices.
+- ✅ **Frontend Accessibility**: Resolved invisible font issues in industry/tech inputs for light theme.
+- ✅ **Global UI Spacing Fix**: Implemented a robust centralized layout wrapper to resolve navigation obstructions.
 - ✅ **Per-User Usage Tracking**: Integrated spend analytics at the user level.
 - ✅ **Library Draft Mode**: Implemented mandatory review for all new library content.
 - ✅ **Production Hardening**: Removed emergency schema repair routes; tightened API security.

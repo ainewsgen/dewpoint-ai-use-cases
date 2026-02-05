@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS use_case_library (
 CREATE TABLE IF NOT EXISTS api_usage (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
+    integration_id INTEGER REFERENCES integrations(id),
     shadow_id TEXT,
     model TEXT,
     prompt_tokens INTEGER,
@@ -175,3 +176,4 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP;
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS download_count INTEGER DEFAULT 0;
+ALTER TABLE api_usage ADD COLUMN IF NOT EXISTS integration_id INTEGER REFERENCES integrations(id);

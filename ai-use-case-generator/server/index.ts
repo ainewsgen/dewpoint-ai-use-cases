@@ -251,7 +251,7 @@ const server = app.listen(Number(PORT), '0.0.0.0', async () => {
     logger.info(`API Server Started on port ${PORT}`);
 
 
-    // API Server Started
+    // API Server Started - Triggering Reload for Schema Update
 });
 
 // Run migrations in background

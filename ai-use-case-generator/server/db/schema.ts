@@ -185,3 +185,12 @@ export const documents = pgTable('documents', {
     downloadCount: integer('download_count').default(0),
     createdAt: timestamp('created_at').defaultNow(),
 });
+
+export const analyticsEvents = pgTable('analytics_events', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => users.id),
+    shadowId: text('shadow_id'),
+    eventType: text('event_type').notNull(), // 'page_view', 'onboarding_start', 'onboarding_complete', 'roadmap_export', 'manual_save'
+    eventData: jsonb('event_data'), // { industry: '...', page: '...', etc }
+    timestamp: timestamp('timestamp').defaultNow(),
+});

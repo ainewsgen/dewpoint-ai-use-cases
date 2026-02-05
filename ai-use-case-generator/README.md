@@ -2,7 +2,7 @@
 
 **Live App:** https://dewpoint-strategy-app.onrender.com  
 **Repository:** ainewsgen/dewpoint-ai-use-cases  
-**Last Updated:** 2026-02-05
+**Last Updated:** 2026-02-05 (v1.3.0)
 
 A full-stack lead generation tool that creates personalized AI automation "recipe cards" for businesses based on their industry, pain points, and tech stack.
 
@@ -26,6 +26,8 @@ A full-stack lead generation tool that creates personalized AI automation "recip
 - **New: AI-Generated Content Summaries** (Automatic descriptions for resource uploads)
 - **New: Resource Analytics** (Track document downloads per lead)
 - **New: Professional PDF Export** (Generate high-impact roadmap documents)
+- **New: Advanced Analytics Dashboard** (Conversion funnels, industry insights, and pain point intelligence)
+- **New: Lead Data Export** (Export CSV format for CRM integration)
 - Configure AI providers and monitor system health
 
 ---
@@ -135,11 +137,11 @@ VITE_API_URL=http://localhost:5000
    - **Draft Mode**: Imported use cases default to "Draft" status
    - Publish/Unpublish toggle for search visibility
 
-5. **Resource Management (New)**
-    - Upload Strategic Resources (Implementation Guides, ROI Reports)
-    - **Draft vs. Published** status management
-    - View **Download Analytics** for each resource
-    - Automated AI descriptions for all uploads
+6. **Advanced Analytics (New)**
+    - **Acquisition Funnel**: Real-time conversion tracking (Anonymous -> Lead -> Export)
+    - **Industry Insights**: Visual breakdown of common user industries
+    - **Pain Point Intelligence**: Top 10 reported business challenges
+    - **CSV Export**: Securely download complete lead data for external tool use
 
 ### Budget Control ✅
 - ✅ Set daily spending limit (default: $5.00)
@@ -173,7 +175,8 @@ api_usage (tracking)
 - `integrations` - AI provider configurations
 - `api_usage` - Request logging and cost tracking
 - `cms_contents` - Announcements and library content
-- `documents` - Strategic resources (guides, reports) and download counts
+- `documents` - Strategic resources and download counts
+- `analytics_events` - Performance tracking (funnels, industry/pain point data)
 
 ### User Flow
 
@@ -246,16 +249,19 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Advanced Analytics Dashboard**: Interactive panel for conversion funnels and marketing intelligence.
+- ✅ **CSV Lead Export**: Secure data extraction for CRM and sales integration.
+- ✅ **Acquisition Tracking**: Granular event logging for onboarding and export intent.
 - ✅ **Professional PDF Roadmap Export**: Integrated print-optimized strategy document generation.
 - ✅ **Robust AI Usage Logging**: Enhanced observability with cost-precision tracking and anonymous `shadowId` capture.
-- ✅ **Outcome-Based Taxonomy Sync**: Standardized AI prompts and fallback recipes with strategic naming (Sentinel, Catalyst, etc.).
+- ✅ **Outcome-Based Taxonomy Sync**: Standardized AI prompts and fallback recipes with strategic naming.
 - ✅ **Admin Dashboard Restoration**: Fixed structural JSX corruption and resolved narrowing/linting errors.
-- ✅ **Per-Integration Budget Limits**: Implemented independent daily limit tracking and enforcement for multiple AI providers.
-- ✅ **System Mode Prediction**: Real-time health diagnostic in the Observability tab (AI Live vs. System Fallback).
-- ✅ **Observability API Alignment**: Resolved 404 errors by implementing missing endpoints (`/stats`) and correcting routing paths.
+- ✅ **Per-Integration Budget Limits**: Implemented independent daily limit tracking and enforcement.
+- ✅ **System Mode Prediction**: Real-time health diagnostic in the Observability tab.
+- ✅ **Observability API Alignment**: Resolved 404 errors by implementing missing endpoints and correcting routing.
 - ✅ **Strategic Document System**: Full management suite for Implementation Guides and Reports.
-- ✅ **AI Content Generation**: Automatic description generation for uploaded resources via Gemini.
-- ✅ **Download Analytics**: Tracking and reporting on lead engagement with strategic resources.
+- ✅ **AI Content Generation**: Automatic description generation for uploaded resources.
+- ✅ **Download Analytics**: Tracking and reporting on lead engagement.
 - ✅ **Mobile Polishing**: Optimized UI for tablets and smartphones (card grids, typography).
 - ✅ **Frontend Accessibility**: Resolved invisible font issues in industry/tech inputs for light theme.
 - ✅ **Global UI Spacing Fix**: Implemented a robust centralized layout wrapper to resolve navigation obstructions.
@@ -279,9 +285,7 @@ b067374 - feat: save onboarding data after registration
 ### Known Limitations
 
 - Email system is placeholder only (password reset not functional)
-- No CSV export for leads (PDF Roadmap for users implemented)
 - No recipe editing for admin
-- No advanced analytics per user
 
 ---
 
@@ -297,7 +301,6 @@ b067374 - feat: save onboarding data after registration
 
 ### High Priority
 - Email integration (password reset, welcome emails)
-- Analytics dashboard (conversion funnel, popular industries)
 - Recipe customization (edit, save custom versions)
 
 ### Medium Priority

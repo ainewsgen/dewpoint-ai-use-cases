@@ -12,6 +12,7 @@ import { useAuth } from './context/AuthContext';
 import { Shield, LogOut, User } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Footer } from './components/Footer';
+import { Toast, useToast } from './components/ui/Toast';
 
 
 import { TrackingService } from './lib/tracking';
@@ -38,6 +39,7 @@ function App() {
     const [authModal, setAuthModal] = useState<'LOGIN' | 'SIGNUP' | null>(null);
 
     const [pendingSave, setPendingSave] = useState<Opportunity | null>(null);
+    const { toast, showToast, hideToast } = useToast();
 
     // ... (keep useEffect) ...
     useEffect(() => {
@@ -201,8 +203,12 @@ function App() {
         // Always save locally first (handled by saveToBackend logic for localStorage)
         saveToBackend(recipe).then((action) => {
             // Feedback
-            if (action === 'ADDED') alert(user ? "Added to Roadmap!" : "Added to temporary Roadmap. Sign up to save permanently.");
-            if (action === 'REMOVED') alert("Removed from Roadmap.");
+            if (action === 'ADDED') {
+                showToast(user ? "Added to Roadmap!" : "Added to temporary Roadmap. Sign up to save permanently.");
+            }
+            if (action === 'REMOVED') {
+                showToast("Removed from Roadmap.", 'info');
+            }
         });
 
         // Prompt for signup if anonymous to ensure data persistence
@@ -246,8 +252,8 @@ function App() {
         if (pendingSave) {
             saveToBackend(pendingSave, loggedInUser).then((action) => {
                 setPendingSave(null);
-                if (action === 'ADDED') alert("Added to Roadmap!");
-                if (action === 'REMOVED') alert("Removed from Roadmap!");
+                if (action === 'ADDED') showToast("Added to Roadmap!");
+                if (action === 'REMOVED') showToast("Removed from Roadmap!", 'info');
             });
         }
     };
@@ -416,6 +422,14 @@ function App() {
                 )}
 
                 {view !== 'ADMIN' && <Footer />}
+
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={hideToast}
+                    />
+                )}
             </div>
         </ErrorBoundary>
     );

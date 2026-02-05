@@ -98,10 +98,26 @@ export function Matrix({ companyData, onUnlock: _onUnlock, isAdmin, onSaveReques
             </header>
 
             {isLoading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '1rem' }}>
-                    <div className="loader" style={{ width: '40px', height: '40px', border: '3px solid var(--border-glass)', borderTopColor: 'hsl(var(--accent-primary))', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                    <p style={{ color: 'var(--text-muted)' }}>Finalizing Blueprints...</p>
-                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                <div className="matrix-grid">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="glass-panel recipe-card animate-pulse" style={{ opacity: 0.6 }}>
+                            <div style={{ height: '20px', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', width: '40%', marginBottom: '1rem' }} />
+                            <div style={{ height: '30px', background: 'rgba(0,0,0,0.1)', borderRadius: '4px', width: '80%', marginBottom: '2rem' }} />
+                            <div style={{ height: '60px', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', width: '100%', marginBottom: '2rem' }} />
+                            <div style={{ height: '40px', background: 'rgba(0,0,0,0.1)', borderRadius: '40px', width: '100%' }} />
+                        </div>
+                    ))}
+                    <div style={{
+                        gridColumn: '1/-1',
+                        textAlign: 'center',
+                        padding: '2rem',
+                        color: 'hsl(var(--accent-primary))',
+                        fontWeight: 600,
+                        fontSize: '1.25rem'
+                    }}>
+                        <div className="animate-bounce" style={{ marginBottom: '1rem' }}>✨</div>
+                        Engineering Custom Blueprints...
+                    </div>
                 </div>
             ) : (
                 <div className="matrix-grid">

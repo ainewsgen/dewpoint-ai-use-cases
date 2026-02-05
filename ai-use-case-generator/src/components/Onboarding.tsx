@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Globe, Sparkles, Briefcase, Loader2, Shield } from 'lucide-react';
+import { ArrowRight, Globe, Sparkles, Briefcase, Shield, AlertCircle } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
 interface OnboardingProps {
@@ -20,7 +20,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const [scrapedContext, setScrapedContext] = useState<any>(null);
 
     const [error, setError] = useState(false);
+    const [scanError, setScanError] = useState<string | null>(null);
     const [isScanning, setIsScanning] = useState(false);
+    const [scanProgress, setScanProgress] = useState(0);
+    const [scanMessage, setScanMessage] = useState('');
 
     // CMS state
     const [announcement, setAnnouncement] = useState('');
@@ -28,6 +31,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     useEffect(() => {
         const msg = localStorage.getItem('dpg_announcement');
         if (msg) setAnnouncement(msg);
+
+        // Track onboarding start
+        fetch('/api/analytics/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventType: 'onboarding_start' })
+        }).catch(err => console.error("Analytics Error:", err));
     }, []);
 
     const techCategories = {
@@ -57,6 +67,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             // Shake effect placeholder
             return;
         }
+
+        // Track onboarding complete
+        fetch('/api/analytics/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventType: 'onboarding_complete', eventData: { industry, role, size } })
+        }).catch(err => console.error("Analytics Error:", err));
+
         onComplete({
             painPoint, url, industry, role, size, stack, description,
             context: scrapedContext,
@@ -78,8 +96,30 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         }
         setIsScanning(true);
         setError(false);
+        setScanError(null);
+        setScanProgress(10);
+        setScanMessage('Connecting to server...');
 
         try {
+            // Simulated progress steps
+            const progressSteps = [
+                { p: 25, m: 'Analyzing website metadata...' },
+                { p: 45, m: 'Extracting industry signals...' },
+                { p: 65, m: 'Identifying tech stack markers...' },
+                { p: 85, m: 'Generating business profile...' }
+            ];
+
+            let stepIdx = 0;
+            const progressInterval = setInterval(() => {
+                if (stepIdx < progressSteps.length) {
+                    setScanProgress(progressSteps[stepIdx].p);
+                    setScanMessage(progressSteps[stepIdx].m);
+                    stepIdx++;
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 800);
+
             // Attempt server-side "AI" scan via Proxy
             const response = await fetch('/api/scan-url', {
                 method: 'POST',
@@ -87,7 +127,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 body: JSON.stringify({ url: cleanUrl })
             });
 
+            clearInterval(progressInterval);
+
             if (response.ok) {
+                setScanProgress(100);
+                setScanMessage('Profile verified!');
                 const { data } = await response.json();
 
                 if (data.industry) setIndustry(data.industry);
@@ -102,15 +146,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 } else {
                     setStack(prev => prev.includes('Gmail/GSuite') ? prev : [...prev, 'Gmail/GSuite']);
                 }
+
+                // Success feedback
+                setTimeout(() => setIsScanning(false), 500);
             } else {
                 console.warn("Scan failed, falling back to heuristics");
+                setScanError("Note: Full AI scan unavailable for this domain. We've applied industry-standard heuristics instead.");
                 runClientHeuristics(cleanUrl);
+                setIsScanning(false);
             }
 
         } catch (err) {
             console.warn("Server scan network error, using fallback.", err);
+            setScanError("Note: Network interruption during scan. Using smart fallback detection.");
             runClientHeuristics(cleanUrl);
-        } finally {
             setIsScanning(false);
         }
     };
@@ -359,15 +408,59 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     onClick={scanUrl}
                                     disabled={isScanning || !url}
                                     className="btn-secondary"
-                                    style={{ padding: '0 1.5rem', height: '100%', borderColor: 'var(--accent-primary)', color: 'hsl(var(--accent-primary))' }}
+                                    style={{
+                                        padding: '0 1.5rem',
+                                        height: '100%',
+                                        borderColor: isScanning ? 'var(--border-glass)' : 'var(--accent-primary)',
+                                        color: isScanning ? 'var(--text-muted)' : 'hsl(var(--accent-primary))',
+                                        minWidth: '100px'
+                                    }}
                                 >
-                                    {isScanning ? <Loader2 className="spin" size={18} /> : "Scan"}
+                                    {isScanning ? <span className="animate-pulse">Scanning...</span> : "Scan"}
                                 </button>
                             </div>
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <Shield size={12} style={{ color: 'hsl(140, 70%, 40%)' }} />
-                                Secure Strategy Audit: We only analyze public metadata. No proprietary data is accessed.
-                            </p>
+
+                            {isScanning && (
+                                <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '8px', padding: '0.75rem', border: '1px solid var(--border-glass)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'hsl(var(--accent-primary))', fontWeight: 600 }}>{scanMessage}</span>
+                                        <span style={{ color: 'var(--text-muted)' }}>{scanProgress}%</span>
+                                    </div>
+                                    <div style={{ height: '4px', background: 'rgba(0,0,0,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                        <div style={{
+                                            height: '100%',
+                                            width: `${scanProgress}%`,
+                                            background: 'hsl(var(--accent-primary))',
+                                            transition: 'width 0.3s ease'
+                                        }}></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {scanError && !isScanning && (
+                                <div style={{
+                                    marginTop: '1rem',
+                                    padding: '0.75rem',
+                                    background: 'hsla(var(--accent-gold)/0.1)',
+                                    border: '1px solid hsla(var(--accent-gold)/0.3)',
+                                    borderRadius: '8px',
+                                    fontSize: '0.8rem',
+                                    color: 'var(--text-main)',
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    alignItems: 'flex-start'
+                                }}>
+                                    <AlertCircle size={14} style={{ marginTop: '2px', color: 'hsl(var(--accent-gold))' }} />
+                                    <span>{scanError}</span>
+                                </div>
+                            )}
+
+                            {!isScanning && !scanError && (
+                                <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Shield size={12} style={{ color: 'hsl(140, 70%, 40%)' }} />
+                                    Secure Strategy Audit: We only analyze public metadata. No proprietary data is accessed.
+                                </p>
+                            )}
                         </div>
 
                         {/* Row 2: Industry & Role */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users, Terminal } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users, Terminal, Download, ArrowRight } from 'lucide-react';
 import { IcpManager } from './admin/IcpManager';
 import { LibraryManager } from './admin/LibraryManager';
 import { DocumentManager } from './admin/DocumentManager';
@@ -26,7 +26,7 @@ interface IntegrationModalProps {
 }
 
 export function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library' | 'debugger' | 'documents'>('leads');
+    const [activeTab, setActiveTab] = useState<'leads' | 'cms' | 'integrations' | 'users' | 'blueprints' | 'observability' | 'icps' | 'library' | 'debugger' | 'documents' | 'analytics'>('leads');
     const [selectedLead, setSelectedLead] = useState<string | null>(null);
     // Local state for fetched leads (ignoring props now)
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
@@ -62,6 +62,8 @@ export function AdminDashboard() {
     const [fetchError, setFetchError] = useState<string | null>(null);
     const [userUsageStats, setUserUsageStats] = useState<any[]>([]);
     const [isLoadingUsage, setIsLoadingUsage] = useState(false);
+    const [analyticsData, setAnalyticsData] = useState<any>(null);
+    const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 
 
     // Blueprint Edit State
@@ -238,6 +240,23 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     };
 
 
+    const fetchAnalytics = async () => {
+        setIsLoadingAnalytics(true);
+        try {
+            const res = await fetch('/api/admin/analytics/stats', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setAnalyticsData(data);
+            }
+        } catch (e) {
+            console.error("Fetch analytics error:", e);
+        } finally {
+            setIsLoadingAnalytics(false);
+        }
+    };
+
     useEffect(() => {
         const storedAnn = localStorage.getItem('dpg_announcement');
         const storedStatus = localStorage.getItem('dpg_announcement_status');
@@ -253,6 +272,8 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             fetchIntegrations(); // Need integrations for prediction mode logic
         } else if (activeTab === 'users') {
             fetchUsers();
+        } else if (activeTab === 'analytics') {
+            fetchAnalytics();
         }
     }, [activeTab]);
 
@@ -795,6 +816,20 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             }}
                         >
                             <FileText size={16} /> Documents
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('analytics')}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: activeTab === 'analytics' ? 'hsla(var(--accent-primary)/0.1)' : 'transparent',
+                                border: 'none',
+                                borderBottom: activeTab === 'analytics' ? '2px solid hsl(var(--accent-primary))' : '2px solid transparent',
+                                color: activeTab === 'analytics' ? 'hsl(var(--accent-primary))' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Activity size={16} /> Analytics
                         </button>
                     </nav>
                 </div>
@@ -2198,6 +2233,134 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             {activeTab === 'library' && <LibraryManager />}
             {activeTab === 'documents' && <DocumentManager />}
             {activeTab === 'debugger' && <DebugConsole />}
+
+            {/* Analytics Tab */}
+            {
+                activeTab === 'analytics' && (
+                    <div className="admin-panel animate-fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+                        <div className="admin-page-header">
+                            <h3 className="admin-page-title">
+                                <Activity size={24} className="text-accent" /> Conversion & Engagement
+                            </h3>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            const res = await fetch('/api/admin/leads/export', {
+                                                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                                            });
+                                            if (res.ok) {
+                                                const blob = await res.blob();
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = `leads_export_${new Date().toISOString().split('T')[0]}.csv`;
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                window.URL.revokeObjectURL(url);
+                                                document.body.removeChild(a);
+                                            }
+                                        } catch (e) {
+                                            console.error("Export failed:", e);
+                                        }
+                                    }}
+                                    className="btn-secondary"
+                                    style={{ gap: '0.5rem' }}
+                                >
+                                    <Download size={16} /> Export Leads (CSV)
+                                </button>
+                                <button
+                                    onClick={fetchAnalytics}
+                                    className="btn-secondary"
+                                    title="Refresh"
+                                >
+                                    <RefreshCw size={16} className={isLoadingAnalytics ? 'animate-spin' : ''} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {isLoadingAnalytics ? (
+                            <div style={{ padding: '4rem', textAlign: 'center' }}>
+                                <RefreshCw className="animate-spin" size={32} />
+                                <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>Calculating performance metrics...</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gap: '2rem' }}>
+                                {/* Funnel Card */}
+                                <div className="glass-panel" style={{ padding: '2rem' }}>
+                                    <h4 style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <ArrowRight size={18} /> Acquisition Funnel
+                                    </h4>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', padding: '0 2rem' }}>
+                                        <div style={{ textAlign: 'center', zIndex: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 800 }}>{analyticsData?.funnel?.onboarding_starts || 0}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Anonymous Engagements</div>
+                                        </div>
+                                        <div style={{ flex: 1, height: '2px', background: 'var(--border-glass)', marginBottom: '1.5rem', margin: '0 1rem', opacity: 0.3 }} />
+                                        <div style={{ textAlign: 'center', zIndex: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'hsl(var(--accent-primary))' }}>{analyticsData?.funnel?.leads_converted || 0}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Leads Captured</div>
+                                        </div>
+                                        <div style={{ flex: 1, height: '2px', background: 'var(--border-glass)', marginBottom: '1.5rem', margin: '0 1rem', opacity: 0.3 }} />
+                                        <div style={{ textAlign: 'center', zIndex: 1 }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'hsl(var(--accent-gold))' }}>{analyticsData?.funnel?.roadmap_downloads || 0}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Roadmaps Exported</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '3rem' }}>
+                                        <div className="status-badge info">
+                                            Conversion Rate: {analyticsData?.funnel?.onboarding_starts ? ((analyticsData.funnel.leads_converted / analyticsData.funnel.onboarding_starts) * 100).toFixed(1) : 0}%
+                                        </div>
+                                        <div className="status-badge success">
+                                            Export Intent: {analyticsData?.funnel?.leads_converted ? ((analyticsData.funnel.roadmap_downloads / analyticsData.funnel.leads_converted) * 100).toFixed(1) : 0}%
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                    {/* Popular Industries */}
+                                    <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                        <h4 style={{ marginBottom: '1.5rem' }}>Popular Industries</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {analyticsData?.industries?.length > 0 ? analyticsData.industries.map((ind: any) => (
+                                                <div key={ind.industry} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontWeight: 500 }}>{ind.industry}</span>
+                                                    <span className="status-badge" style={{ background: 'rgba(0,0,0,0.05)' }}>{ind.count} users</span>
+                                                </div>
+                                            )) : <p style={{ color: 'var(--text-muted)' }}>No data yet</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* Top Pain Points */}
+                                    <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                        <h4 style={{ marginBottom: '1.5rem' }}>Top 10 Pain Points</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {analyticsData?.painPoints?.length > 0 ? analyticsData.painPoints.map((pp: any) => (
+                                                <div key={pp.painPoint} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
+                                                            {pp.painPoint}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{pp.count}</span>
+                                                    </div>
+                                                    <div style={{ height: '4px', background: 'rgba(0,0,0,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                        <div style={{
+                                                            height: '100%',
+                                                            width: `${(pp.count / (analyticsData.painPoints[0].count || 1)) * 100}%`,
+                                                            background: 'hsl(var(--accent-primary))',
+                                                            opacity: 0.6
+                                                        }} />
+                                                    </div>
+                                                </div>
+                                            )) : <p style={{ color: 'var(--text-muted)' }}>No data yet</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )
+            }
 
             {/* Integration Modal */}
             {

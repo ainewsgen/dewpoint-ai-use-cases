@@ -148,6 +148,13 @@ export function Roadmap({ isAdmin, user, leads: _leads = [], onSignup }: Roadmap
     }
 
     const handleExportPDF = () => {
+        // Track export
+        fetch('/api/analytics/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventType: 'roadmap_export' })
+        }).catch(err => console.error("Analytics Error:", err));
+
         window.print();
     };
 

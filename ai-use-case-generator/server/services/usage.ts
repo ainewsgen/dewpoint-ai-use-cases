@@ -95,73 +95,73 @@ export class UsageService {
             console.error("[Usage] ERROR: Failed to insert api_usage record:", e);
         }
     }
-}
+
     /**
      * Get usage stats for the dashboard.
      */
     static async getDailyStats() {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
 
-    // Fetch spending per integration for better dashboard context (Daily)
-    const statsByIntegration = await db.select({
-        integrationId: apiUsage.integrationId,
-        totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
-        requestCount: sql<number>`count(*)`
-    })
-        .from(apiUsage)
-        .where(gte(apiUsage.timestamp, startOfDay))
-        .groupBy(apiUsage.integrationId);
+        // Fetch spending per integration for better dashboard context (Daily)
+        const statsByIntegration = await db.select({
+            integrationId: apiUsage.integrationId,
+            totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
+            requestCount: sql<number>`count(*)`
+        })
+            .from(apiUsage)
+            .where(gte(apiUsage.timestamp, startOfDay))
+            .groupBy(apiUsage.integrationId);
 
-    // Fetch MTD spending per integration
-    const mtdStatsByIntegration = await db.select({
-        integrationId: apiUsage.integrationId,
-        totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
-        requestCount: sql<number>`count(*)`
-    })
-        .from(apiUsage)
-        .where(gte(apiUsage.timestamp, startOfMonth))
-        .groupBy(apiUsage.integrationId);
+        // Fetch MTD spending per integration
+        const mtdStatsByIntegration = await db.select({
+            integrationId: apiUsage.integrationId,
+            totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
+            requestCount: sql<number>`count(*)`
+        })
+            .from(apiUsage)
+            .where(gte(apiUsage.timestamp, startOfMonth))
+            .groupBy(apiUsage.integrationId);
 
-    const allIntegrations = await db.select().from(integrations);
+        const allIntegrations = await db.select().from(integrations);
 
-    // Map stats to integration names and limits
-    const detailedStats = allIntegrations.map(int => {
-        const stat = statsByIntegration.find(s => s.integrationId === int.id);
-        const mtdStat = mtdStatsByIntegration.find(s => s.integrationId === int.id);
-        const metaLimit = (int.metadata as any)?.daily_limit_usd;
-        const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
+        // Map stats to integration names and limits
+        const detailedStats = allIntegrations.map(int => {
+            const stat = statsByIntegration.find(s => s.integrationId === int.id);
+            const mtdStat = mtdStatsByIntegration.find(s => s.integrationId === int.id);
+            const metaLimit = (int.metadata as any)?.daily_limit_usd;
+            const limit = (metaLimit !== undefined && metaLimit !== null) ? Number(metaLimit) : 5.00;
+
+            return {
+                id: int.id,
+                name: int.name,
+                spend: parseFloat(String(stat?.totalSpend || 0)),
+                requests: parseInt(String(stat?.requestCount || 0), 10),
+                mtdSpend: parseFloat(String(mtdStat?.totalSpend || 0)),
+                mtdRequests: parseInt(String(mtdStat?.requestCount || 0), 10),
+                limit
+            };
+        });
+
+        // Global Totals
+        const totalSpend = detailedStats.reduce((sum, s) => sum + s.spend, 0);
+        const totalRequests = detailedStats.reduce((sum, s) => sum + s.requests, 0);
+        const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
+        const totalMtdSpend = detailedStats.reduce((sum, s) => sum + s.mtdSpend, 0);
+        const totalMtdRequests = detailedStats.reduce((sum, s) => sum + s.mtdRequests, 0);
 
         return {
-            id: int.id,
-            name: int.name,
-            spend: parseFloat(String(stat?.totalSpend || 0)),
-            requests: parseInt(String(stat?.requestCount || 0), 10),
-            mtdSpend: parseFloat(String(mtdStat?.totalSpend || 0)),
-            mtdRequests: parseInt(String(mtdStat?.requestCount || 0), 10),
-            limit
+            spend: totalSpend,
+            requests: totalRequests,
+            limit: totalLimit,
+            mtdSpend: totalMtdSpend,
+            mtdRequests: totalMtdRequests,
+            detailed: detailedStats,
+            integrationCount: allIntegrations.length
         };
-    });
-
-    // Global Totals
-    const totalSpend = detailedStats.reduce((sum, s) => sum + s.spend, 0);
-    const totalRequests = detailedStats.reduce((sum, s) => sum + s.requests, 0);
-    const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
-    const totalMtdSpend = detailedStats.reduce((sum, s) => sum + s.mtdSpend, 0);
-    const totalMtdRequests = detailedStats.reduce((sum, s) => sum + s.mtdRequests, 0);
-
-    return {
-        spend: totalSpend,
-        requests: totalRequests,
-        limit: totalLimit,
-        mtdSpend: totalMtdSpend,
-        mtdRequests: totalMtdRequests,
-        detailed: detailedStats,
-        integrationCount: allIntegrations.length
-    };
-}
+    }
 }

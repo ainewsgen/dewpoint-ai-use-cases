@@ -407,9 +407,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     }}
                                     disabled={industry === 'General Business'}
                                     style={{
-                                        background: industry === 'General Business' ? 'rgba(255,255,255,0.05)' : 'var(--bg-card)',
+                                        background: industry === 'General Business' ? 'rgba(0,0,0,0.05)' : 'var(--bg-card)',
                                         width: '100%', paddingLeft: '2.5rem',
-                                        color: industry === 'General Business' ? 'var(--text-muted)' : 'white',
+                                        color: industry === 'General Business' ? 'var(--text-muted)' : 'hsl(var(--text-main))',
                                         fontStyle: industry === 'General Business' ? 'italic' : 'normal'
                                     }}
                                 />
@@ -547,7 +547,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                             }
                                         }
                                     }}
-                                    style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'white' }}
+                                    style={{ width: '100%', background: 'transparent', borderBottom: '1px solid var(--border-glass)', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.5rem 0', outline: 'none', color: 'hsl(var(--text-main))' }}
                                 />
                                 {stack.filter(s => !allTechOptions.includes(s) && !['RingCentral', 'Zoom Phone', 'Dialpad', 'Aircall', 'Nextiva', 'GoToConnect'].includes(s)).length > 0 && (
                                     <div className="chips-grid" style={{ marginTop: '1rem' }}>

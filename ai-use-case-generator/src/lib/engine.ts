@@ -96,7 +96,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
 
     // 1. ADD: The personalized "Pain Killer"
     opportunities.push({
-        title: "The Silent Assistant",
+        title: "Cognitive Load Eliminator",
         department: getDepartmentFromPain(painPoint),
         industry: industry || "General",
         public_view: {
@@ -136,7 +136,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
     const financeTool = stack.find(s => ['QuickBooks', 'Xero', 'NetSuite'].includes(s));
     if (financeTool) {
         opportunities.push({
-            title: "The Invoice Watchdog",
+            title: "Margin Preservation Agent",
             department: "Finance",
             industry: industry || "Finance",
             public_view: {
@@ -214,7 +214,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
     const dataTool = stack.find(s => ['Salesforce', 'HubSpot', 'Pipedrive', 'Airtable', 'Notion'].includes(s)) || "Data Source";
     if (dataTool) {
         opportunities.push({
-            title: "The Omni-Channel Nurture",
+            title: "High-Value Prospect Catalyst",
             department: "Sales",
             industry: industry || "Sales",
             public_view: {
@@ -289,7 +289,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
 
     // 4. RECIPE: The Bridge (Ops)
     opportunities.push({
-        title: "The Project Pulse",
+        title: "Stakeholder Trust Synchronizer",
         department: "Operations",
         industry: industry || "Operations",
         public_view: {
@@ -521,7 +521,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
     // 10. NEW: The Shipment Alchemist (Logistics)
     if (painPoint.toLowerCase().includes('logistics') || painPoint.toLowerCase().includes('ship') || painPoint.toLowerCase().includes('track') || industryLower.includes('logistics')) {
         opportunities.push({
-            title: "The Shipment Alchemist",
+            title: "Logistics Fidelity Guard",
             department: "Logistics",
             industry: "Logistics",
             public_view: {

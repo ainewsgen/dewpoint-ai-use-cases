@@ -10,12 +10,13 @@ export function Analysis({ onComplete }: AnalysisProps) {
 
     useEffect(() => {
         const steps = [
-            "Reading Company URL context...",
-            "Identifying core revenue drivers...",
-            "Benchmarking against industry standards...",
-            "Searching for automation bottlenecks...",
-            "Synthesizing Opportunity Matrix...",
-            "Analysis complete."
+            "Consulting DewPoint Strategic Knowledge Base...",
+            "Identifying core Business DNA and revenue drivers...",
+            "Benchmarking against curated industry standards...",
+            "Searching for high-impact automation gaps...",
+            "Optimizing ROI and margin projections...",
+            "Finalizing Professional Implementation Roadmap...",
+            "Audit complete."
         ];
 
         let currentStep = 0;

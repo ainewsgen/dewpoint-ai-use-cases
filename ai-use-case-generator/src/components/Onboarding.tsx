@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Globe, Sparkles, Briefcase, Loader2 } from 'lucide-react';
+import { ArrowRight, Globe, Sparkles, Briefcase, Loader2, Shield } from 'lucide-react';
 import { CompanyData } from '../lib/engine';
 
 interface OnboardingProps {
@@ -152,22 +152,22 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
                 <div style={{ textAlign: 'center', marginBottom: '3rem', padding: '0 1rem' }}>
                     <h1 style={{
-                        fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                        fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
                         fontWeight: 800,
-                        lineHeight: 1.05,
+                        lineHeight: 1.1,
                         marginBottom: '1.25rem',
                         maxWidth: '1000px',
                         margin: '0 auto 1.5rem auto',
                         letterSpacing: '-0.03em',
                     }}>
-                        <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Turn "I hate doing this"</span><br />
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Quantify the ROI of AI for</span><br />
                         <span style={{
                             background: 'linear-gradient(135deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-gold)) 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             display: 'inline-block',
-                            paddingBottom: '0.5rem' // Prevent descender clipping
-                        }}>into "It's already done."</span>
+                            paddingBottom: '0.5rem'
+                        }}>your specific Tech Stack.</span>
                     </h1>
 
                     <p className="subtitle" style={{
@@ -178,7 +178,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         margin: '0 auto',
                         opacity: 0.85
                     }}>
-                        Tell us a little about your business and the tools you use. We’ll instantly map out exactly where AI can save you time, money, and sanity—customized to how you actually work.
+                        The DewPoint Strategy Engine analyzes your existing workflows to identify high-impact automation gaps. No data-entry required. See where $5,000+ in monthly overhead can be eliminated in under 60 seconds.
                     </p>
                 </div>
 
@@ -364,6 +364,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                                     {isScanning ? <Loader2 className="spin" size={18} /> : "Scan"}
                                 </button>
                             </div>
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Shield size={12} style={{ color: 'hsl(140, 70%, 40%)' }} />
+                                Secure Strategy Audit: We only analyze public metadata. No proprietary data is accessed.
+                            </p>
                         </div>
 
                         {/* Row 2: Industry & Role */}
@@ -560,10 +564,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </div>
                     </div>
 
-                    <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
-                        <button onClick={handleSubmit} className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
-                            Generate Roadmap <Sparkles size={18} style={{ marginLeft: '8px' }} />
+                    <div style={{ marginTop: '3rem', paddingTop: '1rem', borderTop: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        <button onClick={handleSubmit} className="btn-primary" style={{ width: '100%', maxWidth: '400px', padding: '1.25rem 2rem', fontSize: '1.2rem', borderRadius: '50px', boxShadow: '0 10px 30px hsla(var(--accent-primary)/0.3)' }}>
+                            Unlock Professional Roadmap <ArrowRight size={20} style={{ marginLeft: '8px' }} />
                         </button>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.8 }}>
+                            One-click generation • Secure PDF export available
+                        </p>
                     </div>
                 </div>
             </div>

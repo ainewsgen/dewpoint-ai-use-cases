@@ -1104,18 +1104,18 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                         {/* Full List of Core Blueprints */}
                         <div style={{ display: 'grid', gap: '1rem' }}>
                             {[
-                                'The Silent Assistant',
-                                'The Invoice Watchdog',
+                                'Cognitive Load Eliminator',
+                                'Margin Preservation Agent',
                                 'Receipt Auto-Router',
-                                'The Omni-Channel Nurture',
+                                'High-Value Prospect Catalyst',
                                 'The Lead Qualifier',
-                                'The Project Pulse',
+                                'Stakeholder Trust Synchronizer',
                                 'The Case Miner',
                                 'The Competitor Watchtower',
                                 'The Talent Matchmaker',
                                 'The Social Listening Post',
                                 'The Churn Sentinel',
-                                'The Shipment Alchemist',
+                                'Logistics Fidelity Guard',
                                 'The Meeting Alchemist'
                             ].map((name, i) => (
                                 <div key={i} className="admin-list-item" style={{

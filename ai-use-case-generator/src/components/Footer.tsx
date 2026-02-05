@@ -18,8 +18,8 @@ export const Footer: React.FC = () => {
             </div>
             <div style={{ maxWidth: '600px', margin: '0 auto', opacity: 0.7 }}>
                 <p style={{ marginBottom: '0.5rem' }}>
-                    Authorized Use Only. This system processes proprietary strategy data.
-                    All activities are logged for compliance and security monitoring.
+                    Secure Strategy Environment. This system is protected by enterprise-grade
+                    security and performance monitoring.
                 </p>
                 <p>
                     &copy; {new Date().getFullYear()} DewPoint AI. All Rights Reserved.

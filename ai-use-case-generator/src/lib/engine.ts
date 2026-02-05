@@ -413,6 +413,181 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     }
 
+    // 7. NEW: The Talent Matchmaker (HR)
+    if (painPoint.toLowerCase().includes('hir') || painPoint.toLowerCase().includes('recruit') || role.toLowerCase().includes('hr')) {
+        opportunities.push({
+            title: "The Talent Matchmaker",
+            department: "HR",
+            industry: industry || "General",
+            public_view: {
+                problem: "Sifting through hundreds of resumes for culture-fit is a slow, manual process.",
+                solution_narrative: "An AI recruiter that screens every applicant for more than just keywords—it evaluates project history and tone to find the perfect fit before you even look.",
+                value_proposition: "Reduces time-to-hire by 60%.",
+                roi_estimate: "20 hours/month saved per recruiter",
+                detailed_explanation: "This workflow connects your Applicant Tracking System (ATS) to a custom screening engine. It analyzes resumes and portfolio links against your specific cultural values and technical requirements.",
+                example_scenario: "A new candidate applies. The system instantly scrapes their public GitHub, analyzes their past projects for complexity, and ranks them as a 'Top 5%' match, automatically scheduling a first-round interview.",
+                walkthrough_steps: [
+                    "Application received via Greenhouse/Lever.",
+                    "Agent scrapes public profiles (LinkedIn, GitHub, Portfolio).",
+                    "Cultural Alignment Check: LLM compares past project tone to company values.",
+                    "Ranking: Candidate assigned a compatibility score.",
+                    "Action: Top candidates get auto-invite to initial screening call."
+                ]
+            },
+            admin_view: {
+                tech_stack: ["Antigravity", "Greenhouse API", "OpenAI"],
+                stack_details: [
+                    { tool: "Greenhouse API", role: "ATS Ingestion" },
+                    { tool: "OpenAI", role: "Resume & Persona Analysis" }
+                ],
+                implementation_difficulty: "Med",
+                workflow_steps: "1. Webhook from ATS 2. Profile enrichment via API 3. Scoring via LLM 4. Auto-scheduling via Calendly.",
+                upsell_opportunity: "Custom culture-fit prompt engineering."
+            },
+            generation_metadata: { source: 'System', model: 'Static Template' }
+        });
+    }
+
+    // 8. NEW: The Social Listening Post (Marketing)
+    if (painPoint.toLowerCase().includes('market') || painPoint.toLowerCase().includes('social') || painPoint.toLowerCase().includes('brand')) {
+        opportunities.push({
+            title: "The Social Listening Post",
+            department: "Marketing",
+            industry: industry || "General",
+            public_view: {
+                problem: "Responding to brand mentions across 5+ platforms manually is impossible to scale.",
+                solution_narrative: "A silent guardian that monitors the entire web for your brand name and drafts contextual, human-like responses for your team to approve.",
+                value_proposition: "Stay ahead of PR crises in real-time.",
+                roi_estimate: "30% increase in social engagement",
+                detailed_explanation: "Using sentiment analysis and semantic search, this agent identifies high-value conversations your brand should join. It doesn't just look for @mentions; it looks for relevant pain points your product solves.",
+                example_scenario: "Someone on Twitter complains about a competitor's pricing. The system flags this, drafts a helpful response mentioning your current promotion, and alerts your social media manager to post it.",
+                walkthrough_steps: [
+                    "Crawl X, Reddit, and LinkedIn for brand/keyword mentions.",
+                    "Sentiment Tagging: Is the mention Positive, Neutral, or Burning?",
+                    "Context Generation: LLM drafts a response in the brand's 'voice'.",
+                    "Alert: Manager receives a push notification with a 1-click 'Post' option.",
+                    "Analytics: System tracks if the reply led to a website visit."
+                ]
+            },
+            admin_view: {
+                tech_stack: ["Antigravity", "Buffer/Hootsuite API", "Sentiment AI"],
+                stack_details: [
+                    { tool: "Sentiment AI", role: "Tone Recognition" },
+                    { tool: "Buffer API", role: "Post Execution" }
+                ],
+                implementation_difficulty: "High",
+                workflow_steps: "1. Monitor X/Reddit stream 2. Filter via relevance 3. Persona-matched reply generation 4. human-in-the-loop approval.",
+                upsell_opportunity: "Brand voice fine-tuning service."
+            },
+            generation_metadata: { source: 'System', model: 'Static Template' }
+        });
+    }
+
+    // 9. NEW: The Churn Sentinel (Customer Success)
+    if (painPoint.toLowerCase().includes('churn') || painPoint.toLowerCase().includes('retention') || painPoint.toLowerCase().includes('support')) {
+        opportunities.push({
+            title: "The Churn Sentinel",
+            department: "Customer Success",
+            industry: industry || "General",
+            public_view: {
+                problem: "Clients often leave without warning because we aren't tracking their 'unspoken' signals.",
+                solution_narrative: "A behavioral analyst that monitors account activity and automatically reaches out with a personalized gift or check-in when it detects a drop in usage.",
+                value_proposition: "Predicts and prevents churn before it happens.",
+                roi_estimate: "15% reduction in annual churn",
+                detailed_explanation: "The system looks for 'negative space'—the things users STOP doing. If a power user hasn't logged in for 4 days, or their support tickets have shifted in tone, the Sentinel acts immediately.",
+                example_scenario: "An enterprise account's login frequency drops by 40%. The Sentinel instantly notifies their account manager and drafts a personalized email offering an 'Executive Strategy Session'.",
+                walkthrough_steps: [
+                    "Daily login/activity sync from Product DB.",
+                    "Anomaly Detection: Flag accounts with >20% activity drop.",
+                    "Sentiment Audit: Review recent support ticket tone via LLM.",
+                    "Action: Automate 'Health Check' email if triggers are met.",
+                    "Reporting: Update the 'At-Risk' dashboard for the CS team."
+                ]
+            },
+            admin_view: {
+                tech_stack: ["Antigravity", "Mixpanel/Segment", "Zendesk API"],
+                stack_details: [
+                    { tool: "Mixpanel", role: "Behavioral Data Source" },
+                    { tool: "Zendesk API", role: "Sentiment Data Source" }
+                ],
+                implementation_difficulty: "High",
+                workflow_steps: "1. Monitor events stream 2. Aggregation over 7-day window 3. Predictive scoring 4. CRM task creation.",
+                upsell_opportunity: "Predictive model optimization."
+            },
+            generation_metadata: { source: 'System', model: 'Static Template' }
+        });
+    }
+
+    // 10. NEW: The Shipment Alchemist (Logistics)
+    if (painPoint.toLowerCase().includes('logistics') || painPoint.toLowerCase().includes('ship') || painPoint.toLowerCase().includes('track') || industryLower.includes('logistics')) {
+        opportunities.push({
+            title: "The Shipment Alchemist",
+            department: "Logistics",
+            industry: "Logistics",
+            public_view: {
+                problem: "Customers asking 'Where is my order?' ties up 40% of support resources.",
+                solution_narrative: "A proactive tracking agent that communicates directly with carrier APIs and notifies customers the second a delay occurs—often before they notice themselves.",
+                value_proposition: "Turning shipping delays into trust builders.",
+                roi_estimate: "50% reduction in 'WIMO' tickets",
+                detailed_explanation: "The system doesn't just wait for 'Delivered' status. It tracks weather patterns and carrier transit logs to predict delays and manage expectations automatically.",
+                example_scenario: "A winter storm hits a major hub. The Alchemist identifies all 50 impacted packages, sends a 'Heads up' email with a 10% discount code, and updates the estimated delivery date in the portal.",
+                walkthrough_steps: [
+                    "Sync shipment IDs from Shopify/ERP.",
+                    "Carrier Pulse: Real-time API calls to FedEx/UPS/DHL.",
+                    "Contextual Intelligence: Monitor weather/NID news for hub delays.",
+                    "Action: Proactive SMS/Email notification to the customer.",
+                    "Feedback: Log customer satisfaction after the delay resolution."
+                ]
+            },
+            admin_view: {
+                tech_stack: ["Antigravity", "AfterShip API", "Twilio"],
+                stack_details: [
+                    { tool: "AfterShip API", role: "Multi-carrier Tracking" },
+                    { tool: "Twilio", role: "SMS Notification Gateway" }
+                ],
+                implementation_difficulty: "Med",
+                workflow_steps: "1. Poll carrier status 2. Cross-reference weather API 3. Trigger SMS flow 4. Update Shopify Note.",
+                upsell_opportunity: "Custom white-label tracking portals."
+            },
+            generation_metadata: { source: 'System', model: 'Static Template' }
+        });
+    }
+
+    // 11. NEW: The Meeting Alchemist (Productivity)
+    if (painPoint.toLowerCase().includes('meet') || painPoint.toLowerCase().includes('time') || painPoint.toLowerCase().includes('produc')) {
+        opportunities.push({
+            title: "The Meeting Alchemist",
+            department: "Operations",
+            industry: industry || "General",
+            public_view: {
+                problem: "The work happens IN meetings, but the output disappears because nobody takes notes.",
+                solution_narrative: "A digital scribe that joins your calls, extracts action items, and automatically syncs them into your project management software.",
+                value_proposition: "Zero-effort meeting minutes and accountability.",
+                roi_estimate: "15 hours/week saved for leadership",
+                detailed_explanation: "This workflow uses Whisper for high-fidelity transcription and LLMs to distinguish between 'chatter' and 'commitments'. It understands context across multiple speakers.",
+                example_scenario: "You mention 'I'll send that proposal by Friday' in a Zoom call. The Alchemist detects this as an action item, creates a task in Asana due Friday, and attaches the meeting recording link.",
+                walkthrough_steps: [
+                    "Agent joins Zoom/Teams via Bot integration.",
+                    "Transcription: Real-time audio-to-text conversion.",
+                    "Extraction: Identify Action Items, Deadlines, and Key Decisions.",
+                    "Integration: Sync tasks to Asana, ClickUp, or Notion.",
+                    "Distribution: Summary emailed to all participants within 5 minutes."
+                ]
+            },
+            admin_view: {
+                tech_stack: ["Antigravity", "Recall.ai", "OpenAI Whisper"],
+                stack_details: [
+                    { tool: "Recall.ai", role: "Meeting Bot Orchestration" },
+                    { tool: "OpenAI Whisper", role: "Speech-to-Text" }
+                ],
+                implementation_difficulty: "High",
+                workflow_steps: "1. Bot invitation logic 2. Audio stream capture 3. Semantic action item parsing 4. API sync.",
+                upsell_opportunity: "Corporate-wide knowledge search across meetings."
+            },
+            generation_metadata: { source: 'System', model: 'Static Template' }
+        });
+    }
+
     return opportunities;
 }
 

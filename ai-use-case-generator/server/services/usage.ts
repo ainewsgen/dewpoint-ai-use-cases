@@ -56,6 +56,16 @@ export class UsageService {
     static async logUsage(userId: number | null, promptTokens: number, completionTokens: number, model: string, integrationId: number, shadowId?: string) {
         console.log(`[Usage] Attempting to log usage for ${userId ? `User ${userId}` : `Shadow ${shadowId || 'Anon'}`} via ${model} (Int: ${integrationId})`);
 
+        // Safety: If integrationId is missing, try to find a default
+        let finalIntId = integrationId;
+        if (!finalIntId) {
+            const [defaultInt] = await db.select().from(integrations).where(eq(integrations.enabled, true)).limit(1);
+            if (defaultInt) {
+                console.warn(`[Usage] integrationId was missing, falling back to: ${defaultInt.name} (ID: ${defaultInt.id})`);
+                finalIntId = defaultInt.id;
+            }
+        }
+
         let inputRate = this.GPT4O_INPUT;
         let outputRate = this.GPT4O_OUTPUT;
 
@@ -78,7 +88,7 @@ export class UsageService {
         try {
             const values = {
                 userId,
-                integrationId,
+                integrationId: finalIntId,
                 shadowId: shadowId || null,
                 model,
                 promptTokens,
@@ -90,10 +100,38 @@ export class UsageService {
             await db.insert(apiUsage).values(values);
 
             const userLabel = userId ? `User ${userId}` : `Anon (Shadow: ${shadowId || 'none'})`;
-            console.log(`[Usage] SUCCESS: Logged $${costStr} (${promptTokens}in/${completionTokens}out) for ${userLabel} via ${model} (Int: ${integrationId})`);
+            console.log(`[Usage] SUCCESS: Logged $${costStr} (${promptTokens}in/${completionTokens}out) for ${userLabel} via ${model} (Int: ${finalIntId})`);
         } catch (e) {
             console.error("[Usage] ERROR: Failed to insert api_usage record:", e);
         }
+    }
+
+    /**
+     * One-time repair to link orphaned records (where integration_id is null) 
+     * to the primary integration.
+     */
+    static async repairOrphanedRecords() {
+        console.log("[UsageRepair] Starting orphaned record repair...");
+
+        // Find the primary integration (or just the first enabled one)
+        const [primary] = await db.select().from(integrations)
+            .where(eq(integrations.enabled, true))
+            .orderBy(desc(integrations.id))
+            .limit(1);
+
+        if (!primary) {
+            console.error("[UsageRepair] No active integration found to link records to.");
+            return { updated: 0, error: 'No active integration' };
+        }
+
+        const result = await db.execute(sql`
+            UPDATE api_usage 
+            SET integration_id = ${primary.id} 
+            WHERE integration_id IS NULL
+        `);
+
+        console.log(`[UsageRepair] Success: Linked orphaned records to "${primary.name}" (ID: ${primary.id})`);
+        return { updated: true, target: primary.name };
     }
 
     /**
@@ -105,6 +143,8 @@ export class UsageService {
         const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
 
         console.log(`[UsageStats] Calculating for Day: ${startOfDay.toISOString()} | Month: ${startOfMonth.toISOString()}`);
+
+        const allIntegrations = await db.select().from(integrations);
 
         // 1. Fetch Global Lifetime Totals (The "Truth")
         const lifetimeGlobal = await db.select({
@@ -157,8 +197,6 @@ export class UsageService {
             .from(apiUsage)
             .groupBy(apiUsage.integrationId);
 
-        const allIntegrations = await db.select().from(integrations);
-
         // Map stats to integration names and limits
         const detailedStats = allIntegrations.map(int => {
             const stat = statsByIntegration.find(s => s.integrationId === int.id);
@@ -181,6 +219,25 @@ export class UsageService {
             };
         });
 
+        // Add "Unassigned" row if there are orphaned records
+        const unassignedStat = lifetimeStatsByIntegration.find(s => s.integrationId === null);
+        if (unassignedStat) {
+            const dayUnassigned = statsByIntegration.find(s => s.integrationId === null);
+            const mtdUnassigned = mtdStatsByIntegration.find(s => s.integrationId === null);
+
+            detailedStats.push({
+                id: 0,
+                name: 'System/Unassigned',
+                spend: parseFloat(String(dayUnassigned?.totalSpend || 0)),
+                requests: parseInt(String(dayUnassigned?.requestCount || 0), 10),
+                mtdSpend: parseFloat(String(mtdUnassigned?.totalSpend || 0)),
+                mtdRequests: parseInt(String(mtdUnassigned?.requestCount || 0), 10),
+                lifetimeSpend: parseFloat(String(unassignedStat.totalSpend || 0)),
+                lifetimeRequests: parseInt(String(unassignedStat.requestCount || 0), 10),
+                limit: 0
+            });
+        }
+
         const spend = parseFloat(String(dailyGlobal[0]?.totalSpend || 0));
         const requests = parseInt(String(dailyGlobal[0]?.requestCount || 0), 10);
         const mtdSpend = parseFloat(String(mtdGlobal[0]?.totalSpend || 0));
@@ -189,8 +246,6 @@ export class UsageService {
         const lifetimeRequests = parseInt(String(lifetimeGlobal[0]?.requestCount || 0), 10);
 
         const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
-
-        console.log(`[UsageStats] Final Results - Day: $${spend}, MTD: $${mtdSpend}, Reqs: ${requests}`);
 
         return {
             spend,

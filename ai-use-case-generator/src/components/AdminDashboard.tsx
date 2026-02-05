@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CompanyData, Opportunity } from '../lib/engine';
-import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users, Terminal, Download, ArrowRight } from 'lucide-react';
+import { Plus, Trash, Edit, CheckCircle, AlertCircle, Save, MonitorStop, RefreshCw, X, Shield, ShieldCheck, FileText, Megaphone, Globe, Database, Bot, Activity, Sparkles, Zap, Key, BookOpen, Layers, User, Users, Terminal, Download, ArrowRight, Wrench } from 'lucide-react';
 import { IcpManager } from './admin/IcpManager';
 import { LibraryManager } from './admin/LibraryManager';
 import { DocumentManager } from './admin/DocumentManager';
@@ -344,7 +344,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     const handleUpdateLimit = async (newLimit: number, integrationId?: number) => {
         setIsUpdatingLimit(true);
         try {
-            const res = await fetch('/api/admin/usage/limit', {
+            const response = await fetch('/api/usage/limit', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -353,16 +353,36 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                 body: JSON.stringify({ limit: newLimit, integrationId })
             });
 
-            if (res.ok) {
-                // Fetch latest to confirm
-                await fetchUsageStats();
-                alert(integrationId ? "Integration limit updated!" : "Daily budget limit updated!");
-            } else {
-                const errText = await res.text();
-                alert(`Failed to update limit: ${errText}`);
-            }
+            if (!response.ok) throw new Error('Failed to update limit');
+            await fetchUsageStats();
+        } catch (error) {
+            console.error('Error updating limit:', error);
+            alert('Failed to update limit');
         } finally {
             setIsUpdatingLimit(false);
+        }
+    };
+
+    const handleRepairLinkage = async () => {
+        if (!confirm("This will attempt to link all 'Unassigned' usage records to your primary integration (usually OpenAI). Proceed?")) return;
+
+        try {
+            const response = await fetch('/api/usage/repair', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (data.updated) {
+                alert(`Successfully linked orphaned records to ${data.target}`);
+                fetchUsageStats();
+            } else {
+                alert("Repair completed: No orphaned records found or no active integration.");
+            }
+        } catch (error) {
+            console.error('Repair Error:', error);
+            alert("Failed to perform repair. Check server logs.");
         }
     };
 
@@ -1061,12 +1081,23 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             {/* Internal Diagnostics */}
                             {usageStats?.debug && (
                                 <div style={{ marginTop: '1rem', padding: '1rem', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.75rem', color: '#64748b' }}>
-                                    <div style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                        <Terminal size={12} /> SYSTEM DIAGNOSTIC (INTERNAL)
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                <Terminal size={12} /> SYSTEM DIAGNOSTIC (INTERNAL)
+                                            </div>
+                                            <div>UTC Day Start: {usageStats.debug.startOfDay}</div>
+                                            <div>UTC Month Start: {usageStats.debug.startOfMonth}</div>
+                                            <div>Daily Result Sets: {usageStats.debug.rowsToday} | Total Records Found: {usageStats.debug.totalRows}</div>
+                                        </div>
+                                        <button
+                                            onClick={handleRepairLinkage}
+                                            className="btn-secondary btn-sm"
+                                            style={{ fontSize: '0.65rem', padding: '0.25rem 0.5rem' }}
+                                        >
+                                            <Wrench size={10} style={{ marginRight: '0.25rem' }} /> Repair Data Linkage
+                                        </button>
                                     </div>
-                                    <div>UTC Day Start: {usageStats.debug.startOfDay}</div>
-                                    <div>UTC Month Start: {usageStats.debug.startOfMonth}</div>
-                                    <div>Daily Result Sets: {usageStats.debug.rowsToday} | Total Records Found: {usageStats.debug.totalRows}</div>
                                 </div>
                             )}
                         </div>

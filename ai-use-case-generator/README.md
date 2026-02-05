@@ -249,7 +249,9 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Integration Data Repair Tool**: Added a one-click mechanism in the Admin Dashboard to backfill and link "unassigned" historical usage records to primary AI providers.
 - ✅ **Standardized Usage Statistics**: Fixed zero-spend reporting by aligning all calculations to UTC and implementing "Global Sums" to ensure 100% data capture regardless of integration mapping.
+- ✅ **Automated Usage Attribution**: Implemented a safety fallback in the logging service that automatically attributes AI requests to the active provider if an ID is missing, preventing future data gaps.
 - ✅ **Lifetime Observability**: The Admin Dashboard now tracks and displays **Lifetime Spend** and **Requests** for the entire system and individual AI providers.
 - ✅ **System Diagnostic Console**: Added an internal diagnostic block at the bottom of the Observability tab to monitor UTC boundaries and raw record health.
 - ✅ **Advanced Analytics Dashboard**: Interactive panel for conversion funnels and marketing intelligence.

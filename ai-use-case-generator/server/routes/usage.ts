@@ -160,4 +160,15 @@ router.post('/usage/readiness-check', requireAuth, requireAdmin, async (req, res
 
 // Readiness Check (Already implemented)
 
+// REPAIR: Link orphaned records to primary integration
+router.post('/usage/repair', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const result = await UsageService.repairOrphanedRecords();
+        res.json(result);
+    } catch (error: any) {
+        console.error('Usage Repair Error:', error);
+        res.status(500).json({ error: 'Failed to repair usage records', details: error.message });
+    }
+});
+
 export default router;

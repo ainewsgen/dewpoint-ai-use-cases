@@ -1,18 +1,18 @@
 # DewPoint AI Use Case Generator - Project TODO
 
 ## 🚀 High Priority (Next Phase)
-- [ ] **Advanced Analytics Dashboard**
-    - [ ] Create 'Observability' view for document engagement
-    - [ ] Track conversion funnel metrics (Anonymous -> Lead -> Download)
-    - [ ] Analyze popular industries and pain points
+- [x] **Advanced Analytics Dashboard**
+    - [x] Create 'Observability' view for document engagement
+    - [x] Track conversion funnel metrics (Anonymous -> Lead -> Download)
+    - [x] Analyze popular industries and pain points
 - [ ] **Email Integration**
     - [ ] Implement actual password reset flow (gating placeholder)
     - [ ] Add "New Roadmap" welcome emails for new signups
     - [ ] Configure SMTP/SendGrid/Postmark integration
-- [ ] **Lead & Analytics Export**
-    - [ ] Add CSV export button for Leads table
+- [x] **Lead & Analytics Export**
+    - [x] Add CSV export button for Leads table
     - [x] Implement professional PDF export for User Roadmaps
-    - [ ] Export document download analytics to spreadsheet
+    - [x] Export document download analytics to spreadsheet
 
 ## 🛠️ Medium Priority
 - [ ] **Library Search/Filter Refinement**

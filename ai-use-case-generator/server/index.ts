@@ -201,7 +201,7 @@ app.post('/api/admin/dry-run', requireAuth, requireAdmin, async (req, res) => {
         // 5. Usage Logging
         log("Step 5: Logging Usage to DB...");
         try {
-            await UsageService.logUsage(userId, 50, 50, modelId);
+            await UsageService.logUsage(userId, 50, 50, modelId, activeInt.id);
             log("Step 5: DB Write Successful ✅");
         } catch (dbErr: any) {
             log(`Step 5 FAILED: DB Write Error - ${dbErr.message} `);

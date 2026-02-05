@@ -244,6 +244,10 @@ Fallback to Templates (if AI fails)
 
 ### Recent Improvements
 
+- ✅ **Admin Dashboard Restoration**: Fixed structural JSX corruption and resolved narrowing/linting errors.
+- ✅ **Per-Integration Budget Limits**: Implemented independent daily limit tracking and enforcement for multiple AI providers.
+- ✅ **System Mode Prediction**: Real-time health diagnostic in the Observability tab (AI Live vs. System Fallback).
+- ✅ **Observability API Alignment**: Resolved 404 errors by implementing missing endpoints (`/stats`) and correcting routing paths.
 - ✅ **Strategic Document System**: Full management suite for Implementation Guides and Reports.
 - ✅ **AI Content Generation**: Automatic description generation for uploaded resources via Gemini.
 - ✅ **Download Analytics**: Tracking and reporting on lead engagement with strategic resources.

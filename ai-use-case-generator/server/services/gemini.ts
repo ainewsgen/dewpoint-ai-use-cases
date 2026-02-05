@@ -26,12 +26,9 @@ export class GeminiService {
         }
     }
 
-    static async generateDocumentDescription(name: string, type: string, fileName: string): Promise<string> {
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) return "";
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    static async generateDocumentDescription(params: AIRequestParams, name: string, type: string, fileName: string): Promise<string> {
+        const genAI = new GoogleGenerativeAI(params.apiKey);
+        const model = genAI.getGenerativeModel({ model: params.model || "gemini-1.5-flash" });
 
         const prompt = `Act as an expert AI Strategy Consultant. Generate a short, professional description (max 20 words) for a document called "${name}". 
         The document type is "${type}" and the file is named "${fileName}".

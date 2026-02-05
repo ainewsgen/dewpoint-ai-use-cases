@@ -164,7 +164,8 @@ export const integrations = pgTable('integrations', {
 export const apiUsage = pgTable('api_usage', {
     id: serial('id').primaryKey(),
     userId: integer('user_id').references(() => users.id), // Allow null for anonymous users
-    shadowId: text('shadow_id'), // NEW: track usage for shadow users too
+    integrationId: integer('integration_id').references(() => integrations.id), // NEW: track which provider was used
+    shadowId: text('shadow_id'), // track usage for shadow users too
     model: text('model'),
     promptTokens: integer('prompt_tokens'),
     completionTokens: integer('completion_tokens'),

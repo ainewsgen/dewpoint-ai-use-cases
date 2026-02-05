@@ -136,18 +136,12 @@ CRITICAL INSTRUCTIONS:
         let usedModelId = '';
         let usedProvider = '';
 
-        // Check Daily Budget ONCE before trying loop (Approximate)
-        try {
-            await UsageService.checkBudgetExceeded();
-        } catch (e: any) {
-            console.warn("Budget Limit Hit Pre-Check:", e.message);
-            // Budget exceeded -> Use System Fallback immediately
-            const fallback = SystemCapabilityService.generateFallback(companyData.industry, companyData.role);
-            return res.json({ blueprints: fallback });
-        }
-
+        // Failover Loop with Per-Integration Budgeting
         for (const activeInt of sortedIntegrations) {
             try {
+                // 1. Check Budget for this specific integration
+                await UsageService.checkBudgetExceeded(activeInt.id);
+
                 const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
                 if (!apiKey && !process.env.OPENAI_API_KEY) continue; // Skip if no key available
 
@@ -183,7 +177,7 @@ CRITICAL INSTRUCTIONS:
                 const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
                 const userIdForLogging = (req as AuthRequest).user?.id || null;
                 const shadowId = (req as any).shadowId;
-                UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, usedModelId, shadowId).catch(err => console.error("Usage Log Error:", err));
+                UsageService.logUsage(userIdForLogging, promptTokens, completionTokens, usedModelId, activeInt.id, shadowId).catch(err => console.error("Usage Log Error:", err));
 
                 break; // Exit loop on success
             } catch (err: any) {
@@ -363,6 +357,10 @@ Generate 3 custom automation blueprints in JSON format...`;
         for (const activeInt of sortedIntegrations) {
             try {
                 log(`Attempting Integration: ${activeInt.name}`);
+
+                // 1. Check Budget for this specific integration
+                await UsageService.checkBudgetExceeded(activeInt.id);
+
                 const apiKey = activeInt.apiKey ? decrypt(activeInt.apiKey) : '';
 
                 if (!apiKey) {
@@ -395,6 +393,12 @@ Generate 3 custom automation blueprints in JSON format...`;
                 log(`Success! (${duration}ms)`, { resultSummary: JSON.stringify(result).substring(0, 100) + '...' });
                 successResult = result;
                 usedModelId = modelId;
+
+                // Log Usage in Debug mode too
+                const promptTokens = 100; // Simplified for debug
+                const completionTokens = 100;
+                UsageService.logUsage((req as AuthRequest).user?.id || null, promptTokens, completionTokens, usedModelId, activeInt.id).catch(e => console.error("Debug Usage Log Error:", e));
+
                 break;
             } catch (err: any) {
                 log(`Integration Failed: ${activeInt.name}`, { error: err.message, stack: err.stack });

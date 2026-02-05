@@ -107,12 +107,19 @@ router.post('/scan-url', async (req, res) => {
 
         if (activeInt && activeInt.apiKey) {
             try {
+                // 1. Check Budget for this specific integration
+                const { UsageService } = await import('../services/usage.js');
+                await UsageService.checkBudgetExceeded(activeInt.id);
+
                 const apiKey = decrypt(activeInt.apiKey);
                 const systemPrompt = buildScanPrompt({ url, title, description, h1, h2, bodySnippet: bodyText.substring(0, 800) });
 
+                const metadata = activeInt.metadata as any || {};
+                const modelId = metadata.model || 'gpt-4o';
+
                 aiAnalysis = await OpenAIService.generateJSON({
                     apiKey,
-                    model: 'gpt-4o',
+                    model: modelId,
                     systemPrompt,
                     userContext: "Analyze the website content above."
                 });
@@ -127,6 +134,11 @@ router.post('/scan-url', async (req, res) => {
                             if (!stack.includes(t)) stack.push(t);
                         });
                     }
+
+                    // 2. Log Usage
+                    const promptTokens = Math.ceil(systemPrompt.length / 4);
+                    const completionTokens = Math.ceil(JSON.stringify(aiAnalysis).length / 4);
+                    UsageService.logUsage(null, promptTokens, completionTokens, modelId, activeInt.id).catch(err => console.error("Scan Usage Log Error:", err));
                 }
             } catch (err) {
                 console.warn("[Scan] AI analysis failed, falling back to heuristics:", err);

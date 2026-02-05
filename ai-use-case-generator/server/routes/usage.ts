@@ -9,7 +9,7 @@ const { users, integrations } = schema;
 const router = Router();
 
 // Get Usage Breakdown By User
-router.get('/admin/usage/by-user', requireAuth, requireAdmin, async (req, res) => {
+router.get('/usage/by-user', requireAuth, requireAdmin, async (req, res) => {
     try {
         // Aggregate spend and request count per user
         const userStats = await db.select({
@@ -28,6 +28,17 @@ router.get('/admin/usage/by-user', requireAuth, requireAdmin, async (req, res) =
     } catch (error: any) {
         console.error('User Usage Error:', error);
         res.status(500).json({ error: 'Failed to fetch user usage stats' });
+    }
+});
+
+// Get Global Stats
+router.get('/usage/stats', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const stats = await UsageService.getDailyStats();
+        res.json(stats);
+    } catch (error: any) {
+        console.error('Usage Stats Error:', error);
+        res.status(500).json({ error: 'Failed to fetch usage stats' });
     }
 });
 

@@ -32,7 +32,12 @@ export function AdminDashboard() {
     const [adminLeads, setAdminLeads] = useState<any[]>([]);
 
     // Usage Stats State
-    const [usageStats, setUsageStats] = useState<{ spend: number; requests: number; limit: number; integrationId?: number; debugMeta?: any } | null>(null);
+    const [usageStats, setUsageStats] = useState<{
+        spend: number;
+        requests: number;
+        limit: number;
+        detailed?: { id: number; name: string; spend: number; requests: number; limit: number }[]
+    } | null>(null);
     const [isUpdatingLimit, setIsUpdatingLimit] = useState(false);
 
     // CMS State
@@ -183,6 +188,46 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             setFetchError(`Network Error: ${error.message}`);
         }
     };
+
+    const renderSystemModePrediction = () => {
+        const hasActiveIntegration = integrations.some(i => i.enabled);
+        const currentSpend = usageStats?.spend || 0;
+        const currentLimit = usageStats?.limit || 100;
+        const budgetExceeded = currentSpend >= currentLimit;
+
+        let status = 'System (Fallback)';
+        let color = 'salmon';
+        let reason = 'Unknown Error';
+        let bg = 'rgba(250, 128, 114, 0.1)';
+
+        if (!hasActiveIntegration) {
+            status = 'System (Fallback)';
+            color = 'orange';
+            bg = 'rgba(255, 165, 0, 0.1)';
+            reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
+        } else if (budgetExceeded) {
+            status = 'System (Fallback)';
+            color = 'salmon';
+            bg = 'rgba(250, 128, 114, 0.1)';
+            reason = `Daily budget limit ($${currentLimit}) has been reached relative to current spend ($${currentSpend}).`;
+        } else {
+            status = 'AI (Live Generation)';
+            color = 'hsl(140, 70%, 40%)';
+            bg = 'hsla(140, 70%, 40%, 0.1)';
+            reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
+        }
+
+        return (
+            <div style={{ padding: '0.75rem', borderRadius: '8px', background: bg, border: `1px solid ${color}`, color: color, fontSize: '0.9rem', marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+                    Predicted Mode: {status}
+                </div>
+                <div style={{ marginTop: '0.25rem', opacity: 0.9 }}>{reason}</div>
+            </div>
+        );
+    };
+
 
     useEffect(() => {
         const storedAnn = localStorage.getItem('dpg_announcement');
@@ -854,48 +899,62 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             )}
                         </div>
 
-                        {(() => {
-                            const hasActiveIntegration = integrations.some(i => i.enabled);
-                            const budgetExceeded = (usageStats?.spend || 0) >= (usageStats?.limit || 100);
-
-                            // Determine State
-                            let status = 'System (Fallback)';
-                            let color = 'salmon';
-                            let reason = 'Unknown Error';
-                            let bg = 'rgba(250, 128, 114, 0.1)';
-
-                            if (!hasActiveIntegration) {
-                                status = 'System (Fallback)';
-                                color = 'orange';
-                                bg = 'rgba(255, 165, 0, 0.1)';
-                                reason = 'No active AI integrations found. Navigate to the Integrations tab to connect a provider.';
-                            } else if (budgetExceeded) {
-                                status = 'System (Fallback)';
-                                color = 'salmon';
-                                bg = 'rgba(250, 128, 114, 0.1)';
-                                reason = `Daily budget limit ($${usageStats?.limit}) has been reached relative to current spend ($${usageStats?.spend}).`;
-                            } else {
-                                status = 'AI (Live Generation)';
-                                color = 'hsl(140, 70%, 40%)';
-                                bg = 'hsla(140, 70%, 40%, 0.1)';
-                                reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
-                            }
-
-                            return (
-                                <div style={{ padding: '0.75rem', borderRadius: '8px', background: bg, border: `1px solid ${color}`, color: color, fontSize: '0.9rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
-                                        Predicted Mode: {status}
-                                    </div>
-                                    <div style={{ marginTop: '0.25rem', opacity: 0.9 }}>{reason}</div>
+                        {/* Per-Integration Breakdown */}
+                        <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '1.5rem' }}>
+                            <h4 style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 0 }}>
+                                <RefreshCw size={18} /> Spend By Integration
+                            </h4>
+                            {isLoadingUsage ? (
+                                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                                    <RefreshCw className="animate-spin" size={20} style={{ margin: '0 auto' }} />
                                 </div>
-                            );
-                        })()}
-                    </div>
-                )}
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <thead>
+                                            <tr style={{ background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid var(--border-glass)' }}>
+                                                <th style={{ textAlign: 'left', padding: '1rem', fontWeight: 600 }}>Integration</th>
+                                                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 600 }}>Usage</th>
+                                                <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Today ($)</th>
+                                                <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>Limit ($)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {!usageStats?.detailed || usageStats.detailed.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No integration usage data yet.</td>
+                                                </tr>
+                                            ) : usageStats.detailed.map(int => (
+                                                <tr key={int.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                                                    <td style={{ padding: '1rem' }}>
+                                                        <div style={{ fontWeight: 600 }}>{int.name}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {int.id}</div>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center', padding: '1rem' }}>
+                                                        <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{int.requests} requests</div>
+                                                        <div style={{ width: '60px', height: '4px', background: '#e2e8f0', margin: '0.25rem auto', borderRadius: '2px', overflow: 'hidden' }}>
+                                                            <div style={{
+                                                                width: `${Math.min((int.spend / (int.limit || 1)) * 100, 100)}%`,
+                                                                height: '100%',
+                                                                background: int.spend >= int.limit ? 'salmon' : 'hsl(var(--accent-primary))'
+                                                            }} />
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ textAlign: 'right', padding: '1rem', fontWeight: 700 }}>${int.spend?.toFixed(4)}</td>
+                                                    <td style={{ textAlign: 'right', padding: '1rem', color: 'var(--text-muted)' }}>${int.limit?.toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
 
-            {/* Debugger Tab */}
-            {activeTab === 'debugger' && <DebugConsole />}
+                            {/* System Mode Prediction */}
+                            {renderSystemModePrediction()}
+                        </div>
+                    </div>
+                )
+            }
 
 
 
@@ -1862,6 +1921,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                     <th style={{ padding: '1rem' }}>Name</th>
                                     <th style={{ padding: '1rem' }}>Type</th>
                                     <th style={{ padding: '1rem' }}>Base URL</th>
+                                    <th style={{ padding: '1rem' }}>Daily Limit</th>
                                     <th style={{ padding: '1rem' }}>Status</th>
                                     <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
                                 </tr>
@@ -1872,6 +1932,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         <td style={{ padding: '1rem' }}>{i.name}</td>
                                         <td style={{ padding: '1rem' }}>{i.authType === 'api_key' ? 'API Key' : 'OAuth'}</td>
                                         <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
+                                        <td style={{ padding: '1rem' }}>${(i.metadata as any)?.daily_limit_usd || '5.00'}</td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
                                                 {i.enabled ? 'Active' : 'Disabled'}
@@ -2091,7 +2152,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             }
         </div >
     );
-};
+}
 
 function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProps) {
     const [name, setName] = useState(integration?.name || '');
@@ -2100,6 +2161,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     const [apiKey, setApiKey] = useState('');
     const [status, setStatus] = useState(integration?.enabled ?? true);
     const [priority, setPriority] = useState(integration?.priority || 0);
+    const [dailyLimit, setDailyLimit] = useState((integration?.metadata as any)?.daily_limit_usd || 5.00);
 
     // Metadata fields
     const metadata = (integration?.metadata as any) || {};
@@ -2107,7 +2169,6 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
     const [provider, setProvider] = useState<string>(effectiveProvider);
     const [model, setModel] = useState<string>(metadata.model || '');
     const [availableModels, setAvailableModels] = useState<string[]>([]);
-
     const [isTesting, setIsTesting] = useState(false);
 
     const handleFetchModels = async (e: React.MouseEvent) => {
@@ -2155,7 +2216,8 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
             metadata: {
                 ...metadata,
                 provider,
-                model
+                model,
+                daily_limit_usd: Number(dailyLimit)
             }
         });
     };
@@ -2285,7 +2347,6 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                             </div>
                         </div>
 
-
                         <div className="admin-form-divider" data-label="Model Parameters"></div>
                         <div className="admin-form-grid">
                             <div className="admin-form-group">
@@ -2339,22 +2400,29 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                                         <RefreshCw size={18} />
                                     </button>
                                 </div>
-                                {availableModels.length > 0 && !availableModels.includes(model) && (
-                                    <input
-                                        type="text"
-                                        className="admin-input"
-                                        value={model}
-                                        onChange={e => setModel(e.target.value)}
-                                        placeholder="Enter custom model ID"
-                                        style={{ marginTop: '0.5rem' }}
-                                    />
-                                )}
                             </div>
                         </div>
 
+                        <div className="admin-form-group">
+                            <label htmlFor="int-limit" className="admin-label">Daily Budget Limit (USD)</label>
+                            <div className="input-with-icon">
+                                <span style={{ position: 'absolute', left: '0.75rem', color: 'var(--text-muted)' }}>$</span>
+                                <input
+                                    id="int-limit"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    className="admin-input"
+                                    style={{ paddingLeft: '1.5rem' }}
+                                    value={dailyLimit}
+                                    onChange={e => setDailyLimit(e.target.value)}
+                                    placeholder="5.00"
+                                />
+                            </div>
+                        </div>
 
                         <div className="admin-form-group" style={{ marginTop: '1rem' }}>
-                            <label className="checkbox-container admin-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                            <label className="checkbox-container admin-label">
                                 <input
                                     type="checkbox"
                                     checked={status}
@@ -2365,7 +2433,7 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                         </div>
                     </div>
 
-                    <div className="admin-modal-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1.5rem' }}>
+                    <div className="admin-modal-footer">
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', width: '100%' }}>
                             {integration && (
                                 <button
@@ -2373,33 +2441,15 @@ function IntegrationModal({ integration, onClose, onSave }: IntegrationModalProp
                                     className="admin-btn-secondary"
                                     onClick={() => handleTest()}
                                     disabled={isTesting}
-                                    style={{ padding: '0.875rem 1.5rem' }}
                                 >
                                     {isTesting ? <RefreshCw size={18} className="spin" /> : <ShieldCheck size={18} style={{ marginRight: '0.5rem' }} />}
                                     Test Connection
                                 </button>
                             )}
-                            <div style={{ flex: 1 }} />
                             <button type="button" onClick={onClose} className="admin-btn-secondary">Cancel</button>
-                            <button type="submit" className="admin-btn-primary" style={{ padding: '0.875rem 2rem' }}>
-                                <Zap size={18} style={{ marginRight: '0.5rem' }} /> {integration ? 'Update Tool' : 'Register Tool'}
+                            <button type="submit" className="admin-btn-primary">
+                                <Zap size={18} style={{ marginRight: '0.5rem' }} /> {integration ? 'Update' : 'Register'}
                             </button>
-                        </div>
-
-                        <div style={{
-                            borderTop: '1px solid #f1f5f9',
-                            paddingTop: '1rem',
-                            textAlign: 'center',
-                            fontSize: '0.75rem',
-                            color: '#94a3b8',
-                            lineHeight: '1.4'
-                        }}>
-                            <p style={{ fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
-                                Authorized Use Only
-                            </p>
-                            <p>
-                                This system processes proprietary strategy data. All activities are logged for compliance and security monitoring.
-                            </p>
                         </div>
                     </div>
                 </form>

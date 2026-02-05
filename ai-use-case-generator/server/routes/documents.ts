@@ -2,8 +2,11 @@ import { Router } from 'express';
 import { db } from '../db/index.js';
 import { documents } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
-import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth.js';
 import { GeminiService } from '../services/gemini.js';
+import { integrations } from '../db/schema.js';
+import { decrypt } from '../utils/encryption.js';
+import { UsageService } from '../services/usage.js';
 
 const router = Router();
 
@@ -51,9 +54,34 @@ router.post('/admin/documents', requireAuth, requireAdmin, async (req, res) => {
         // Auto-generate description if missing
         if (!description) {
             try {
-                description = await GeminiService.generateDocumentDescription(name, type, fileName || "");
-            } catch (err) {
-                console.error("AI Description failed, skipping...", err);
+                // Find an active Gemini integration
+                const ints = await db.select().from(integrations)
+                    .where(eq(integrations.enabled, true));
+
+                const geminiInt = ints.find(i => i.name.toLowerCase().includes('gemini') || (i.metadata as any)?.provider === 'gemini');
+
+                if (geminiInt && geminiInt.apiKey) {
+                    const apiKey = decrypt(geminiInt.apiKey);
+                    const metadata = geminiInt.metadata as any || {};
+                    const modelId = metadata.model || 'gemini-1.5-flash';
+
+                    // 1. Check Budget
+                    await UsageService.checkBudgetExceeded(geminiInt.id);
+
+                    description = await GeminiService.generateDocumentDescription({
+                        apiKey,
+                        model: modelId,
+                        systemPrompt: "Document description generator",
+                        userContext: ""
+                    }, name, type, fileName || "");
+
+                    // 2. Log Usage
+                    if (description) {
+                        UsageService.logUsage((req as AuthRequest).user?.id || null, 50, 20, modelId, geminiInt.id).catch(err => console.error("Doc Description Usage Log Error:", err));
+                    }
+                }
+            } catch (err: any) {
+                console.error("AI Description failed:", err.message);
             }
         }
 

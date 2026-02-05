@@ -192,10 +192,17 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     };
 
     const renderSystemModePrediction = () => {
-        const hasActiveIntegration = integrations.some(i => i.enabled);
-        const currentSpend = usageStats?.spend || 0;
-        const currentLimit = usageStats?.limit || 100;
-        const budgetExceeded = currentSpend >= currentLimit;
+        const enabledIntegrations = integrations.filter(i => i.enabled);
+        const hasActiveIntegration = enabledIntegrations.length > 0;
+
+        // Find if ANY enabled integration has budget remaining
+        const healthyIntegrations = enabledIntegrations.filter(i => {
+            const stats = usageStats?.detailed?.find(s => s.id === i.id);
+            if (!stats) return true; // Assume okay if no stats yet
+            return stats.spend < stats.limit;
+        });
+
+        const budgetExceeded = hasActiveIntegration && healthyIntegrations.length === 0;
 
         let status = 'System (Fallback)';
         let color = 'salmon';
@@ -211,12 +218,12 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             status = 'System (Fallback)';
             color = 'salmon';
             bg = 'rgba(250, 128, 114, 0.1)';
-            reason = `Daily budget limit ($${currentLimit}) has been reached relative to current spend ($${currentSpend}).`;
+            reason = `All active integrations have reached their daily budget limits.`;
         } else {
             status = 'AI (Live Generation)';
             color = 'hsl(140, 70%, 40%)';
             bg = 'hsla(140, 70%, 40%, 0.1)';
-            reason = 'System is healthy. Active Integration found and budget is sufficient for new runs.';
+            reason = `System is healthy. ${healthyIntegrations.length} integration(s) ready with available budget.`;
         }
 
         return (
@@ -243,6 +250,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
             fetchIntegrations();
         } else if (activeTab === 'observability') {
             fetchUsageStats();
+            fetchIntegrations(); // Need integrations for prediction mode logic
         } else if (activeTab === 'users') {
             fetchUsers();
         }

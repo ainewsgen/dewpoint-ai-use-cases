@@ -100,14 +100,14 @@ export class UsageService {
      * Get usage stats for the dashboard.
      */
     static async getDailyStats() {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
+        // Use UTC Boundaries to match DB timestamps
+        const now = new Date();
+        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+        const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
 
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+        console.log(`[UsageStats] Calculating for Day: ${startOfDay.toISOString()} | Month: ${startOfMonth.toISOString()}`);
 
-        // Fetch spending per integration for better dashboard context (Daily)
+        // Fetch spending per integration (Daily)
         const statsByIntegration = await db.select({
             integrationId: apiUsage.integrationId,
             totalSpend: sql<number>`coalesce(sum(${apiUsage.totalCost}), 0)`,
@@ -128,6 +128,7 @@ export class UsageService {
             .groupBy(apiUsage.integrationId);
 
         const allIntegrations = await db.select().from(integrations);
+        console.log(`[UsageStats] Found ${allIntegrations.length} integrations. Daily rows: ${statsByIntegration.length}, MTD rows: ${mtdStatsByIntegration.length}`);
 
         // Map stats to integration names and limits
         const detailedStats = allIntegrations.map(int => {
@@ -153,6 +154,8 @@ export class UsageService {
         const totalLimit = detailedStats.reduce((sum, s) => sum + s.limit, 0);
         const totalMtdSpend = detailedStats.reduce((sum, s) => sum + s.mtdSpend, 0);
         const totalMtdRequests = detailedStats.reduce((sum, s) => sum + s.mtdRequests, 0);
+
+        console.log(`[UsageStats] Totals - Daily: $${totalSpend.toFixed(4)}, MTD: $${totalMtdSpend.toFixed(4)}`);
 
         return {
             spend: totalSpend,

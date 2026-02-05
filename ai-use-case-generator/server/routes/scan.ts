@@ -117,12 +117,22 @@ router.post('/scan-url', async (req, res) => {
                 const metadata = activeInt.metadata as any || {};
                 const modelId = metadata.model || 'gpt-4o';
 
-                aiAnalysis = await OpenAIService.generateJSON({
-                    apiKey,
-                    model: modelId,
-                    systemPrompt,
-                    userContext: "Analyze the website content above."
-                });
+                if (activeInt.name.toLowerCase().includes('gemini')) {
+                    const { GeminiService } = await import('../services/gemini.js');
+                    aiAnalysis = await GeminiService.generateJSON({
+                        apiKey,
+                        model: modelId,
+                        systemPrompt,
+                        userContext: "Analyze the website content above."
+                    });
+                } else {
+                    aiAnalysis = await OpenAIService.generateJSON({
+                        apiKey,
+                        model: modelId,
+                        systemPrompt,
+                        userContext: "Analyze the website content above."
+                    });
+                }
 
                 if (aiAnalysis?.industry) {
                     industry = aiAnalysis.industry;

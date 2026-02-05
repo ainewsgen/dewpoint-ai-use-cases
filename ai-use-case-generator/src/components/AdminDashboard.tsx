@@ -1106,17 +1106,17 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                             {[
                                 'Cognitive Load Eliminator',
                                 'Margin Preservation Agent',
-                                'Receipt Auto-Router',
+                                'Expense Governance Automator',
                                 'High-Value Prospect Catalyst',
-                                'The Lead Qualifier',
+                                'Conversion Acceleration Scout',
                                 'Stakeholder Trust Synchronizer',
-                                'The Case Miner',
-                                'The Competitor Watchtower',
-                                'The Talent Matchmaker',
-                                'The Social Listening Post',
-                                'The Churn Sentinel',
+                                'Intellectual Property Monetizer',
+                                'Strategic Agility Monitor',
+                                'Human Capital Optimization Agent',
+                                'Brand Sentiment Sentinel',
+                                'Retention Risk Predictor',
                                 'Logistics Fidelity Guard',
-                                'The Meeting Alchemist'
+                                'Operational Transparency Scribe'
                             ].map((name, i) => (
                                 <div key={i} className="admin-list-item" style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',

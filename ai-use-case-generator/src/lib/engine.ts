@@ -174,7 +174,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     } else {
         opportunities.push({
-            title: "Receipt Auto-Router",
+            title: "Expense Governance Automator",
             department: "Finance",
             industry: industry || "Finance",
             public_view: {
@@ -251,7 +251,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     } else {
         opportunities.push({
-            title: "The Lead Qualifier",
+            title: "Conversion Acceleration Scout",
             department: "Sales",
             industry: industry || "Sales",
             public_view: {
@@ -338,7 +338,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
 
     if (isProfessionalServices) {
         opportunities.push({
-            title: "The Case Miner",
+            title: "Intellectual Property Monetizer",
             department: "Knowledge",
             industry: "Legal",
             public_view: {
@@ -377,7 +377,7 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
     // 6. ADVANCED: Competitor Gap (Simulated)
     if (!stack.includes("LinkedIn")) {
         opportunities.push({
-            title: "The Competitor Watchtower",
+            title: "Strategic Agility Monitor",
             department: "Strategy",
             industry: "Strategy",
             public_view: {
@@ -413,10 +413,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     }
 
-    // 7. NEW: The Talent Matchmaker (HR)
+    // 7. NEW: Human Capital Optimization Agent (HR)
     if (painPoint.toLowerCase().includes('hir') || painPoint.toLowerCase().includes('recruit') || role.toLowerCase().includes('hr')) {
         opportunities.push({
-            title: "The Talent Matchmaker",
+            title: "Human Capital Optimization Agent",
             department: "HR",
             industry: industry || "General",
             public_view: {
@@ -448,10 +448,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     }
 
-    // 8. NEW: The Social Listening Post (Marketing)
+    // 8. NEW: Brand Sentiment Sentinel (Marketing)
     if (painPoint.toLowerCase().includes('market') || painPoint.toLowerCase().includes('social') || painPoint.toLowerCase().includes('brand')) {
         opportunities.push({
-            title: "The Social Listening Post",
+            title: "Brand Sentiment Sentinel",
             department: "Marketing",
             industry: industry || "General",
             public_view: {
@@ -483,10 +483,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     }
 
-    // 9. NEW: The Churn Sentinel (Customer Success)
+    // 9. NEW: Retention Risk Predictor (Customer Success)
     if (painPoint.toLowerCase().includes('churn') || painPoint.toLowerCase().includes('retention') || painPoint.toLowerCase().includes('support')) {
         opportunities.push({
-            title: "The Churn Sentinel",
+            title: "Retention Risk Predictor",
             department: "Customer Success",
             industry: industry || "General",
             public_view: {
@@ -553,10 +553,10 @@ export async function generateOpportunities(companyData: CompanyData, promptDeta
         });
     }
 
-    // 11. NEW: The Meeting Alchemist (Productivity)
+    // 11. NEW: Operational Transparency Scribe (Productivity)
     if (painPoint.toLowerCase().includes('meet') || painPoint.toLowerCase().includes('time') || painPoint.toLowerCase().includes('produc')) {
         opportunities.push({
-            title: "The Meeting Alchemist",
+            title: "Operational Transparency Scribe",
             department: "Operations",
             industry: industry || "General",
             public_view: {

@@ -6,7 +6,7 @@ dotenv.config();
 
 const genericRecipes = [
     {
-        title: "AI Meeting Assistant",
+        title: "Operational Transparency Scribe",
         industry: "General",
         description: "Automated meeting transcription, summarization, and action item extraction.",
         roiEstimate: "5hrs/week per manager",
@@ -23,7 +23,7 @@ const genericRecipes = [
         }
     },
     {
-        title: "Automated Invoice Processing",
+        title: "Margin Preservation Agent",
         industry: "Finance",
         description: "Extract data from PDF invoices and sync to accounting software.",
         roiEstimate: "20hrs/month",
@@ -32,7 +32,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Customer Support Triaging",
+        title: "Brand Sentiment Sentinel",
         industry: "Support",
         description: "Classify incoming tickets and draft responses automatically.",
         roiEstimate: "Reduce response time by 60%",
@@ -41,7 +41,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Social Media Content Repurposing",
+        title: "Content Asset Multiplier",
         industry: "Marketing",
         description: "Turn blog posts into tweets, LinkedIn posts, and newsletters.",
         roiEstimate: "10x Content Output",
@@ -50,7 +50,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Lead Scoring & Enrichment",
+        title: "Conversion Acceleration Scout",
         industry: "Sales",
         description: "Enrich leads with LinkedIn data and score them by ICP fit.",
         roiEstimate: "Increase conversion by 15%",
@@ -59,7 +59,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Employee Onboarding Bot",
+        title: "Human Capital Optimization Agent",
         industry: "HR",
         description: "Guide new hires through paperwork and answer FAQs via Slack/Teams.",
         roiEstimate: "Save HR 2hrs/hire",
@@ -68,7 +68,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Competitor Price Watch",
+        title: "Strategic Agility Monitor",
         industry: "Retail/E-com",
         description: "Monitor competitor pricing and adjust your own dynamically.",
         roiEstimate: "Increase margin by 5%",
@@ -77,7 +77,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Legal Contract Review",
+        title: "Intellectual Property Monetizer",
         industry: "Legal",
         description: "Scan NDAs and contracts for risky clauses automatically.",
         roiEstimate: "Reduce legal bill by 30%",
@@ -86,7 +86,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Inventory Demand Forecasting",
+        title: "Logistics Fidelity Guard",
         industry: "Operations",
         description: "Predict stock needs based on historical data and trends.",
         roiEstimate: "Reduce waste by 20%",
@@ -95,7 +95,7 @@ const genericRecipes = [
         data: { /* ... */ }
     },
     {
-        title: "Personalized Email Outreach",
+        title: "High-Value Prospect Catalyst",
         industry: "Sales",
         description: "Generate hyper-personalized cold emails at scale.",
         roiEstimate: "3x Reply Rate",

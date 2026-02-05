@@ -16,7 +16,7 @@ router.get('/usage/by-user', requireAuth, requireAdmin, async (req, res) => {
             userId: users.id,
             userName: users.name,
             userEmail: users.email,
-            totalSpend: sql<number>`CAST(SUM(total_cost) AS DOUBLE PRECISION)`,
+            totalSpend: sql<number>`CAST(SUM(${schema.apiUsage.totalCost}) AS DOUBLE PRECISION)`.as('total_spend'),
             requestCount: sql<number>`COUNT(*)`
         })
             .from(schema.apiUsage)
@@ -26,8 +26,8 @@ router.get('/usage/by-user', requireAuth, requireAdmin, async (req, res) => {
 
         res.json({ users: userStats });
     } catch (error: any) {
-        console.error('User Usage Error:', error);
-        res.status(500).json({ error: 'Failed to fetch user usage stats' });
+        console.error('User Usage Error [by-user]:', error);
+        res.status(500).json({ error: 'Failed to fetch user usage stats', details: error.message });
     }
 });
 
@@ -37,8 +37,8 @@ router.get('/usage/stats', requireAuth, requireAdmin, async (req, res) => {
         const stats = await UsageService.getDailyStats();
         res.json(stats);
     } catch (error: any) {
-        console.error('Usage Stats Error:', error);
-        res.status(500).json({ error: 'Failed to fetch usage stats' });
+        console.error('Usage Stats Error [stats]:', error);
+        res.status(500).json({ error: 'Failed to fetch usage stats', details: error.message });
     }
 });
 

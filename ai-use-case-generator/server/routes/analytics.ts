@@ -34,8 +34,9 @@ router.get('/admin/analytics/stats', requireAuth, requireAdmin, async (req, res)
         const painPoints = await AnalyticsService.getPainPointInsights();
 
         res.json({ funnel, industries, painPoints });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch analytics stats' });
+    } catch (error: any) {
+        console.error('Analytics Stats Error:', error);
+        res.status(500).json({ error: 'Failed to fetch analytics stats', details: error.message });
     }
 });
 

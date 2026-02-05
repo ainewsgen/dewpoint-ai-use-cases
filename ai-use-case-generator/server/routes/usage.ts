@@ -45,39 +45,51 @@ router.get('/usage/stats', requireAuth, requireAdmin, async (req, res) => {
 // Update Daily Limit (via OpenAI Integration Metadata)
 router.put('/usage/limit', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { limit } = req.body;
+        const { limit, integrationId } = req.body;
         const newLimit = parseFloat(limit);
 
         if (isNaN(newLimit) || newLimit < 0) {
             return res.status(400).json({ error: 'Invalid limit value' });
         }
 
-        // 1. Fetch ALL enabled integrations using db.select
-        const allIntegrations = await db.select().from(integrations)
-            .where(eq(integrations.enabled, true))
-            .orderBy(desc(integrations.id));
+        let targetIntId = integrationId;
+        let targetName = '';
 
-        // 2. Find best match
-        const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')
-            || allIntegrations.find(i => (i.metadata as any)?.provider === 'openai')
-            || allIntegrations[0];
+        if (!targetIntId) {
+            // Fallback Logic: Fetch ALL enabled integrations
+            const allIntegrations = await db.select().from(integrations)
+                .where(eq(integrations.enabled, true))
+                .orderBy(desc(integrations.id));
 
-        if (!openAIInt) {
-            console.warn("Update Limit: No active integration found");
-            return res.status(404).json({ error: 'No active integration found. Please connect an AI provider.' });
+            // Find best match (OpenAI prioritized for the "Global" card legacy)
+            const openAIInt = allIntegrations.find(i => i.name === 'OpenAI')
+                || allIntegrations.find(i => (i.metadata as any)?.provider === 'openai')
+                || allIntegrations[0];
+
+            if (!openAIInt) {
+                return res.status(404).json({ error: 'No active integration found. Please connect an AI provider.' });
+            }
+            targetIntId = openAIInt.id;
+            targetName = openAIInt.name;
+        }
+
+        // 3. Fetch the specific integration
+        const [targetInt] = await db.select().from(integrations).where(eq(integrations.id, targetIntId));
+        if (!targetInt) {
+            return res.status(404).json({ error: 'Integration not found' });
         }
 
         // Update Metadata
-        const currentMeta = (openAIInt.metadata as any) || {};
+        const currentMeta = (targetInt.metadata as any) || {};
         const newMeta = { ...currentMeta, daily_limit_usd: newLimit };
 
         await db.update(integrations)
             .set({ metadata: newMeta })
-            .where(eq(integrations.id, openAIInt.id));
+            .where(eq(integrations.id, targetInt.id));
 
-        console.log(`[Admin] Updated Daily Limit to $${newLimit} for Integration ID ${openAIInt.id}`);
+        console.log(`[Admin] Updated Daily Limit to $${newLimit} for Integration: ${targetInt.name} (ID: ${targetInt.id})`);
 
-        res.json({ success: true, limit: newLimit });
+        res.json({ success: true, limit: newLimit, integrationId: targetInt.id });
 
     } catch (error) {
         console.error('Update Limit Error:', error);

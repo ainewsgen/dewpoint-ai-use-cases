@@ -449,10 +449,17 @@ Generate 3 custom automation blueprints in JSON format...`;
                 successResult = result;
                 usedModelId = modelId;
 
-                // Log Usage in Debug mode too
-                const promptTokens = 100; // Simplified for debug
-                const completionTokens = 100;
-                UsageService.logUsage((req as AuthRequest).user?.id || null, promptTokens, completionTokens, usedModelId, activeInt.id).catch(e => console.error("Debug Usage Log Error:", e));
+                // Log Usage in Debug mode via DB
+                const promptTokens = Math.ceil((systemPrompt.length + JSON.stringify(companyData).length) / 4);
+                const completionTokens = Math.ceil(JSON.stringify(result).length / 4);
+
+                try {
+                    await UsageService.logUsage((req as AuthRequest).user?.id || null, promptTokens, completionTokens, usedModelId, activeInt.id);
+                    log(`Usage Logged: ${promptTokens} prime / ${completionTokens} completion tokens via ${usedModelId}`);
+                } catch (e: any) {
+                    log(`Usage Log Error: ${e.message}`);
+                    console.error("Debug Usage Log Error:", e);
+                }
 
                 break;
             } catch (err: any) {

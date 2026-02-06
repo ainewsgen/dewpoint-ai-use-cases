@@ -1,5 +1,9 @@
 import { GeminiService } from './gemini.js';
-import industries from '../data/industries-smb.json' assert { type: "json" };
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const industries = require('../data/industries-smb.json');
+
 export class SystemCapabilityService {
     /**
      * Maps a raw user input (e.g. "Topical Analgesics") to the closest known 

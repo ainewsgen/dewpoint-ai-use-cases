@@ -16,6 +16,8 @@ export class OpenAIService {
         // Instantiate client per-request with the specific key
         const openai = new OpenAI({
             apiKey: params.apiKey,
+            timeout: 60 * 1000, // Explicit 60s timeout
+            maxRetries: 2,
         });
 
         try {

@@ -260,10 +260,6 @@ router.post('/admin/integrations/test', requireAuth, requireAdmin, async (req: A
                     apiKey: effectiveKey,
                     systemPrompt: "You are a connection tester.",
                     userContext: "Return { \"status\": \"ok\" } JSON object. No markdown.",
-                await GeminiService.generateJSON({
-                    apiKey: effectiveKey,
-                    systemPrompt: "You are a connection tester.",
-                    userContext: "Return { \"status\": \"ok\" } JSON object. No markdown.",
                     model: effectiveModel || "gemini-1.5-flash" // Use selected model or default
                 });
                 return res.json({ success: true, message: `Successfully connected to Gemini (${effectiveModel || 'default'})!` });

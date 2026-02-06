@@ -428,7 +428,10 @@ Generate 3 custom automation blueprints in JSON format...`;
 
                 break;
             } catch (err: any) {
-                console.warn(`[Failover] Integration ${activeInt.name} Failed:`, err.message);
+                const errorMsg = err.message || 'Unknown Error';
+                const errorStack = err.stack ? err.stack.split('\n')[0] : '';
+                log(`Integration ${activeInt.name} Failed: ${errorMsg}`, { stack: errorStack });
+                console.warn(`[Failover] Integration ${activeInt.name} Failed:`, errorMsg);
 
                 // Track Last Error in DB for Debugging
                 try {

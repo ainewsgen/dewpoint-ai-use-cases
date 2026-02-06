@@ -1,5 +1,52 @@
-
+import { GeminiService } from './gemini.js';
+import industries from '../data/industries-smb.json' assert { type: "json" };
 export class SystemCapabilityService {
+    /**
+     * Maps a raw user input (e.g. "Topical Analgesics") to the closest known 
+     * industry in our taxonomy (e.g. "Medical").
+     */
+    static async normalizeIndustry(rawInput: string): Promise<string | null> {
+        console.log(`[Normalization] Mapping "${rawInput}" to taxonomy...`);
+
+        // 1. Check for exact match first (case-insensitive)
+        const exact = industries.find(i => i.industry.toLowerCase() === rawInput.toLowerCase());
+        if (exact) return exact.industry;
+
+        // 2. Use AI to semantic match
+        try {
+            // Create a condensed list of options for the context window
+            const options = industries.map(i => i.industry).join(", ");
+
+            const prompt = `
+                You are a semantic classifier. Map the user's input to the closest matching Industry Category from the provided list.
+                
+                USER INPUT: "${rawInput}"
+                
+                ALLOWED CATEGORIES:
+                ${options}
+                
+                INSTRUCTIONS:
+                - Return ONLY the exact string of the matching category.
+                - If the input is completely unrelated to any category, return "General".
+                - Do not add markdown or explanation.
+            `;
+
+            const result = await GeminiService.generateJSON({
+                apiKey: process.env.GEMINI_API_KEY!,
+                model: 'gemini-1.5-flash',
+                systemPrompt: "You are a JSON classifier. Output format: { \"match\": \"Category Name\" }",
+                userContext: prompt
+            });
+
+            console.log(`[Normalization] Mapped "${rawInput}" -> "${result.match}"`);
+            return result.match || null;
+
+        } catch (err) {
+            console.warn("[Normalization] AI mapping failed:", err);
+            return null; // Fallback to original flow
+        }
+    }
+
     static generateFallback(industry: string, role: string) {
         // Return a generic, high-quality template that works for any industry
         return [

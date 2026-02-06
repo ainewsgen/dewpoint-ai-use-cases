@@ -395,63 +395,86 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             }}>
                                 Company Website
                             </label>
-                            <div className="input-group" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem' }}>
-                                <div style={{ position: 'relative', width: '100%' }}>
-                                    <input
-                                        type="text" placeholder="www.company.com"
-                                        value={url} onChange={e => { setUrl(e.target.value); setError(false); }}
-                                        style={{ width: '100%', paddingLeft: '2.5rem', background: 'var(--bg-card)' }}
-                                    />
-                                    <Globe className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                </div>
-                                <button
-                                    onClick={scanUrl}
-                                    disabled={isScanning || !url}
-                                    className="btn-secondary"
-                                    style={{
-                                        padding: '0 1.5rem',
-                                        height: '100%',
-                                        borderColor: isScanning ? 'var(--border-glass)' : 'var(--accent-primary)',
-                                        color: isScanning ? 'var(--text-muted)' : 'hsl(var(--accent-primary))',
-                                        minWidth: '100px'
-                                    }}
-                                >
-                                    {isScanning ? <span className="animate-pulse">Scanning...</span> : "Scan"}
-                                </button>
-                            </div>
 
-                            {isScanning && (
-                                <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '8px', padding: '0.75rem', border: '1px solid var(--border-glass)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.8rem' }}>
-                                        <span style={{ color: 'hsl(var(--accent-primary))', fontWeight: 600 }}>{scanMessage}</span>
-                                        <span style={{ color: 'var(--text-muted)' }}>{scanProgress}%</span>
+                            {isScanning ? (
+                                <div style={{ marginBottom: '1.5rem', background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'hsl(var(--accent-primary))' }}>
+                                        <Sparkles size={16} className="spin" />
+                                        {scanMessage}
+                                    </h3>
+
+                                    <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                        {[
+                                            { p: 25, label: 'Analyzing website metadata...' },
+                                            { p: 45, label: 'Extracting industry signals...' },
+                                            { p: 65, label: 'Identifying tech stack markers...' },
+                                            { p: 85, label: 'Generating business profile...' }
+                                        ].map((step, idx) => {
+                                            const isComplete = scanProgress > step.p;
+                                            const isCurrent = scanProgress >= step.p && scanProgress < (idx === 3 ? 100 : step.p + 20);
+
+                                            return (
+                                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', color: isComplete ? 'hsl(140, 70%, 35%)' : isCurrent ? 'hsl(var(--text-main))' : 'var(--text-muted)', transition: 'all 0.3s' }}>
+                                                    <div style={{
+                                                        width: '18px', height: '18px', borderRadius: '50%',
+                                                        border: isComplete ? 'none' : isCurrent ? '2px solid hsl(var(--accent-primary))' : '2px solid #cbd5e1',
+                                                        background: isComplete ? 'hsl(140, 70%, 40%)' : 'transparent',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        flexShrink: 0
+                                                    }}>
+                                                        {isComplete && <div style={{ width: '8px', height: '4px', borderLeft: '2px solid white', borderBottom: '2px solid white', transform: 'rotate(-45deg) translate(1px, -1px)' }} />}
+                                                    </div>
+                                                    <span style={{ fontWeight: isCurrent ? 600 : 400 }}>{step.label}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                    <div style={{ height: '4px', background: 'rgba(0,0,0,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-                                        <div style={{
+
+                                    <div className="progress-bar" style={{ height: '6px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '1.25rem' }}>
+                                        <div className="fill" style={{ width: `${scanProgress}%`, height: '100%', background: 'linear-gradient(90deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%)', transition: 'width 0.4s ease-out' }}></div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="input-group" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem' }}>
+                                    <div style={{ position: 'relative', width: '100%' }}>
+                                        <input
+                                            type="text" placeholder="www.yourcompany.com"
+                                            value={url} onChange={e => { setUrl(e.target.value); setError(false); }}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') scanUrl(); }}
+                                            style={{ width: '100%', paddingLeft: '2.5rem', background: 'var(--bg-card)' }}
+                                        />
+                                        <Globe className="input-icon" size={18} style={{ left: '1rem', position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                    </div>
+                                    <button
+                                        onClick={scanUrl}
+                                        disabled={!url}
+                                        className="btn-secondary"
+                                        style={{
+                                            padding: '0 1.5rem',
                                             height: '100%',
-                                            width: `${scanProgress}%`,
-                                            background: 'hsl(var(--accent-primary))',
-                                            transition: 'width 0.3s ease'
-                                        }}></div>
-                                    </div>
+                                            borderColor: 'var(--accent-primary)',
+                                            color: 'hsl(var(--accent-primary))',
+                                            minWidth: '100px'
+                                        }}
+                                    >
+                                        Scan
+                                    </button>
                                 </div>
                             )}
 
-                            {scanError && !isScanning && (
-                                <div style={{
+                            {scanError && (
+                                <div className="animate-fade-in" style={{
                                     marginTop: '1rem',
                                     padding: '0.75rem',
-                                    background: 'hsla(var(--accent-gold)/0.1)',
-                                    border: '1px solid hsla(var(--accent-gold)/0.3)',
+                                    background: 'hsl(45, 100%, 96%)',
+                                    border: '1px solid hsl(45, 90%, 80%)',
                                     borderRadius: '8px',
-                                    fontSize: '0.8rem',
-                                    color: 'var(--text-main)',
-                                    display: 'flex',
-                                    gap: '0.5rem',
-                                    alignItems: 'flex-start'
+                                    fontSize: '0.85rem',
+                                    color: 'hsl(45, 90%, 30%)',
+                                    display: 'flex', gap: '0.5rem', alignItems: 'start'
                                 }}>
-                                    <AlertCircle size={14} style={{ marginTop: '2px', color: 'hsl(var(--accent-gold))' }} />
-                                    <span>{scanError}</span>
+                                    <AlertCircle size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                                    <p style={{ margin: 0 }}>{scanError}</p>
                                 </div>
                             )}
 

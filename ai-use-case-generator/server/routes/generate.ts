@@ -51,12 +51,36 @@ router.post('/generate', async (req, res) => {
                 if (icpMatch.length > 0) {
                     const icp = icpMatch[0];
                     console.log(`[Generate] Applied ICP: ${icp.industry} (${targetType})`);
-
                     icpContext = buildIcpContext(icp, targetType);
                 } else {
-                    console.log(`[Generate] No specific ICP found for ${companyData.industry} (${targetType}), using generic fallback.`);
-                    // Also use generic context here as a better fallback than empty string?
-                    icpContext = buildGenericContext();
+                    console.log(`[Generate] No exact ICP found for "${companyData.industry}". Attempting Semantic Normalization...`);
+
+                    // NEW: Try to normalize the industry using AI
+                    const normalized = await SystemCapabilityService.normalizeIndustry(companyData.industry);
+
+                    if (normalized && normalized !== "General") {
+                        console.log(`[Generate] Normalized "${companyData.industry}" -> "${normalized}"`);
+
+                        // Retry DB lookup with normalized name
+                        const retryMatch = await db.select().from(industryIcps)
+                            .where(and(
+                                ilike(industryIcps.industry, normalized),
+                                eq(industryIcps.icpType, targetType)
+                            ))
+                            .limit(1);
+
+                        if (retryMatch.length > 0) {
+                            const icp = retryMatch[0];
+                            console.log(`[Generate] Applied Normalized ICP: ${icp.industry}`);
+                            icpContext = buildIcpContext(icp, targetType);
+                        } else {
+                            console.log(`[Generate] Normalized industry "${normalized}" also not found in DB. using generic fallback.`);
+                            icpContext = buildGenericContext();
+                        }
+                    } else {
+                        console.log(`[Generate] Normalization returned generic/null. using generic fallback.`);
+                        icpContext = buildGenericContext();
+                    }
                 }
             }
         } else {

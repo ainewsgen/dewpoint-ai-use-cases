@@ -2097,9 +2097,16 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
                                         <td style={{ padding: '1rem' }}>{i.baseUrl || '-'}</td>
                                         <td style={{ padding: '1rem' }}>${(i.metadata as any)?.daily_limit_usd || '5.00'}</td>
                                         <td style={{ padding: '1rem' }}>
-                                            <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
-                                                {i.enabled ? 'Active' : 'Disabled'}
-                                            </span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <span style={{ color: i.enabled ? 'hsl(140, 70%, 50%)' : 'salmon' }}>
+                                                    {i.enabled ? 'Active' : 'Disabled'}
+                                                </span>
+                                                {(i.metadata as any)?.last_error && (
+                                                    <div title={`Last Error (${new Date((i.metadata as any).last_error_ts).toLocaleString()}): ${(i.metadata as any).last_error}`} style={{ color: 'salmon', cursor: 'help' }}>
+                                                        <AlertCircle size={16} />
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                         <td style={{ padding: '1rem', textAlign: 'right' }}>
                                             <button

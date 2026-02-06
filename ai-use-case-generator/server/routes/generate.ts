@@ -404,7 +404,22 @@ Generate 3 custom automation blueprints in JSON format...`;
 
                 break;
             } catch (err: any) {
-                log(`Integration Failed: ${activeInt.name}`, { error: err.message, stack: err.stack });
+                console.warn(`[Failover] Integration ${activeInt.name} Failed:`, err.message);
+
+                // Track Last Error in DB for Debugging
+                try {
+                    const currentMeta = (activeInt.metadata as any) || {};
+                    const newMeta = {
+                        ...currentMeta,
+                        last_error: err.message,
+                        last_error_ts: new Date().toISOString()
+                    };
+                    await db.update(integrations)
+                        .set({ metadata: newMeta })
+                        .where(eq(integrations.id, activeInt.id));
+                } catch (dbErr) {
+                    console.error("Failed to log failover error to DB:", dbErr);
+                }
             }
         }
 

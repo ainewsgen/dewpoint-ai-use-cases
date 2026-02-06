@@ -23,8 +23,8 @@
     - [ ] Allow admins to clone and customize site-wide templates
 
 ## 💅 UX & Polishing
-- [ ] **Interactive Onboarding**
-    - [ ] Add progress indicators to the website scanner
-    - [ ] Improve feedback for failed URL scans
-- [ ] **Success States**
-    - [ ] Better "Toast" notifications for saved recipes and uploads
+- [x] **Interactive Onboarding**
+    - [x] Add progress indicators to the website scanner
+    - [x] Improve feedback for failed URL scans
+- [x] **Success States**
+    - [x] Better "Toast" notifications for saved recipes and uploads

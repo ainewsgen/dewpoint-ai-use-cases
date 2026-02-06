@@ -174,7 +174,8 @@ CRITICAL INSTRUCTIONS:
 
                 const metadata = activeInt.metadata as any || {};
                 const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
-                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-4o');
+                // OPTIMIZATION: Default to faster models (gpt-4o-mini / gemini-1.5-flash) for speed
+                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-flash' : 'gpt-4o-mini');
 
                 console.log(`[Failover] Trying Priority ${activeInt.priority || 0} - ${activeInt.name} (${provider}:${modelId})...`);
 
@@ -316,8 +317,34 @@ router.post('/admin/generate-debug', requireAuth, requireAuth, async (req, res) 
                     log("ICP Found", { industry: icpMatch[0].industry });
                     icpContext = buildIcpContext(icpMatch[0], targetType);
                 } else {
-                    log("ICP Not Found - Using Generic Fallback");
-                    icpContext = buildGenericContext();
+                    log("No exact ICP found for input. Attempting Semantic Normalization...");
+
+                    // NEW: Try to normalize the industry using AI
+                    const normalized = await SystemCapabilityService.normalizeIndustry(companyData.industry);
+
+                    if (normalized && normalized !== "General") {
+                        log(`Normalized "${companyData.industry}" -> "${normalized}"`);
+
+                        // Retry DB lookup with normalized name
+                        const retryMatch = await db.select().from(industryIcps)
+                            .where(and(
+                                ilike(industryIcps.industry, normalized),
+                                eq(industryIcps.icpType, targetType)
+                            ))
+                            .limit(1);
+
+                        if (retryMatch.length > 0) {
+                            const icp = retryMatch[0];
+                            log(`Applied Normalized ICP: ${icp.industry}`);
+                            icpContext = buildIcpContext(icp, targetType);
+                        } else {
+                            log(`Normalized industry "${normalized}" also not found in DB. Using Generic Fallback.`);
+                            icpContext = buildGenericContext();
+                        }
+                    } else {
+                        log("Normalization returned generic/null. Using Generic Fallback.");
+                        icpContext = buildGenericContext();
+                    }
                 }
             }
         } else {
@@ -397,7 +424,8 @@ Generate 3 custom automation blueprints in JSON format...`;
 
                 const metadata = activeInt.metadata as any || {};
                 const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
-                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-flash' : 'gpt-4o');
+                // OPTIMIZATION: Default to faster models (gpt-4o-mini / gemini-1.5-flash) for speed
+                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-flash' : 'gpt-4o-mini');
 
                 log(`Configuration`, { provider, modelId });
 

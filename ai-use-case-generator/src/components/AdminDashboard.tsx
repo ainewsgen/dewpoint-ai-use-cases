@@ -344,7 +344,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
     const handleUpdateLimit = async (newLimit: number, integrationId?: number) => {
         setIsUpdatingLimit(true);
         try {
-            const response = await fetch('/api/usage/limit', {
+            const response = await fetch('/api/admin/usage/limit', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -367,7 +367,7 @@ Generate 3 custom automation blueprints in JSON format. Each blueprint MUST incl
         if (!confirm("This will attempt to link all 'Unassigned' usage records to your primary integration (usually OpenAI). Proceed?")) return;
 
         try {
-            const response = await fetch('/api/usage/repair', {
+            const response = await fetch('/api/admin/usage/repair', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`

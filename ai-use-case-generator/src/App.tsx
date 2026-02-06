@@ -276,10 +276,27 @@ function App() {
                     boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
                 }}>
                     {/* Brand - visible on larger screens */}
-                    <div style={{ pointerEvents: 'auto' }}>
+                    <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <div className="logo-pill" style={{ padding: '0.25rem 0.5rem' }}>
                             <img src="/logo-icon.png" alt="DPG" style={{ height: '28px' }} />
                         </div>
+                        <a
+                            href="https://www.thedewpointgroup.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                color: 'hsl(var(--text-main))',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                fontSize: '0.9rem',
+                                opacity: 0.8,
+                                transition: 'opacity 0.2s',
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                        >
+                            The Dewpoint Group
+                        </a>
                     </div>
 
                     <div style={{

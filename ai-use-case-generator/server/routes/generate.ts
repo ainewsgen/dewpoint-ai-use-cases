@@ -373,7 +373,7 @@ Generate 3 custom automation blueprints in JSON format...`;
 
                 const metadata = activeInt.metadata as any || {};
                 const provider = metadata.provider || (activeInt.name.toLowerCase().includes('gemini') ? 'gemini' : 'openai');
-                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-4o');
+                const modelId = metadata.model || (provider === 'gemini' ? 'gemini-1.5-flash' : 'gpt-4o');
 
                 log(`Configuration`, { provider, modelId });
 
